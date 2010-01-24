@@ -91,3 +91,6 @@
 
 (defn parse-units [xml-tree]
   (map parse-element (:content xml-tree)))
+
+(defn load-units [file]
+  (parse-units (xml/parse (slurp file))))

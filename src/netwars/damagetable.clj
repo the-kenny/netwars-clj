@@ -23,3 +23,6 @@
 
 (defn parse-damagetable [xml-tree]
   (apply merge (map parse-element (:content xml-tree))))
+
+(defn load-damagetable [file]
+  (parse-damagetable (xml/parse file)))
