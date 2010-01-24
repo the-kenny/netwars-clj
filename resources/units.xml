@@ -282,7 +282,7 @@
 
 		<transport count="2">
 			<transportable type="infantry" />
-			<transport type="mech" />
+			<transportable type="mech" />
 		</transport>
 	</unit>
 
@@ -296,7 +296,7 @@
 		</combat>
 
 		<supply>
-			<available type="air" />
+			<environment type="air" />
 		</supply>
 
 		<transport count="2">
