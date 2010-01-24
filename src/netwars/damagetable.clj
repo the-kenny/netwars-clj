@@ -22,4 +22,4 @@
              {:alt_damage :alt-damage}))})
 
 (defn parse-damagetable [xml-tree]
-  (map parse-element (:content xml-tree)))
+  (apply merge (map parse-element (:content xml-tree))))
