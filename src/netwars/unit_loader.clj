@@ -92,5 +92,7 @@
 (defn parse-units [xml-tree]
   (map parse-element (:content xml-tree)))
 
-(defn load-units [file]
-  (parse-units (xml/parse (slurp file))))
+(defn load-units [stream]
+  "Load and returns a list of units.
+ stream is a stream pointing to the xml-file.."
+  (parse-units (xml/parse stream)))
