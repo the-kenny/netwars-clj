@@ -65,9 +65,11 @@
 	(.rewind buf)))
 
 (defn read-n-string [buf len]
-  (let [arr (make-array Byte/TYPE len)]
-    (.get buf arr)
-    (apply str (map char  arr))))
+  (if (> len 0)
+   (let [arr (make-array Byte/TYPE len)]
+     (.get buf arr)
+     (apply str (map char  arr)))
+   ""))
 
 (defn read-null-string [buf]
   (loop [s ""]
@@ -130,12 +132,21 @@
 (defn parse-map [file] 
   (let [ ;; I hope Little-Endianess doesn't cause problems
         buf (.order (read-binary-file file) java.nio.ByteOrder/LITTLE_ENDIAN)
+        filetype (str2/tail file 4)
 		editor-version (read-n-string buf 6)
 		format-version (read-n-string buf 3)
 		_ (read-byte buf)
-		width (read-byte buf)
-		height (read-byte buf)
-		tileset (parse-tileset (int (read-byte buf)))
+		width (if (= filetype ".aws")
+                (read-byte buf)
+                30)
+		height (if (= filetype ".aws")
+                (read-byte buf)
+                20)
+		tileset (parse-tileset
+                 (condp = filetype
+                   ".awd"  (dec (int (read-byte buf)))
+                   ".aws"  (int (read-byte buf))
+                   0))
 		terrain-data (parse-terrain-data
                       (doall (for [_ (range (* width height))]
                                (read-dword buf))))
@@ -143,9 +154,15 @@
                    (doall (for [_ (range (* width height))]
                             (read-dword buf)))
                    width height)
-        name (read-n-string buf (read-int32 buf))
-        author (read-n-string buf (read-int32 buf))
-        desc (str2/replace (read-n-string buf (read-int32 buf))  #"\r\n" "\n")]
+        name (if (.hasRemaining buf)
+               (read-n-string buf (read-int32 buf))
+               "")
+        author (if (.hasRemaining buf)
+                 (read-n-string buf (read-int32 buf))
+                 "")
+        desc (str2/replace (if (.hasRemaining buf)
+                             (read-n-string buf (read-int32 buf)) "")
+                           #"\r\n" "\n")]
 	(struct-map map-file 
       :filename file
 	  :width width
