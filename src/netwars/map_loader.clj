@@ -63,10 +63,10 @@
 	(.. (java.io.FileInputStream. file) (getChannel) (read buf))
 	(.rewind buf)))
 
-(defn read-n-string
-  [buf len] (let [arr (make-array Byte/TYPE len)]
-			  (.get buf arr)
-			  arr))
+(defn read-n-string [buf len]
+  (let [arr (make-array Byte/TYPE len)]
+    (.get buf arr)
+    (apply str (map char  arr))))
 
 (defn read-null-string [buf]
   (loop [s ""]
