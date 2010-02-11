@@ -154,4 +154,5 @@
 	  :unit-data unit-data
       :name name
       :author author
-      :description desc)))
+      :description desc
+      :type editor-version)))
