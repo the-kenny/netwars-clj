@@ -80,6 +80,9 @@
 (defn read-dword [#^java.nio.ByteBuffer buf]
   (.getShort buf))
 
+(defn read-int32 [#^java.nio.ByteBuffer buf]
+  (.getInt buf))
+
 (defn parse-tileset [byte]
   (get tilesets byte))
 
