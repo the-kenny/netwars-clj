@@ -105,18 +105,17 @@
           :unimplemented)
        data))
 
-(defn parse-unit-data [data]
-  ;; Not yet functional
-  ;; (map (fn [value]
-  ;;   	 ;; (println (short value))
-  ;;   	 (when (< 499 value 900)
-  ;;   	   (when-let [color (get unit-color-values
-  ;;                                (int (java.lang.Math/floor
-  ;;                                     (/ (- value 500) 40))))]
-  ;;   		 {:value (int (/ (- value 500) 40))
-  ;;   		  :color color}))) data)
-  nil)
-		 
+(defn find-unit-by-id [id]
+  (when @*unit-prototypes*
+    (first (filter #(= (get % :id) (str id)) @*unit-prototypes*))))
+
+(defn parse-unit-data [data width height]
+  (if @*unit-prototypes*
+    (for [x (range width) y (range height)
+          :let [val (rem (- (nth data (+ (* x height) y)) 300) 10)]
+          :when (not= val -1)]
+      [x y (:internal-name (find-unit-by-id val))])
+    :units-not-loaded)) 
 
 (def aws-spec '[[:editor-version 6 :string]
 				[:format-version 3 :string]
@@ -141,12 +140,18 @@
                                (read-dword buf))))
 		unit-data (parse-unit-data
                    (doall (for [_ (range (* width height))]
-                            (read-dword buf))))]
-	(struct-map map-file
+                            (read-dword buf)))
+                   width height)
+        name (read-n-string buf (read-int32 buf))
+        author (read-n-string buf (read-int32 buf))
+        desc (read-n-string buf (read-int32 buf))]
+	(struct-map map-file 
       :filename file
 	  :width width
 	  :height height
 	  :tileset tileset
 	  :terrain-data terrain-data
-	  :unit-data unit-data)
-    ))
+	  :unit-data unit-data
+      :name name
+      :author author
+      :description desc)))
