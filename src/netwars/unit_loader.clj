@@ -7,6 +7,7 @@
         :doc "A map of maps to represent the renaming of the xml-keywords."}
      +tag-mappings+
      {:unit {:internal_name :internal-name}
+      :dummy_unit {:internal_name :internal-name}
       :movement {:range :movement-range
                  :type :movement-type
                  :capture_buildings :can-capture}
@@ -36,7 +37,6 @@
 (defmacro #^{:private true} def-recursive-replace-parse [element]
   `(defmethod parse-element ~element
      [{attrs# :attrs content# :content}]
-     (println attrs#)
      (apply merge (rename-keys attrs# (get +tag-mappings+ ~element {}))
          (map parse-element content#))))
 
