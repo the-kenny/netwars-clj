@@ -3,6 +3,8 @@
             [clojure.zip :as zip])
   (:use [clojure.set :only [rename-keys]]))
 
+(def *unit-prototypes* (atom nil))
+
 (def #^{:private true
         :doc "A map of maps to represent the renaming of the xml-keywords."}
      +tag-mappings+
@@ -96,3 +98,7 @@
   "Load and returns a list of units.
  stream is a stream pointing to the xml-file.."
   (parse-units (xml/parse stream)))
+
+(defn load-units! [stream]
+  "Loads units and stores them in *unit-prototypes*"
+  (reset! *unit-prototypes* (load-units stream)))
