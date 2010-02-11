@@ -58,6 +58,10 @@
 
 (defalias unit-color-values terrain-color-values)
 
+(defmacro read-when-possible [buf & body]
+  `(when (.hasRemaining ~buf)
+     ~@body))
+
 (defn read-binary-file [#^String uri]
   (let [file (java.io.File. uri)
 		buf (java.nio.ByteBuffer/allocate (.length file))]
@@ -154,15 +158,14 @@
                    (doall (for [_ (range (* width height))]
                             (read-dword buf)))
                    width height)
-        name (if (.hasRemaining buf)
-               (read-n-string buf (read-int32 buf))
-               "")
-        author (if (.hasRemaining buf)
-                 (read-n-string buf (read-int32 buf))
-                 "")
-        desc (str2/replace (if (.hasRemaining buf)
-                             (read-n-string buf (read-int32 buf)) "")
-                           #"\r\n" "\n")]
+        name (read-when-possible buf
+               (read-n-string buf (read-int32 buf)))
+        author (read-when-possible buf
+                 (read-n-string buf (read-int32 buf)))
+        desc (read-when-possible buf
+               (str2/replace (read-n-string buf (read-int32 buf)) 
+                             #"\r\n"
+                             "\n"))]
 	(struct-map map-file 
       :filename file
 	  :width width
