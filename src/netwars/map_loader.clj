@@ -1,6 +1,7 @@
 (ns netwars.map-loader
   (:use [clojure.contrib.def :only [defalias]]
         netwars.unit-loader)
+  (:require [clojure.contrib.str-utils2 :as str2])
   (:import java.nio.ByteBuffer))
 
 (defstruct map-file
@@ -144,7 +145,7 @@
                    width height)
         name (read-n-string buf (read-int32 buf))
         author (read-n-string buf (read-int32 buf))
-        desc (read-n-string buf (read-int32 buf))]
+        desc (str2/replace (read-n-string buf (read-int32 buf))  #"\r\n" "\n")]
 	(struct-map map-file 
       :filename file
 	  :width width
