@@ -16,13 +16,7 @@
 
 
 (def #^{:private true} tilesets
-	 {0 :normal
-	  1 :snow
-	  2 :desert
-	  3 :wasteland
-	  4 :aw1
-	  5 :aw2})
-
+     [:normal :snow :desert :wasteland :aw1 :aw2])
 
 (def #^{:private true} terrain-values
 	 {0   :plain
@@ -40,21 +34,10 @@
 	  39  :beach})
 
 (def #^{:private true} terrain-building-values
-	 {0 :headquarter
-	  1 :city
-	  2 :base
-	  3 :airport
-	  4 :port
-	  5 :tower
-	  6 :lab})
+     [:headquarter :city :base :airport :port :tower :lab])
 
 (def #^{:private true} terrain-color-values
-	{0 :red
-	 1 :blue
-	 2 :green
-	 3 :yellow
-	 4 :black
-	 5 :white})
+	 [:red :blue :green :yellow :black :white])
 
 (defalias unit-color-values terrain-color-values)
 
