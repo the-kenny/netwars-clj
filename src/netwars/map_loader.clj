@@ -11,7 +11,7 @@
   :description
   :type
   :tileset
-  :terrain-data
+  :terrain-data                         ;Top-to-bottom, left-to-right
   :unit-data)
 
 
