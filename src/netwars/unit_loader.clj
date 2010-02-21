@@ -27,9 +27,48 @@
       :transport {:count :transport-limit}
       :transportable {:type :transport-types}})
 
+(defn parseInt [n]
+  (when n
+    (Integer/parseInt n)))
+
+(defn parseBoolean [b]
+  (when b
+   (Boolean/parseBoolean b)))
+
+(def #^{:private true}
+     +type-mappings+
+     {:internal-name keyword
+      :price parseInt
+      :factory keyword
+      :movement-range parseInt
+      :movement-type keyword
+      :can-capture parseBoolean
+      :max-fuel-level parseInt
+      :fuel-waste parseInt
+      :remove-without-fuel parseBoolean
+
+      ;; Combat
+      :can-counterattack parseBoolean
+      :can-knock-down-units parseBoolean
+      :ammo parseInt
+      :range parseInt
+      :distance parseInt
+      :damage-multiplier parseInt       ;Used in dummy_units
+              
+      ;; Supply
+      :repair-points parseInt
+      :repair-types #(set (map keyword %))
+      ;; Transport
+      :transport-limit parseInt
+      :transport-types #(set (map keyword %))})
+
+(defn parse-value [[key value]]
+  [key ((get +type-mappings+ key identity) value)])
+
+(defn parse-values [unit]
+  (apply hash-map (apply concat (map parse-value unit))))
 
 (defmulti parse-element :tag)
-
 
 (defmacro #^{:private true} def-simple-replace-parse [element]
   `(defmethod parse-element ~element
@@ -54,11 +93,11 @@
 
 (defmethod parse-element :main_weapon
   [{:keys [attrs]}]
-  {:main-weapon attrs})
+  {:main-weapon (parse-values attrs)})  ;Parse values here too
 
 (defmethod parse-element :alt_weapon
   [{:keys [attrs]}]
-  (:alt-weapon attrs))
+  (:alt-weapon (parse-values attrs)))
 
 (defmethod parse-element :explosive_charge
   [{attrs :attrs}]
@@ -92,7 +131,7 @@
 
 
 (defn parse-units [xml-tree]
-  (map parse-element (:content xml-tree)))
+  (map (comp parse-values parse-element) (:content xml-tree)))
 
 (defn load-units [stream]
   "Load and returns a list of units.

@@ -310,7 +310,7 @@
 
 	<!-- Dummy Units -->
 	<!-- The destructible pipeline -->
-	<dummy_unit name="Segment-Pipe-Dummy" internal_name="segment_pipe" hp="99">
+	<dummy_unit name="Segment-Pipe-Dummy" internal_name="segment-pipe" hp="99">
 		<combat damage_multiplier="10" />
 	</dummy_unit>
 </unit_list>
