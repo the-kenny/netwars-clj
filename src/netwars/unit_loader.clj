@@ -48,6 +48,7 @@
       :remove-without-fuel parseBoolean
 
       ;; Combat
+      :hp parseInt
       :can-counterattack parseBoolean
       :can-knock-down-units parseBoolean
       :ammo parseInt
@@ -66,7 +67,7 @@
   [key ((get +type-mappings+ key identity) value)])
 
 (defn parse-values [unit]
-  (apply hash-map (apply concat (map parse-value unit))))
+  (into {} (map parse-value unit)))
 
 (defmulti parse-element :tag)
 
