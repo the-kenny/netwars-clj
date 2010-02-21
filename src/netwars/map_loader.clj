@@ -101,10 +101,14 @@
 
 (defn parse-unit-data [data width height]
   (if @*unit-prototypes*
-    (for [x (range width) y (range height)
-          :let [val (rem (- (nth data (+ (* x height) y)) 300) 10)]
-          :when (not= val -1)]
-      [x y (:internal-name (find-unit-by-id val))])
+    (apply merge
+           (for [x (range width) y (range height)
+                 :let [val (nth data (+ (* x height) y))
+                       id (rem (- val 500) 40)
+                       color (get unit-color-values 
+                                  (int (/ (- val 500) 40)))]
+                 :when (not= val -1)]
+             {[x y] [(:internal-name (find-unit-by-id id)) color]}))
     :units-not-loaded)) 
 
 (def aws-spec '[[:editor-version 6 :string]
