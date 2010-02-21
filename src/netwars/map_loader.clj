@@ -82,8 +82,8 @@
    (get terrain-values (+ (rem value 30)
                           (* 30 (int (/ value 30)))))
    (<= 300 value 499)
-   (if-let [terr (get terrain-building-values (rem (- value 300) 10))]
-     [terr (get terrain-color-values (rem (- value 300) 10))])
+   (when-let [terr (get terrain-building-values (rem (- value 300) 10))]
+     [terr (get terrain-color-values (int (/ (- value 300) 10)))])
    ;; (<= 900 value 1299) ni
    ;; (+ 900 (rem (- value 900) 20)
    ;;    (* 20 (int (/ (- value 900) 20))))
@@ -116,7 +116,7 @@
 				[:terrain-data (* :width :height 2) :dword parse-terrain-data]
 				[:unit-data (* :width :height 2) :dword parse-unit-data]])
 
-(defn parse-map [file] 
+(defn load-map [file] 
   (let [ ;; I hope Little-Endianess doesn't cause problems
         buf (.order (read-binary-file file) java.nio.ByteOrder/LITTLE_ENDIAN)
         filetype (str2/tail file 4)
