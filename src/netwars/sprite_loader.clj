@@ -34,3 +34,10 @@
                     "/"
                     (name direction)
                     ".png")))
+
+(defn load-building-tile [[building color]]
+  (load-pixmap (str "pixmaps/ground/buildings/"
+                    (name building)
+                    "/"
+                    (name color)
+                    ".png")))
