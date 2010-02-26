@@ -18,7 +18,7 @@
   (let [msta (partial terrain-at map-struct)]
    (hash-map
     :north (msta x (dec y))
-    :east (msta (inc y) y)
+    :east (msta (inc x) y)
     :south (msta x (inc y))
     :west (msta (dec x) y)
 
