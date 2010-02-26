@@ -14,6 +14,9 @@
     (nth (:terrain-data map-struct)
          (+ y (* x (:height map-struct))))))
 
+(defn access-coordinate [seq width height x y]
+  (nth seq (+ y (* x height))))
+
 (defn neighbours [map-struct x y]
   (let [msta (partial terrain-at map-struct)]
    (hash-map
