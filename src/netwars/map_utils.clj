@@ -9,13 +9,13 @@
        (< x (:width map-struct))
        (< y (:height map-struct))))
 
-(defn tile-at [map-struct x y]
+(defn terrain-at [map-struct x y]
   (when (on-map map-struct x y)
     (nth (:terrain-data map-struct)
          (+ y (* x (:height map-struct))))))
 
 (defn neighbours [map-struct x y]
-  (let [msta (partial tile-at map-struct)]
+  (let [msta (partial terrain-at map-struct)]
    (hash-map
     :north (msta x (dec y))
     :east (msta (inc y) y)
@@ -31,3 +31,6 @@
   (clojure.inspector/inspect
    (apply merge (for [x (range 30) y (range 20)]
                   {[x y] (tile-at loaded-map x y)}))))
+
+(defn is-ground [terrain]
+  (not (#{:water :reef :bridge :beach} terrain)))
