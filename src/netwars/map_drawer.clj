@@ -12,7 +12,7 @@
 (defmulti connectable? (fn [t1 _] t1))
 
 (defmacro defconnectable [t1 ts]
-  `(defmethod connectable? ~1 [_# t2#]
+  `(defmethod connectable? ~t1 [_# t2#]
      (boolean (#{~@ts} t2#))))
 
 (defconnectable :street [:street :bridge])
@@ -28,7 +28,7 @@
 ;; (defmethod connectable? :street [_ t2]
 ;;   (boolean (#{:street :bridge} t2)))
 
-(defn- dispatch-fn [terrain neighbours]
+(defn- dispatch-fn [terrain _]
   (if (vector? terrain)
     :building
     terrain))
@@ -48,8 +48,39 @@
 ;; (def-orientation-method :building
 ;;   nil)
 
+(defn uldr-sorter [k]
+  (condp = k
+    :u 0
+    :l 1
+    :d 2
+    :r 3
+    4))
+
+(def +dir-mappings+
+  {:north :u,
+   :east :r
+   :south :d
+   :west :l})
+
+(defmacro def-orientation-method
+"An orientation method should return a list consisting of :u :l :d :r,
+according to the applicable directions where this tile can be connected to."
+  [type [neighbours] & body]
+  `(defmethod tile-orientation ~type [~'_ ~neighbours]
+     (keyword (apply str
+                     (map name (sort-by uldr-sorter
+                                        (replace +dir-mappings+
+                                                 (do ~@body))))))))
+
+(def-orientation-method :street [nbs]
+  (reduce (fn [acc o]
+            (if (connectable? :street (o nbs))
+              (conj acc o)
+              acc)) [] [:north :east :west :south]))
+
+
 (defmethod tile-orientation :building [_ _]
   nil)
 
-(defmethod tile-orientation :default [_ _]
-  :unimplemented)
+(defmethod tile-orientation :default [type _]
+  nil)
