@@ -1,5 +1,8 @@
 (ns netwars.map-drawer
-  (:use netwars.map-utils))
+  (:use netwars.map-utils
+        netwars.sprite-loader)
+  (:import java.awt.Graphics2D
+           java.awt.image.BufferedImage))
 
 ;; (defn tile-orientation [map-struct x y]
 ;;   (let [{:keys [north east south west
@@ -72,15 +75,56 @@ according to the applicable directions where this tile can be connected to."
                                         (replace +dir-mappings+
                                                  (do ~@body))))))))
 
-(def-orientation-method :street [nbs]
-  (reduce (fn [acc o]
-            (if (connectable? :street (o nbs))
-              (conj acc o)
-              acc)) [] [:north :east :west :south]))
+(defn- direction-complement [dir]
+  (get {:north :south,
+        :south :north,
+        :east :west,
+        :west :east}
+       dir))
 
+(def-orientation-method :street [nbs]
+  (let [dirseq (reduce (fn [acc o]      ;Get possible connections in all dirs
+                         (if (connectable? :street (o nbs))
+                           (conj acc o)
+                           acc)) [] [:north :east :south :west])]
+    ;; Streets have at least two endpoints (Special handling for :u and :d)
+    (cond
+     (or (= dirseq [:north])
+         (= dirseq [:south])) [:north :south]
+     (or (= dirseq [:east])
+         (= dirseq [:west])) [:east :west]
+     true dirseq)))
 
 (defmethod tile-orientation :building [_ _]
   nil)
 
 (defmethod tile-orientation :default [type _]
   nil)
+
+(defn orientate-terrain-tiles [map-struct]
+  (for [x (range (:width map-struct))
+        y (range (:height map-struct))
+        :let [data (tile-at map-struct x y)]]
+   (if-let [or (tile-orientation data (neighbours map-struct  x y))]
+     [data or]
+     data)))
+
+(defn render-map-to-image [loaded-map]
+  (let [image (BufferedImage. 320 240 BufferedImage/TYPE_INT_ARGB )
+        graphics (.createGraphics image)
+        oriented-tiles (orientate-terrain-tiles loaded-map)]
+    (doseq [x (range (:width loaded-map))
+            y (range (:height loaded-map))x]
+      (when-let [ordt (access-coordinate  oriented-tiles
+                                          (:width loaded-map)
+                                          (:height loaded-map)
+                                          x y)]
+        (when (and (sequential? ordt)
+                   (not (#{:red :green :blue :yellow :black} (second ordt))))
+          (.drawImage graphics
+                      (load-terrain-tile ordt)
+                      (* x 16)
+                      (* y 16)
+                      nil))))
+    (.finalize graphics)
+    image))
