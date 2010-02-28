@@ -10,10 +10,7 @@
        (< y (:height map-struct))))
 
 (defn terrain-at [map-struct x y]
-  (when (on-map map-struct x y)
-    (nth (:terrain-data map-struct)
-         (+ y (* x (:height map-struct))))))
-
+  (nth (:terrain-data map-struct) (+ y (* x (:height map-struct))) nil))
 
 
 (defn neighbours [map-struct x y]
@@ -35,4 +32,5 @@
                   {[x y] (terrain-at loaded-map x y)}))))
 
 (defn is-ground [terrain]
-  (not (#{:water :reef :bridge :beach} terrain)))
+  (boolean (and terrain
+                (not (#{:water :reef :bridge :beach} terrain)))))

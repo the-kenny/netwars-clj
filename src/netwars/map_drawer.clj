@@ -1,6 +1,7 @@
 (ns netwars.map-drawer
   (:use netwars.map-utils
-        netwars.sprite-loader)
+        netwars.sprite-loader
+        netwars.map-loader)
   (:import java.awt.Graphics2D
            java.awt.image.BufferedImage))
 
@@ -40,11 +41,8 @@
   "A method which returns the direction for the specific tile"
   dispatch-fn)
 
-(defn- get-coordinate [seq width height x y]
-  (when (and (< (count seq) (* x y))
-             (< x width)
-             (< y height))
-   (nth seq (+ y (* x height)))))
+(defn- get-coordinate [seq width height x y] 
+  (nth seq (+ y (* x height)) nil))
 
 (defn- uldr-sorter [k]
   (condp = k
@@ -59,6 +57,8 @@
    :east :r
    :south :d
    :west :l})
+
+;;; Begin of section for orienting tiles
 
 (defmacro def-orientation-method
 "An orientation method should return a list consisting of :u :l :d :r,
@@ -87,8 +87,16 @@ according to the applicable directions where this tile can be connected to."
      (or (= dirseq [:north])
          (= dirseq [:south])) [:north :south]
      (or (= dirseq [:east])
-         (= dirseq [:west])) [:east :west]
+         (= dirseq [:west])
+         (empty? dirseq)) [:east :west]
      true dirseq)))
+
+(def-orientation-method :bridge [nbs]
+  (cond
+   (or (connectable? :bridge (:east nbs))
+       (connectable? :bridge (:west nbs))) [:east :west]
+   
+       true [:north :south]))
 
 (defmethod tile-orientation :building [_ _]
   nil)
@@ -96,30 +104,43 @@ according to the applicable directions where this tile can be connected to."
 (defmethod tile-orientation :default [type _]
   nil)
 
+;;; End of orientation-section
+
 (defn orientate-terrain-tiles [map-struct]
   (for [x (range (:width map-struct))
         y (range (:height map-struct))
         :let [data (terrain-at map-struct x y)]]
-   (if-let [or (tile-orientation data (neighbours map-struct  x y))]
-     [data or]
-     data)))
+    (if-let [ori (tile-orientation data (neighbours map-struct x y))]
+      [data ori]
+      data)))
 
 (defn render-map-to-image [loaded-map]
-  (let [image (BufferedImage. 320 240 BufferedImage/TYPE_INT_ARGB )
+  (let [image (BufferedImage. (* 16 (:width loaded-map))
+                              (* 16 (:height loaded-map))
+                              BufferedImage/TYPE_INT_ARGB)
         graphics (.createGraphics image)
         oriented-tiles (orientate-terrain-tiles loaded-map)]
+    (.drawImage graphics (load-pixmap "pixmaps/background.png") 0 0 nil)
     (doseq [x (range (:width loaded-map))
             y (range (:height loaded-map))]
-      (when-let [ordt (get-coordinate  oriented-tiles
-                                          (:width loaded-map)
-                                          (:height loaded-map)
-                                          x y)]
-        (when (and (sequential? ordt)
-                   (not (#{:red :green :blue :yellow :black} (second ordt))))
-          (.drawImage graphics
-                      (load-terrain-tile ordt)
-                      (* x 16)
-                      (* y 16)
-                      nil))))
+      (when-let [ordt (get-coordinate oriented-tiles
+                                      (:width loaded-map)
+                                      (:height loaded-map)
+                                      x y)]
+        (when (sequential? ordt) ;ordered terrain or building with color
+          (let [tile #^BufferedImage (if (is-terrain? (first ordt))
+                       (load-terrain-tile ordt)
+                       (load-building-tile ordt))]
+            (.drawImage graphics
+                        tile
+                        (- (* x 16) (- (.getWidth tile) 16))
+                        (- (* y 16) (- (.getHeight tile) 16))
+                        nil)))))
     (.finalize graphics)
     image))
+
+(defn- test-drawing [file]
+  (let [m (netwars.map-loader/load-map "/Users/moritz/Development/clojure/netwars/7330.aws")]
+    (javax.imageio.ImageIO/write (time (render-map-to-image m)) "png" (java.io.File. file))))
+
+(comment (test-drawing "/Users/moritz/7330.png"))
