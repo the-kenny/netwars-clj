@@ -14,8 +14,7 @@
     (nth (:terrain-data map-struct)
          (+ y (* x (:height map-struct))))))
 
-(defn access-coordinate [seq width height x y]
-  (nth seq (+ y (* x height))))
+
 
 (defn neighbours [map-struct x y]
   (let [msta (partial terrain-at map-struct)]
@@ -33,7 +32,7 @@
 (defn inspect-terrain [loaded-map]
   (clojure.inspector/inspect
    (apply merge (for [x (range 30) y (range 20)]
-                  {[x y] (tile-at loaded-map x y)}))))
+                  {[x y] (terrain-at loaded-map x y)}))))
 
 (defn is-ground [terrain]
   (not (#{:water :reef :bridge :beach} terrain)))

@@ -40,18 +40,13 @@
   "A method which returns the direction for the specific tile"
   dispatch-fn)
 
-;; (defmacro def-orientation-method [type & body]
-;;   `(defmethod tile-orientation ~type [terrain neighbours]
-;;      (let [{:keys ~'[north east south west
-;;                      north-east north-west
-;;                      south-east south-west]}
-;;            ~neighbours]
-;;        ~@body)))
+(defn- get-coordinate [seq width height x y]
+  (when (and (< (count seq) (* x y))
+             (< x width)
+             (< y height))
+   (nth seq (+ y (* x height)))))
 
-;; (def-orientation-method :building
-;;   nil)
-
-(defn uldr-sorter [k]
+(defn- uldr-sorter [k]
   (condp = k
     :u 0
     :l 1
@@ -104,7 +99,7 @@ according to the applicable directions where this tile can be connected to."
 (defn orientate-terrain-tiles [map-struct]
   (for [x (range (:width map-struct))
         y (range (:height map-struct))
-        :let [data (tile-at map-struct x y)]]
+        :let [data (terrain-at map-struct x y)]]
    (if-let [or (tile-orientation data (neighbours map-struct  x y))]
      [data or]
      data)))
@@ -114,8 +109,8 @@ according to the applicable directions where this tile can be connected to."
         graphics (.createGraphics image)
         oriented-tiles (orientate-terrain-tiles loaded-map)]
     (doseq [x (range (:width loaded-map))
-            y (range (:height loaded-map))x]
-      (when-let [ordt (access-coordinate  oriented-tiles
+            y (range (:height loaded-map))]
+      (when-let [ordt (get-coordinate  oriented-tiles
                                           (:width loaded-map)
                                           (:height loaded-map)
                                           x y)]
