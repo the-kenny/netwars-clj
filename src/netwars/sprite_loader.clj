@@ -21,18 +21,25 @@
       :black   "bm"})
 
 (defn load-unit-tile
-  "Loads the pixmap of an unit defined as [unit-keyword color-keyword]"
+  "Loads the pixmap of an unit given at defined as [unit color] and caches it."
   [[unit color]]
   (load-pixmap (str "pixmaps/units/"
                     (get +unit-color-mappings+ color)
                     "/"
                     (name unit) ".png")))
 
-(defn load-terrain-tile [[terrain direction]]
+
+(defn load-terrain-tile
+  "Loads a terrain-tile given as [terrain direction], terrain and directions
+  being keywords.
+  Loads the specific sprite from 'pixmaps/ground/$terrain/$direction.png'
+  If direction is nil, loads the sprite 'pixmaps/ground/$terrain.png'
+  The sprite will be cached."
+  [[terrain direction]]
   (load-pixmap (str "pixmaps/ground/"
                     (name terrain)
-                    "/"
-                    (name direction)
+                    (when direction
+                      (str "/" (name direction)))
                     ".png")))
 
 (defn load-building-tile [[building color]]

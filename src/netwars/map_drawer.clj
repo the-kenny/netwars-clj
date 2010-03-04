@@ -98,6 +98,11 @@ according to the applicable directions where this tile can be connected to."
    
        true [:north :south]))
 
+(defmethod tile-orientation :mountain [_ nbs]
+  (if (:north nbs)
+    :big
+    :small))
+
 (defmethod tile-orientation :building [_ _]
   nil)
 
@@ -110,8 +115,8 @@ according to the applicable directions where this tile can be connected to."
   (for [x (range (:width map-struct))
         y (range (:height map-struct))
         :let [data (terrain-at map-struct x y)]]
-    (if-let [ori (tile-orientation data (neighbours map-struct x y))]
-      [data ori]
+    (if-not (sequential? data)
+      [data (tile-orientation data (neighbours map-struct x y))]
       data)))
 
 (defn render-map-to-image [loaded-map]
@@ -127,15 +132,15 @@ according to the applicable directions where this tile can be connected to."
                                       (:width loaded-map)
                                       (:height loaded-map)
                                       x y)]
-        (when (sequential? ordt) ;ordered terrain or building with color
-          (let [tile #^BufferedImage (if (is-terrain? (first ordt))
-                       (load-terrain-tile ordt)
-                       (load-building-tile ordt))]
-            (.drawImage graphics
-                        tile
-                        (- (* x 16) (- (.getWidth tile) 16))
-                        (- (* y 16) (- (.getHeight tile) 16))
-                        nil)))))
+        (if-let [tile #^BufferedImage (if (is-terrain? (first ordt))
+                                          (load-terrain-tile ordt)
+                                          (load-building-tile ordt))]
+          (.drawImage graphics
+                      tile
+                      (- (* x 16) (- (.getWidth tile) 16))
+                      (- (* y 16) (- (.getHeight tile) 16))
+                      nil)
+          (println ordt " not found."))))
     (.finalize graphics)
     image))
 
