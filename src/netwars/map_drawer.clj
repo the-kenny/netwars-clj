@@ -44,31 +44,24 @@
 (defn- get-coordinate [seq width height x y] 
   (nth seq (+ y (* x height)) nil))
 
+;;; Utility Functions
+
 (defn- uldr-sorter [k]
   (condp = k
     :u 0
     :l 1
     :d 2
     :r 3
-    4))
-
+    4)
+  )
 (def +dir-mappings+
   {:north :u,
    :east :r
    :south :d
    :west :l})
 
-;;; Begin of section for orienting tiles
-
-(defmacro def-orientation-method
-"An orientation method should return a list consisting of :u :l :d :r,
-according to the applicable directions where this tile can be connected to."
-  [type [neighbours] & body]
-  `(defmethod tile-orientation ~type [~'_ ~neighbours]
-     (keyword (apply str
-                     (map name (sort-by uldr-sorter
-                                        (replace +dir-mappings+
-                                                 (do ~@body))))))))
+(defn rename-direction [dir]
+  (get +dir-mappings+ dir))
 
 (defn- direction-complement [dir]
   (get {:north :south,
@@ -77,47 +70,87 @@ according to the applicable directions where this tile can be connected to."
         :west :east}
        dir))
 
-(def-orientation-method :street [nbs]
-  (let [dirseq (reduce (fn [acc o]      ;Get possible connections in all dirs
-                         (if (connectable? :street (o nbs))
-                           (conj acc o)
-                           acc)) [] [:north :east :south :west])]
-    ;; Streets have at least two endpoints (Special handling for :u and :d)
-    (cond
-     (or (= dirseq [:north])
-         (= dirseq [:south])) [:north :south]
-     (or (= dirseq [:east])
-         (= dirseq [:west])
-         (empty? dirseq)) [:east :west]
-     true dirseq)))
+;;; Begin of section for orienting tiles
+
+(defmacro def-orientation-method
+  "An orientation method should return a list consisting of :u :l :d :r,
+  according to the applicable directions where this tile can be connected to."
+  [type [neighbours] & body]
+  `(defmethod tile-orientation ~type [~'_ ~neighbours]
+     (when-let [dirs# (do ~@body)]
+       [~type (keyword (apply str
+                         (map name (sort-by uldr-sorter
+                                            (map rename-direction dirs#)))))])))
+
+(defmacro def-straighten-orientation-method [type]
+  `(def-orientation-method ~type [nbs#]
+     (let [dirseq# (reduce (fn [acc# o#] ;Get possible connections in all dirs
+                             (if (connectable? ~type (o# nbs#))
+                               (conj acc# o#)
+                               acc#)) [] [:north :east :south :west])]
+       ;; Streets have at least two endpoints (Special handling for :u and :d)
+       (cond
+        (or (= dirseq# [:north])
+            (= dirseq# [:south])) [:north :south]
+        (or (= dirseq# [:east])
+            (= dirseq# [:west])
+            (empty? dirseq#)) [:east :west]
+        true dirseq#))))
+
+(def-straighten-orientation-method :street)
+(def-straighten-orientation-method :river)
 
 (def-orientation-method :bridge [nbs]
+  (if (or (connectable? :bridge (:north nbs))
+          (connectable? :bridge (:south nbs)))
+    [:north :south]
+    [:east :west]))
+
+(def-orientation-method :wreckage [nbs]
   (cond
-   (or (connectable? :bridge (:east nbs))
-       (connectable? :bridge (:west nbs))) [:east :west]
-   
-       true [:north :south]))
+   (or (connectable? :wreckage (:east nbs))
+       (connectable? :wreckage (:west nbs))) [:east :west]
+   (or (connectable? :wreckage (:north nbs))
+       (connectable? :wreckage (:south nbs))) [:north :south]))
 
 (defmethod tile-orientation :mountain [_ nbs]
-  (if (:north nbs)
-    :big
-    :small))
+  [:mountain (if (:north nbs)
+               :big
+               :small)])
 
-(defmethod tile-orientation :building [_ _]
-  nil)
+;; (def-orientation-method :pipe [nbs]
+;;   ())
+
+(def-orientation-method :beach [nbs] 
+  (reduce (fn [acc o]   ;Get possible connections in all dirs
+            ;; If there's ground on the side, add the side
+            (if (is-ground? (o nbs))
+              (conj acc o)
+              acc))
+          [] [:north :east :south :west]))
+
+(defmethod tile-orientation :water [_ nbs]
+  nil
+  ;; [:water (reduce (fn [acc dir]
+  ;;            (when-let [nb (nbs dir)]
+  ;;              (cond
+  ;;               (= nb :river) (rename-direction dir))))
+  ;;          [] [:north :east :south :west])]
+  )
+
+(defmethod tile-orientation :building [type _]
+  type)
 
 (defmethod tile-orientation :default [type _]
-  nil)
+  [type nil])
 
 ;;; End of orientation-section
 
 (defn orientate-terrain-tiles [map-struct]
   (for [x (range (:width map-struct))
         y (range (:height map-struct))
-        :let [data (terrain-at map-struct x y)]]
-    (if-not (sequential? data)
-      [data (tile-orientation data (neighbours map-struct x y))]
-      data)))
+        :let [data (terrain-at map-struct x y)]] 
+    (tile-orientation data (neighbours map-struct x y))))
 
 (defn render-map-to-image [loaded-map]
   (let [image (BufferedImage. (* 16 (:width loaded-map))

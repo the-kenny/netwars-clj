@@ -172,3 +172,8 @@
 
 (defn is-terrain? [t]
   (boolean ((set (vals terrain-values)) t)))
+
+(defn is-water? [t]
+  (boolean (#{:water :reef :beach} t)))
+
+(def is-ground? (complement is-water?))
