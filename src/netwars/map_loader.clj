@@ -168,7 +168,7 @@
 ;;; Utility-Methods
 
 (defn is-building? [t]
-  (boolean ((set (vals terrain-building-values)) t)))
+  (boolean ((set terrain-building-values) t)))
 
 (defn is-terrain? [t]
   (boolean ((set (vals terrain-values)) t)))

@@ -63,6 +63,11 @@
 (defn rename-direction [dir]
   (get +dir-mappings+ dir))
 
+(defn stringify-directions [dirs]
+  (keyword (apply str
+                  (map name (sort-by uldr-sorter
+                                     (map rename-direction dirs))))))
+
 (defn- direction-complement [dir]
   (get {:north :south,
         :south :north,
@@ -82,12 +87,18 @@
                          (map name (sort-by uldr-sorter
                                             (map rename-direction dirs#)))))])))
 
+(defn get-connectables-directions
+  "Returns an vector of directions ([:north :south etc.]) to where the
+  binary-predicate connectable-fn returns true."
+  [connectable-fn type neighbours]
+  (reduce (fn [acc o] ;Get possible connections in all dirs
+            (if (connectable-fn type (get neighbours o))
+              (conj acc o)
+              acc)) [] [:north :east :south :west]))
+
 (defmacro def-straighten-orientation-method [type]
   `(def-orientation-method ~type [nbs#]
-     (let [dirseq# (reduce (fn [acc# o#] ;Get possible connections in all dirs
-                             (if (connectable? ~type (o# nbs#))
-                               (conj acc# o#)
-                               acc#)) [] [:north :east :south :west])]
+     (let [dirseq# (get-connectables-directions connectable? ~type nbs#)]
        ;; Streets have at least two endpoints (Special handling for :u and :d)
        (cond
         (or (= dirseq# [:north])
@@ -119,24 +130,19 @@
                :small)])
 
 ;; (def-orientation-method :pipe [nbs]
-;;   ())
+;;   [:east :west])
+
+(def-straighten-orientation-method :pipe)
+(def-straighten-orientation-method :segment-pipe)
 
 (def-orientation-method :beach [nbs] 
-  (reduce (fn [acc o]   ;Get possible connections in all dirs
-            ;; If there's ground on the side, add the side
-            (if (is-ground? (o nbs))
-              (conj acc o)
-              acc))
-          [] [:north :east :south :west]))
+  (get-connectables-directions (fn [_ t] (is-ground? t)) :beach nbs))
 
 (defmethod tile-orientation :water [_ nbs]
-  nil
-  ;; [:water (reduce (fn [acc dir]
-  ;;            (when-let [nb (nbs dir)]
-  ;;              (cond
-  ;;               (= nb :river) (rename-direction dir))))
-  ;;          [] [:north :east :south :west])]
-  )
+  (if-let [grounds (seq (get-connectables-directions
+                         (fn [_ t] (is-ground? t))
+                         :water nbs))] 
+    [:seaside (stringify-directions grounds)]))
 
 (defmethod tile-orientation :building [type _]
   type)
@@ -165,9 +171,9 @@
                                       (:width loaded-map)
                                       (:height loaded-map)
                                       x y)]
-        (if-let [tile #^BufferedImage (if (is-terrain? (first ordt))
-                                          (load-terrain-tile ordt)
-                                          (load-building-tile ordt))]
+        (if-let [tile #^BufferedImage (if (is-building? (first ordt))
+                                        (load-building-tile ordt)
+                                        (load-terrain-tile ordt))]
           (.drawImage graphics
                       tile
                       (- (* x 16) (- (.getWidth tile) 16))
@@ -178,7 +184,7 @@
     image))
 
 (defn- test-drawing [file]
-  (let [m (netwars.map-loader/load-map "/Users/moritz/Development/clojure/netwars/7330.aws")]
+  (let [m (netwars.map-loader/load-map "/Users/moritz/Development/clojure/netwars/bla.aws")]
     (javax.imageio.ImageIO/write (time (render-map-to-image m)) "png" (java.io.File. file))))
 
 (comment (test-drawing "/Users/moritz/7330.png"))
