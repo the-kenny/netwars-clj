@@ -27,7 +27,7 @@
 
 ;;; Handle bridges, which are special in case of rivers
 (defmethod connectable? :bridge [_ t2]
-  (or (= t2 :bridge) (and (is-ground t2) (not= t2 :river))))
+  (or (= t2 :bridge) (and (is-ground? t2) (not= t2 :river))))
 
 ;; (defmethod connectable? :street [_ t2]
 ;;   (boolean (#{:street :bridge} t2)))
@@ -138,11 +138,50 @@
 (def-orientation-method :beach [nbs] 
   (get-connectables-directions (fn [_ t] (is-ground? t)) :beach nbs))
 
-(defmethod tile-orientation :water [_ nbs]
-  (if-let [grounds (seq (get-connectables-directions
-                         (fn [_ t] (is-ground? t))
-                         :water nbs))] 
+;; (defmacro river-mouth-cond [dir nbs]
+;;   `(and (= :river (~dir ~nbs))
+;;         (every? is-water?
+;;                 (vals (select-keys ~nbs (rectangular-direction ~dir))))))
+
+(defmacro river-mouth-cond [dir nbs]
+  `(and (= :river (~dir ~nbs))
+        (every? is-water?
+                (vals  (drop-neighbours-behind
+                        (direction-complement ~dir)
+                        ~nbs)))))
+
+(defn river-mouth-or-nil [nbs]
+  (when-let [dir (cond
+                  (river-mouth-cond :north nbs) :north
+                  (river-mouth-cond :south nbs) :south
+                  (river-mouth-cond :east nbs) :east
+                  (river-mouth-cond :west nbs) :west)]
+        [:river :mouth (stringify-directions [dir])]))
+
+(defn seaside-or-nil [nbs]
+  (when-let [grounds (seq (get-connectables-directions
+                           (fn [_ t] (is-ground? t))
+                           :water nbs))]
+    ;; (println grounds)
     [:seaside (stringify-directions grounds)]))
+
+(defmethod tile-orientation :water [_ nbs]
+  (or
+   (river-mouth-or-nil nbs)
+   (seaside-or-nil nbs))
+  
+  ;; (if-let [grounds (seq (get-connectables-directions
+  ;;                        (fn [_ t] (is-ground? t))
+  ;;                        :water nbs))] 
+  ;;   [:seaside (stringify-directions grounds)])
+  ;; River
+  ;; [:river :mouth (stringify-directions
+  ;;                 (cond
+  ;;                  (= :river (:north nbs)) [:north]
+  ;;                  (= :river (:south nbs)) [:south]
+  ;;                  (= :river (:east nbs)) [:east]
+  ;;                  (= :river (:west nbs)) [:west]))]
+  )
 
 (defmethod tile-orientation :building [type _]
   type)

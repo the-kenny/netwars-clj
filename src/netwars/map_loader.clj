@@ -176,4 +176,6 @@
 (defn is-water? [t]
   (boolean (#{:water :reef :beach} t)))
 
-(def is-ground? (complement is-water?))
+(defn is-ground? [t]
+  (boolean (when t
+             (not (is-water? t)))))
