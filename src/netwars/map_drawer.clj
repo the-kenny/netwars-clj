@@ -137,9 +137,6 @@ For example: [:pipe :uldr] or [:seaside :corner :dr]"
                                     :big
                                     :small)]))
 
-;; (def-orientation-method :pipe [nbs]
-;;   [:east :west])
-
 (def-straighten-orientation-method :pipe)
 (def-straighten-orientation-method :segment-pipe)
 
