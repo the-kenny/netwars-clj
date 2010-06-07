@@ -2,6 +2,7 @@
   (:use netwars.map-utils
         netwars.sprite-loader
         netwars.map-loader)
+  (:require [clojure.contrib.str-utils2 :as str2])
   (:import java.awt.Graphics2D
            java.awt.image.BufferedImage))
 
@@ -154,7 +155,7 @@ For example: [:pipe :uldr] or [:seaside :corner :dr]"
                         (direction-complement ~dir)
                         ~nbs)))))
 
-(defn river-mouth [nbs drawing-fn]
+(defn- river-mouth [nbs drawing-fn]
   (when-let [dir (cond
                   (river-mouth-cond :north nbs) :north
                   (river-mouth-cond :south nbs) :south
@@ -162,16 +163,28 @@ For example: [:pipe :uldr] or [:seaside :corner :dr]"
                   (river-mouth-cond :west nbs) :west)]
         (drawing-fn [:river :mouth (stringify-directions [dir])])))
 
-(defn seaside [nbs drawing-fn]
+(defn- seaside [nbs drawing-fn]
   (when-let [grounds (seq (get-connectables-directions
                            (fn [_ t] (is-ground? t))
                            :water nbs))]
     (drawing-fn [:seaside (stringify-directions grounds)])))
 
+(defn split-intercardinal-direction [inter-dir]
+   (map #(keyword (apply str %)) (str2/split (name inter-dir) #"-")))
+
+(defn- seaside-corners [nbs drawing-fn]
+  (doseq [inter-dir [:north-east :south-east :north-west :south-west]]
+    (let [dirs (split-intercardinal-direction inter-dir)]
+      (when (and (is-ground? (get nbs inter-dir))
+                 (every? #(or (is-water? %)
+                              (= % :beach)) (map #(get nbs %) dirs)))
+        (drawing-fn  (conj [:seaside :corner] (stringify-directions dirs)))))))
+
 (defmethod tile-orientation :water [_ nbs drawing-fn]
   (do 
-   (river-mouth nbs drawing-fn)
-   (seaside nbs drawing-fn)))
+   (seaside nbs drawing-fn)
+   (seaside-corners nbs drawing-fn)
+   (river-mouth nbs drawing-fn)))
 
 (defmethod tile-orientation :building [type _ drawing-fn]
            (drawing-fn (cons :buildings type)))
