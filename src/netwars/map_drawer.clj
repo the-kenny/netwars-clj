@@ -32,13 +32,18 @@
 ;; (defmethod connectable? :street [_ t2]
 ;;   (boolean (#{:street :bridge} t2)))
 
-(defn- dispatch-fn [terrain _]
-  (if (vector? terrain)
+(defn- dispatch-fn [terrain _ _]
+  ;; Buildings are [type color] terrains just type
+  (if (vector? terrain)           
     :building
     terrain))
 
 (defmulti tile-orientation
-  "A method which returns the direction for the specific tile"
+  "A method which returns the direction for the specific tile
+Takes three arguments: the type, the neighbours and a drawing-function.
+drawing-fn takes a vector as the only argument, defining the path to the tile drawn.
+
+For example: [:pipe :uldr] or [:seaside :corner :dr]"
   dispatch-fn)
 
 (defn- get-coordinate [seq width height x y] 
@@ -52,8 +57,8 @@
     :l 1
     :d 2
     :r 3
-    4)
-  )
+    4))
+
 (def +dir-mappings+
   {:north :u,
    :east :r
@@ -81,11 +86,10 @@
   "An orientation method should return a list consisting of :u :l :d :r,
   according to the applicable directions where this tile can be connected to."
   [type [neighbours] & body]
-  `(defmethod tile-orientation ~type [~'_ ~neighbours]
+  `(defmethod tile-orientation ~type [~'_ ~neighbours drawing-fn#]
      (when-let [dirs# (do ~@body)]
-       [~type (keyword (apply str
-                         (map name (sort-by uldr-sorter
-                                            (map rename-direction dirs#)))))])))
+       (drawing-fn# 
+        [~type (stringify-directions dirs#)]))))
 
 (defn get-connectables-directions
   "Returns an vector of directions ([:north :south etc.]) to where the
@@ -93,8 +97,8 @@
   [connectable-fn type neighbours]
   (reduce (fn [acc o] ;Get possible connections in all dirs
             (if (connectable-fn type (get neighbours o))
-              (conj acc o)
-              acc)) [] [:north :east :south :west]))
+              (conj acc o) acc))
+          [] [:north :east :south :west]))
 
 (defmacro def-straighten-orientation-method [type]
   `(def-orientation-method ~type [nbs#]
@@ -124,10 +128,10 @@
    (or (connectable? :wreckage (:north nbs))
        (connectable? :wreckage (:south nbs))) [:north :south]))
 
-(defmethod tile-orientation :mountain [_ nbs]
-  [:mountain (if (:north nbs)
-               :big
-               :small)])
+(defmethod tile-orientation :mountain [_ nbs drawing-fn]
+           (drawing-fn [:mountain (if (:north nbs)
+                                    :big
+                                    :small)]))
 
 ;; (def-orientation-method :pipe [nbs]
 ;;   [:east :west])
@@ -143,82 +147,104 @@
 ;;         (every? is-water?
 ;;                 (vals (select-keys ~nbs (rectangular-direction ~dir))))))
 
-(defmacro river-mouth-cond [dir nbs]
-  `(and (= :river (~dir ~nbs))
-        (every? is-water?
-                (vals  (drop-neighbours-behind
-                        (direction-complement ~dir)
-                        ~nbs)))))
+;; (defmacro river-mouth-cond [dir nbs]
+;;   `(and (= :river (~dir ~nbs))
+;;         (every? is-water?
+;;                 (vals  (drop-neighbours-behind
+;;                         (direction-complement ~dir)
+;;                         ~nbs)))))
 
-(defn river-mouth-or-nil [nbs]
-  (when-let [dir (cond
-                  (river-mouth-cond :north nbs) :north
-                  (river-mouth-cond :south nbs) :south
-                  (river-mouth-cond :east nbs) :east
-                  (river-mouth-cond :west nbs) :west)]
-        [:river :mouth (stringify-directions [dir])]))
+;; (defn river-mouth-or-nil [nbs]
+;;   (when-let [dir (cond
+;;                   (river-mouth-cond :north nbs) :north
+;;                   (river-mouth-cond :south nbs) :south
+;;                   (river-mouth-cond :east nbs) :east
+;;                   (river-mouth-cond :west nbs) :west)]
+;;         [:river :mouth (stringify-directions [dir])]))
 
-(defn seaside-or-nil [nbs]
-  (when-let [grounds (seq (get-connectables-directions
-                           (fn [_ t] (is-ground? t))
-                           :water nbs))]
-    ;; (println grounds)
-    [:seaside (stringify-directions grounds)]))
+;; (defn- seaside-corners [nbs]
+;;   (when (and (is-ground? (:north-east nbs))
+;;              (is-water? (:north nbs))
+;;              (is-water? (:east nbs)))
+;;     [:north :east]))
 
-(defmethod tile-orientation :water [_ nbs]
-  (or
-   (river-mouth-or-nil nbs)
-   (seaside-or-nil nbs))
-  
-  ;; (if-let [grounds (seq (get-connectables-directions
-  ;;                        (fn [_ t] (is-ground? t))
-  ;;                        :water nbs))] 
-  ;;   [:seaside (stringify-directions grounds)])
-  ;; River
-  ;; [:river :mouth (stringify-directions
-  ;;                 (cond
-  ;;                  (= :river (:north nbs)) [:north]
-  ;;                  (= :river (:south nbs)) [:south]
-  ;;                  (= :river (:east nbs)) [:east]
-  ;;                  (= :river (:west nbs)) [:west]))]
-  )
+;; (defn seaside-corners-or-nil [nbs]
+;;   (when-let [dir (seaside-corners nbs)]
+;;     [:seaside :corner (stringify-directions dir)]))
 
-(defmethod tile-orientation :building [type _]
-  type)
+;; (defn seaside-or-nil [nbs]
+;;   (when-let [grounds (seq (get-connectables-directions
+;;                            (fn [_ t] (is-ground? t))
+;;                            :water nbs))]
+;;     [:seaside (stringify-directions grounds)]))
 
-(defmethod tile-orientation :default [type _]
-  [type nil])
+;; (defmethod tile-orientation :water [_ nbs]
+;;   (or
+;;    (river-mouth-or-nil nbs)
+;;    (seaside-or-nil nbs)
+;;    (seaside-corners-or-nil nbs)))
+
+(defmethod tile-orientation :building [type _ drawing-fn]
+           (drawing-fn (cons :buildings type)))
+
+(defmethod tile-orientation :default [type _ drawing-fn]
+  (drawing-fn [(name type)]))
 
 ;;; End of orientation-section
 
-(defn orientate-terrain-tiles [map-struct]
-  (for [x (range (:width map-struct))
-        y (range (:height map-struct))
-        :let [data (terrain-at map-struct x y)]] 
-    (tile-orientation data (neighbours map-struct x y))))
+;; (defn orientate-terrain-tiles [map-struct]
+;;   (for [x (range (:width map-struct))
+;;         y (range (:height map-struct))
+;;         :let [data (terrain-at map-struct x y)]] 
+;;     (tile-orientation data (neighbours map-struct x y))))
+
+;; (defn render-map-to-image [loaded-map]
+;;   (let [image (BufferedImage. (* 16 (:width loaded-map))
+;;                               (* 16 (:height loaded-map))
+;;                               BufferedImage/TYPE_INT_ARGB)
+;;         graphics (.createGraphics image)
+;;         oriented-tiles (orientate-terrain-tiles loaded-map)]
+;;     (.drawImage graphics (load-pixmap "pixmaps/background.png") 0 0 nil)
+;;     (doseq [x (range (:width loaded-map))
+;;             y (range (:height loaded-map))]
+;;       (when-let [ordt (get-coordinate oriented-tiles
+;;                                       (:width loaded-map)
+;;                                       (:height loaded-map)
+;;                                       x y)]
+;;         (if-let [tile #^BufferedImage (if (is-building? (first ordt))
+;;                                         (load-building-tile ordt)
+;;                                         (load-terrain-tile ordt))]
+;;           (.drawImage graphics
+;;                       tile
+;;                       (- (* x 16) (- (.getWidth tile) 16))
+;;                       (- (* y 16) (- (.getHeight tile) 16))
+;;                       nil)
+;;           (println ordt " not found."))))
+;;     (.finalize graphics)
+;;     image))
+
+(defn drawing-fn [graphics x y path]
+  (if-let [tile #^BufferedImage (if (is-building? (first path))
+                                  (load-building-tile path)
+                                  (load-terrain-tile path))]
+    (.drawImage graphics
+                tile
+                (- (* x 16) (- (.getWidth tile) 16))
+                (- (* y 16) (- (.getHeight tile) 16))
+                nil)
+    (println path " not found.")))
 
 (defn render-map-to-image [loaded-map]
   (let [image (BufferedImage. (* 16 (:width loaded-map))
                               (* 16 (:height loaded-map))
                               BufferedImage/TYPE_INT_ARGB)
-        graphics (.createGraphics image)
-        oriented-tiles (orientate-terrain-tiles loaded-map)]
+        graphics (.createGraphics image)]
     (.drawImage graphics (load-pixmap "pixmaps/background.png") 0 0 nil)
     (doseq [x (range (:width loaded-map))
             y (range (:height loaded-map))]
-      (when-let [ordt (get-coordinate oriented-tiles
-                                      (:width loaded-map)
-                                      (:height loaded-map)
-                                      x y)]
-        (if-let [tile #^BufferedImage (if (is-building? (first ordt))
-                                        (load-building-tile ordt)
-                                        (load-terrain-tile ordt))]
-          (.drawImage graphics
-                      tile
-                      (- (* x 16) (- (.getWidth tile) 16))
-                      (- (* y 16) (- (.getHeight tile) 16))
-                      nil)
-          (println ordt " not found."))))
+      (when-let [terr (terrain-at loaded-map x y)]
+        (tile-orientation terr (neighbours loaded-map x y)
+                          (partial drawing-fn graphics x y))))
     (.finalize graphics)
     image))
 
