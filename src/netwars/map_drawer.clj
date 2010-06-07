@@ -122,12 +122,15 @@ For example: [:pipe :uldr] or [:seaside :corner :dr]"
     [:north :south]
     [:east :west]))
 
-(def-orientation-method :wreckage [nbs]
-  (cond
-   (or (connectable? :wreckage (:east nbs))
-       (connectable? :wreckage (:west nbs))) [:east :west]
-   (or (connectable? :wreckage (:north nbs))
-       (connectable? :wreckage (:south nbs))) [:north :south]))
+;;; :wreckage has a special-handling for a single wreckage, w/o a direction
+(defmethod tile-orientation :wreckage [_ nbs drawing-fn]
+  (if-let [dirs (cond
+                 (or (connectable? :wreckage (:east nbs))
+                     (connectable? :wreckage (:west nbs))) [:east :west]
+                 (or (connectable? :wreckage (:north nbs))
+                     (connectable? :wreckage (:south nbs))) [:north :south])]
+    (drawing-fn [:wreckage (stringify-directions dirs)])
+    (drawing-fn [:wreckage])))
 
 (defmethod tile-orientation :mountain [_ nbs drawing-fn]
            (drawing-fn [:mountain (if (:north nbs)
@@ -214,7 +217,6 @@ For example: [:pipe :uldr] or [:seaside :corner :dr]"
     (doseq [x (range (:width loaded-map))
             y (range (:height loaded-map))]
       (when-let [terr (terrain-at loaded-map x y)]
-        (println (neighbours loaded-map x y))
         (tile-orientation terr (neighbours loaded-map x y)
                           (partial drawing-fn graphics x y))))
     (.finalize graphics)
