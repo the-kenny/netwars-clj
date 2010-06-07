@@ -142,47 +142,36 @@ For example: [:pipe :uldr] or [:seaside :corner :dr]"
 (def-orientation-method :beach [nbs] 
   (get-connectables-directions (fn [_ t] (is-ground? t)) :beach nbs))
 
-;; (defmacro river-mouth-cond [dir nbs]
-;;   `(and (= :river (~dir ~nbs))
-;;         (every? is-water?
-;;                 (vals (select-keys ~nbs (rectangular-direction ~dir))))))
+(defmacro river-mouth-cond [dir nbs]
+  `(and (= :river (~dir ~nbs))
+        (every? is-water?
+                (vals (select-keys ~nbs (rectangular-direction ~dir))))))
 
-;; (defmacro river-mouth-cond [dir nbs]
-;;   `(and (= :river (~dir ~nbs))
-;;         (every? is-water?
-;;                 (vals  (drop-neighbours-behind
-;;                         (direction-complement ~dir)
-;;                         ~nbs)))))
+(defmacro river-mouth-cond [dir nbs]
+  `(and (= :river (~dir ~nbs))
+        (every? is-water?
+                (vals  (drop-neighbours-behind
+                        (direction-complement ~dir)
+                        ~nbs)))))
 
-;; (defn river-mouth-or-nil [nbs]
-;;   (when-let [dir (cond
-;;                   (river-mouth-cond :north nbs) :north
-;;                   (river-mouth-cond :south nbs) :south
-;;                   (river-mouth-cond :east nbs) :east
-;;                   (river-mouth-cond :west nbs) :west)]
-;;         [:river :mouth (stringify-directions [dir])]))
+(defn river-mouth [nbs drawing-fn]
+  (when-let [dir (cond
+                  (river-mouth-cond :north nbs) :north
+                  (river-mouth-cond :south nbs) :south
+                  (river-mouth-cond :east nbs) :east
+                  (river-mouth-cond :west nbs) :west)]
+        (drawing-fn [:river :mouth (stringify-directions [dir])])))
 
-;; (defn- seaside-corners [nbs]
-;;   (when (and (is-ground? (:north-east nbs))
-;;              (is-water? (:north nbs))
-;;              (is-water? (:east nbs)))
-;;     [:north :east]))
+(defn seaside [nbs drawing-fn]
+  (when-let [grounds (seq (get-connectables-directions
+                           (fn [_ t] (is-ground? t))
+                           :water nbs))]
+    (drawing-fn [:seaside (stringify-directions grounds)])))
 
-;; (defn seaside-corners-or-nil [nbs]
-;;   (when-let [dir (seaside-corners nbs)]
-;;     [:seaside :corner (stringify-directions dir)]))
-
-;; (defn seaside-or-nil [nbs]
-;;   (when-let [grounds (seq (get-connectables-directions
-;;                            (fn [_ t] (is-ground? t))
-;;                            :water nbs))]
-;;     [:seaside (stringify-directions grounds)]))
-
-;; (defmethod tile-orientation :water [_ nbs]
-;;   (or
-;;    (river-mouth-or-nil nbs)
-;;    (seaside-or-nil nbs)
-;;    (seaside-corners-or-nil nbs)))
+(defmethod tile-orientation :water [_ nbs drawing-fn]
+  (do 
+   (river-mouth nbs drawing-fn)
+   (seaside nbs drawing-fn)))
 
 (defmethod tile-orientation :building [type _ drawing-fn]
            (drawing-fn (cons :buildings type)))
