@@ -178,7 +178,7 @@ For example: [:pipe :uldr] or [:seaside :corner :dr]"
       (when (and (is-ground? (get nbs inter-dir))
                  (every? #(or (is-water? %)
                               (= % :beach)) (map #(get nbs %) dirs)))
-        (drawing-fn  (conj [:seaside :corner] (stringify-directions dirs)))))))
+        (drawing-fn [:seaside :corner (stringify-directions dirs)])))))
 
 (defmethod tile-orientation :water [_ nbs drawing-fn]
   (do 
@@ -193,37 +193,6 @@ For example: [:pipe :uldr] or [:seaside :corner :dr]"
   (drawing-fn [(name type)]))
 
 ;;; End of orientation-section
-
-;; (defn orientate-terrain-tiles [map-struct]
-;;   (for [x (range (:width map-struct))
-;;         y (range (:height map-struct))
-;;         :let [data (terrain-at map-struct x y)]] 
-;;     (tile-orientation data (neighbours map-struct x y))))
-
-;; (defn render-map-to-image [loaded-map]
-;;   (let [image (BufferedImage. (* 16 (:width loaded-map))
-;;                               (* 16 (:height loaded-map))
-;;                               BufferedImage/TYPE_INT_ARGB)
-;;         graphics (.createGraphics image)
-;;         oriented-tiles (orientate-terrain-tiles loaded-map)]
-;;     (.drawImage graphics (load-pixmap "pixmaps/background.png") 0 0 nil)
-;;     (doseq [x (range (:width loaded-map))
-;;             y (range (:height loaded-map))]
-;;       (when-let [ordt (get-coordinate oriented-tiles
-;;                                       (:width loaded-map)
-;;                                       (:height loaded-map)
-;;                                       x y)]
-;;         (if-let [tile #^BufferedImage (if (is-building? (first ordt))
-;;                                         (load-building-tile ordt)
-;;                                         (load-terrain-tile ordt))]
-;;           (.drawImage graphics
-;;                       tile
-;;                       (- (* x 16) (- (.getWidth tile) 16))
-;;                       (- (* y 16) (- (.getHeight tile) 16))
-;;                       nil)
-;;           (println ordt " not found."))))
-;;     (.finalize graphics)
-;;     image))
 
 (defn drawing-fn [graphics x y path]
   (if-let [tile #^BufferedImage (if (is-building? (first path))
@@ -245,6 +214,7 @@ For example: [:pipe :uldr] or [:seaside :corner :dr]"
     (doseq [x (range (:width loaded-map))
             y (range (:height loaded-map))]
       (when-let [terr (terrain-at loaded-map x y)]
+        (println (neighbours loaded-map x y))
         (tile-orientation terr (neighbours loaded-map x y)
                           (partial drawing-fn graphics x y))))
     (.finalize graphics)
