@@ -10,7 +10,9 @@
        (< y (:height map-struct))))
 
 (defn terrain-at [map-struct x y]
-  (nth (:terrain-data map-struct) (+ y (* x (:height map-struct))) nil))
+  (if-not (on-map map-struct x y)
+    nil
+    (nth (:terrain-data map-struct) (+ y (* x (:height map-struct))))))
 
 
 (defn neighbours [map-struct x y]
