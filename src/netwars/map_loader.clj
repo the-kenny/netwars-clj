@@ -176,7 +176,7 @@
   (boolean ((set (vals terrain-values)) t)))
 
 (defn is-water? [t]
-  (boolean (#{:water :reef :beach} t)))
+  (boolean (#{:water :reef :beach :bridge} t)))
 
 (defn is-ground? [t]
   (boolean (when t
