@@ -1,7 +1,8 @@
 (ns netwars.map-loader
   (:use [clojure.contrib.def :only [defalias]]
         netwars.unit-loader)
-  (:require [clojure.contrib.str-utils2 :as str2])
+  (:require [clojure.contrib.str-utils2 :as str2]
+            [clojure.java.io :as io])
   (:import java.nio.ByteBuffer))
 
 (defstruct map-file
@@ -45,11 +46,11 @@
   `(when (.hasRemaining ~buf)
      ~@body))
 
-(defn read-binary-file [#^String uri]
-  (let [file (java.io.File. uri)
-		buf (java.nio.ByteBuffer/allocate (.length file))]
-	(.. (java.io.FileInputStream. file) (getChannel) (read buf))
-	(.rewind buf)))
+(defn read-binary-resource [#^String uri]
+  (with-open [bos (java.io.ByteArrayOutputStream.)
+              is (io/input-stream uri)]
+    (io/copy is bos)
+    (java.nio.ByteBuffer/wrap (.toByteArray bos))))
 
 (defn read-n-string [buf len]
   (if (> len 0)
@@ -64,13 +65,13 @@
 	  (recur (str s c))
 	  s)))
 
-(defn read-byte [#^java.nio.ByteBuffer buf]
+(defn read-byte [#^ByteBuffer buf]
   (.get buf))
 
-(defn read-dword [#^java.nio.ByteBuffer buf]
+(defn read-dword [#^ByteBuffer buf]
   (.getShort buf))
 
-(defn read-int32 [#^java.nio.ByteBuffer buf]
+(defn read-int32 [#^ByteBuffer buf]
   (.getInt buf))
 
 (defn parse-tileset [byte]
@@ -122,7 +123,8 @@
 
 (defn load-map [file] 
   (let [ ;; I hope Little-Endianess doesn't cause problems
-        buf (.order (read-binary-file file) java.nio.ByteOrder/LITTLE_ENDIAN)
+        buf (.order ( read-binary-resource file)
+                    java.nio.ByteOrder/LITTLE_ENDIAN)
         filetype (str2/tail file 4)
 		editor-version (read-n-string buf 6)
 		format-version (read-n-string buf 3)
