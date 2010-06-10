@@ -135,14 +135,14 @@
 (defn load-units [stream]
   "Load and returns a list of units.
  stream is a stream pointing to the xml-file.."
-  (parse-units (xml/parse stream)))
+  (into {} (map #(vector (:internal-name %) %)
+                (parse-units (xml/parse stream)))))
 
 (def *unit-prototypes* (atom nil))
 
 (defn load-units! [stream]
   "Loads units and stores them in *unit-prototypes*"
-  (reset! *unit-prototypes* (into {} (map #(vector (:internal-name %) %)
-                                          (load-units stream)))))
+  (reset! *unit-prototypes* (load-units stream)))
 
 (defn get-unit-prototype [internal-name]
   (get @*unit-prototypes* internal-name nil))
