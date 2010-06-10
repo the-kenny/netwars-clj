@@ -26,3 +26,11 @@
 
 (defn load-damagetable [file]
   (parse-damagetable (xml/parse file)))
+
+(def +damagetable+ (atom nil))
+
+(defn load-damagetable! [file]
+  (reset! +damagetable+ (load-damagetable file)))
+
+(defn get-base-damage [att def]
+  (get-in @+damagetable+ [att def]))
