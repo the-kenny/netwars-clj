@@ -62,21 +62,21 @@
       :transport-limit parseInt
       :transport-types #(set (map keyword %))})
 
-(defn parse-value [[key value]]
+(defn- parse-value [[key value]]
   [key ((get +type-mappings+ key identity) value)])
 
-(defn parse-values [unit]
+(defn- parse-values [unit]
   (into {} (map parse-value unit)))
 
-(defmulti parse-element :tag)
+(defmulti #^{:private true} parse-element :tag)
 
 (defmacro #^{:private true} def-simple-replace-parse [element]
-  `(defmethod parse-element ~element
+  `(defmethod #^{:private true} parse-element ~element
      [{attrs# :attrs}]
      (rename-keys attrs# (get +tag-mappings+ ~element {}))))
 
 (defmacro #^{:private true} def-recursive-replace-parse [element]
-  `(defmethod parse-element ~element
+  `(defmethod #^{:private true} parse-element ~element
      [{attrs# :attrs content# :content}]
      (apply merge (rename-keys attrs# (get +tag-mappings+ ~element {}))
          (map parse-element content#))))
@@ -91,41 +91,41 @@
 ;;; Weapon-Specific Methods
 (def-recursive-replace-parse :combat)
 
-(defmethod parse-element :main_weapon
+(defmethod #^{:private true} parse-element :main_weapon
   [{:keys [attrs]}]
   {:main-weapon (parse-values attrs)})  ;Parse values here too
 
-(defmethod parse-element :alt_weapon
+(defmethod #^{:private true} parse-element :alt_weapon
   [{:keys [attrs]}]
   (:alt-weapon (parse-values attrs)))
 
-(defmethod parse-element :explosive_charge
+(defmethod #^{:private true} parse-element :explosive_charge
   [{attrs :attrs}]
   {:explosive-charge attrs})
 
 ;;; Supply
-(defmethod parse-element :supply
+(defmethod #^{:private true} parse-element :supply
   [{:keys [attrs content]}]
   (apply merge (if attrs                ;Small hack to handle attrs = nil
                  (rename-keys attrs (get +tag-mappings+ :supply {}))
                  {})
          {:repair-types (set (map parse-element content))}))
 
-(defmethod parse-element :environment
+(defmethod #^{:private true} parse-element :environment
   [{attrs :attrs}]
   (keyword (:type attrs)))
 
-(defmethod parse-element :available
+(defmethod #^{:private true} parse-element :available
   [{attrs :attrs}]
   (keyword (:type attrs)))
 
 ;;; Transport
-(defmethod parse-element :transport
+(defmethod #^{:private true} parse-element :transport
   [{:keys [attrs content]}]
   (apply merge (rename-keys attrs (get +tag-mappings+ :transport {}))
          {:transportable (set (map parse-element content))}))
 
-(defmethod parse-element :transportable
+(defmethod #^{:private true} parse-element :transportable
   [{attrs :attrs}]
   (keyword (:type attrs)))
 
