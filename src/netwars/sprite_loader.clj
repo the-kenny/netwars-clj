@@ -29,19 +29,6 @@
                     (name unit) ".png")))
 
 
-;; (defn load-terrain-tile
-;;   "Loads a terrain-tile given as [terrain direction], terrain and directions
-;;   being keywords.
-;;   Loads the specific sprite from 'pixmaps/ground/$terrain/$direction.png'
-;;   If direction is nil, loads the sprite 'pixmaps/ground/$terrain.png'
-;;   The sprite will be cached."
-;;   [[terrain direction]]
-;;   (load-pixmap (str "pixmaps/ground/"
-;;                     (name terrain)
-;;                     (when direction
-;;                       (str "/" (name direction)))
-;;                     ".png")))
-
 (defn load-terrain-tile
   "Loads a terrain tile from pixmaps/grounds.
   Every segment is a keyword describing a level in the filesystem structure:
