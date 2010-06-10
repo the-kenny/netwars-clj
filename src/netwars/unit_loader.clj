@@ -36,6 +36,7 @@
 (def #^{:private true}
      +type-mappings+
      {:internal-name keyword
+      :id parseInt
       :price parseInt
       :factory keyword
       :movement-range parseInt
