@@ -6,7 +6,7 @@
   (:import java.awt.Graphics2D
            java.awt.image.BufferedImage))
 
-;; (defn tile-orientation [map-struct x y]
+;; (defn draw-tile [map-struct x y]
 ;;   (let [{:keys [north east south west
 ;;                 north-east north-west
 ;;                 south-east south-west]}
@@ -39,7 +39,7 @@
     :building
     terrain))
 
-(defmulti tile-orientation
+(defmulti draw-tile
   "A method which returns the direction for the specific tile
 Takes three arguments: the type, the neighbours and a drawing-function.
 drawing-fn takes a vector as the only argument, defining the path to the tile drawn.
@@ -87,7 +87,7 @@ For example: [:pipe :uldr] or [:seaside :corner :dr]"
   "An orientation method should return a list consisting of :u :l :d :r,
   according to the applicable directions where this tile can be connected to."
   [type [neighbours] & body]
-  `(defmethod tile-orientation ~type [~'_ ~neighbours drawing-fn#]
+  `(defmethod draw-tile ~type [~'_ ~neighbours drawing-fn#]
      (when-let [dirs# (do ~@body)]
        (drawing-fn# 
         [~type (stringify-directions dirs#)]))))
@@ -123,7 +123,7 @@ For example: [:pipe :uldr] or [:seaside :corner :dr]"
     [:east :west]))
 
 ;;; :wreckage has a special-handling for a single wreckage, w/o a direction
-(defmethod tile-orientation :wreckage [_ nbs drawing-fn]
+(defmethod draw-tile :wreckage [_ nbs drawing-fn]
   (if-let [dirs (cond
                  (or (connectable? :wreckage (:east nbs))
                      (connectable? :wreckage (:west nbs))) [:east :west]
@@ -132,7 +132,7 @@ For example: [:pipe :uldr] or [:seaside :corner :dr]"
     (drawing-fn [:wreckage (stringify-directions dirs)])
     (drawing-fn [:wreckage])))
 
-(defmethod tile-orientation :mountain [_ nbs drawing-fn]
+(defmethod draw-tile :mountain [_ nbs drawing-fn]
            (drawing-fn [:mountain (if (:north nbs)
                                     :big
                                     :small)]))
@@ -180,16 +180,16 @@ For example: [:pipe :uldr] or [:seaside :corner :dr]"
                               (= % :beach)) (map #(get nbs %) dirs)))
         (drawing-fn [:seaside :corner (stringify-directions dirs)])))))
 
-(defmethod tile-orientation :water [_ nbs drawing-fn]
+(defmethod draw-tile :water [_ nbs drawing-fn]
   (do 
    (seaside nbs drawing-fn)
    (seaside-corners nbs drawing-fn)
    (river-mouth nbs drawing-fn)))
 
-(defmethod tile-orientation :building [type _ drawing-fn]
+(defmethod draw-tile :building [type _ drawing-fn]
            (drawing-fn (cons :buildings type)))
 
-(defmethod tile-orientation :default [type _ drawing-fn]
+(defmethod draw-tile :default [type _ drawing-fn]
   (drawing-fn [(name type)]))
 
 ;;; End of orientation-section
@@ -214,7 +214,7 @@ For example: [:pipe :uldr] or [:seaside :corner :dr]"
     (doseq [x (range (:width loaded-map))
             y (range (:height loaded-map))]
       (when-let [terr (terrain-at loaded-map x y)]
-        (tile-orientation terr (neighbours loaded-map x y)
+        (draw-tile terr (neighbours loaded-map x y)
                           (partial drawing-fn graphics x y))))
     (.finalize graphics)
     image))
