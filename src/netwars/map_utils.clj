@@ -3,16 +3,13 @@
   (:require clojure.inspector))
 
 (defn on-map [map-struct x y]
-  (and (< (* x y) (* (:width map-struct) (:height map-struct)))
-       (>= x 0)
-       (>= y 0)
-       (< x (:width map-struct))
-       (< y (:height map-struct))))
+  (and (< -1 x (:width map-struct))
+       (< -1 y (:height map-struct))))
 
 (defn terrain-at [map-struct x y]
   (if-not (on-map map-struct x y)
     nil
-    (nth (:terrain-data map-struct) (+ y (* x (:height map-struct))))))
+    (get (:terrain-data map-struct) (+ y (* x (:height map-struct))))))
 
 
 (defn neighbours [map-struct x y]

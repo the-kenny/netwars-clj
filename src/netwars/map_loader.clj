@@ -140,9 +140,9 @@
                    ".awd"  (dec (int (read-byte buf)))
                    ".aws"  (int (read-byte buf))
                    0))
-		terrain-data (parse-terrain-data
-                      (doall (for [_ (range (* width height))]
-                               (read-dword buf))))
+		terrain-data (vec (parse-terrain-data
+                           (doall (for [_ (range (* width height))]
+                                    (read-dword buf)))))
 		unit-data (parse-unit-data
                    (doall (for [_ (range (* width height))]
                             (read-dword buf)))
