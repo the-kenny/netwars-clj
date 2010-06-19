@@ -136,8 +136,8 @@
 (defn load-units [stream]
   "Load and returns a list of units.
  stream is a stream pointing to the xml-file.."
-  (into {} (map #(vector (:internal-name %) %)
-                (parse-units (xml/parse stream)))))
+  (let [pu (parse-units (xml/parse stream))]
+   (zipmap (map :internal-name pu) pu)))
 
 (def *unit-prototypes* (atom nil))
 
