@@ -3,8 +3,9 @@
             [clojure.zip :as zip])
   (:use [clojure.set :only [rename-keys]]))
 
-(defn #^{:private true} mapvals [f m]
-  "Maps f over the values in a map"
+(defn- mapvals
+  "Maps f over the values in a map" 
+  [f m]
   (zipmap (keys m) (map f (vals m))))
 
 (defmulti #^{:private true} parse-element :tag)
