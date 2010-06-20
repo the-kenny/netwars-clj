@@ -17,10 +17,11 @@
 (defmethod #^{:private true} parse-element :enemy
   [{attrs :attrs}]
   {(keyword (:name attrs))
-   (mapvals #(if % (read-string %))
-            (rename-keys
-             (select-keys attrs [:damage :alt_damage])
-             {:alt_damage :alt-damage}))})
+   (into {} (remove (fn [[_ v]] (= v -1))
+            (mapvals #(when % (read-string %))
+                     (rename-keys
+                      (select-keys attrs [:damage :alt_damage])
+                      {:alt_damage :alt-damage}))))})
 
 (defn parse-damagetable [xml-tree]
   (apply merge (map parse-element (:content xml-tree))))
