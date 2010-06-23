@@ -27,7 +27,7 @@
                                          (:color unit)) 0 0 nil)
     (doseq [[k v] unit]
             (when-let [img ((get +unit-draw-properties+ k
-                                 (fn [& _] nil)) v)]
+                                 (constantly nil)) v)]
               (.drawImage graphics img 0 0 nil)))
     (.finalize graphics)
     image))
