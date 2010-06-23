@@ -22,7 +22,7 @@
 
 (defn load-unit-tile
   "Loads the pixmap of an unit given at defined as [unit color] and caches it."
-  [[unit color]]
+  [unit color]
   (load-pixmap (str "pixmaps/units/"
                     (get +unit-color-mappings+ color)
                     "/"
