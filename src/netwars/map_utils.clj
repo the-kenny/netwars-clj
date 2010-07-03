@@ -56,3 +56,34 @@
 ;; (defn is-ground [terrain]
 ;;   (boolean (and terrain
 ;;                 (not (#{:water :reef :bridge :beach} terrain)))))
+
+(def ^{:private true}
+     +not-traversable-types+
+     {:foot      #{:pipe :reef :water}
+      :mech      #{:pipe :reef :water}
+      :tread     #{:mountain :pipe :reef :water :river}
+      :tires     #{:mountain :pipe :reef :water :river}
+      :air       #{:pipe}
+      :sea       #{:plain :forest :building :bridge :hq
+                   :mountain :pipe :street :silo :river :beach}
+      :transport #{:plain :forest :building :bridge :hq
+                   :mointain :pipe :street :silo :river}
+      :oozium    #{:pipe :reef :water}}) 
+
+(defn can-pass? [move-type terrain]
+  (when-let [npt (move-type +not-traversable-types+)]
+    (not (boolean (npt terrain)))))
+
+(def ^{:private true} +movement-costs+
+     ;; movement-costs = 1 and not-traversable were omitted 
+     {:plain {:tires 2}
+      :forest {:tread 2
+               :tires 3}
+      :mountain {:foot 2}
+      :reef {:sea 2
+             :transport 2}
+      :river {:foot 2}})
+
+(defn movement-costs [terrain movement-type]
+  (when (can-pass? movement-type terrain)
+    (get-in +movement-costs+ [terrain movement-type] 1)))
