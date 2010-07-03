@@ -4,15 +4,20 @@
   (:import java.awt.Graphics2D
            java.awt.image.BufferedImage))
 
+(defmulti ^{:private true} property-pixmap key)
+
 (def ^{:private true} +number-mappings+
      (zipmap (iterate inc 1) ["one" "two" "three"
                               "four" "five" "six"
                               "seven" "eight" "nine"]))
 
-(defn- hp-pixmap [hp]
-  (when (< 0 hp 10)
-   (sprites/load-pixmap
-    (str "pixmaps/units/misc/" (get +number-mappings+ hp) ".png"))))
+(defmethod property-pixmap :hp [[_ hp]]
+           (when (< 0 hp 10)
+             (sprites/load-pixmap
+              (str "pixmaps/units/misc/" (get +number-mappings+ hp) ".png"))))
+
+(defmethod property-pixmap :default [_]
+           nil)
 
 (def ^{:private true
        :doc "A map. Key corresponds to the keys in an unit-struct, v is a
@@ -25,9 +30,8 @@
         graphics (.createGraphics image)]
     (.drawImage graphics (load-unit-tile (:internal-name unit)
                                          (:color unit)) 0 0 nil)
-    (doseq [[k v] unit]
-            (when-let [img ((get +unit-draw-properties+ k
-                                 (constantly nil)) v)]
+    (doseq [entry unit]
+            (when-let [img (property-pixmap entry)]
               (.drawImage graphics img 0 0 nil)))
     (.finalize graphics)
     image))
