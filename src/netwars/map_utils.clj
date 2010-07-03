@@ -47,10 +47,11 @@
                          :south-west :south-east
                          :east :west])))
 
-(defn inspect-terrain [loaded-map]
-  (clojure.inspector/inspect
-   (apply merge (for [x (range 30) y (range 20)]
-                  {[x y] (terrain-at loaded-map x y)}))))
+(comment
+ (defn inspect-terrain [loaded-map]
+   (clojure.inspector/inspect
+    (apply merge (for [x (range 30) y (range 20)]
+                   {[x y] (terrain-at loaded-map x y)})))))
 
 ;; (defn is-ground [terrain]
 ;;   (boolean (and terrain
