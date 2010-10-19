@@ -71,7 +71,7 @@
          (doseq [nb (remove @closedset (graph/get-neighbors graph x))]
            (if-not (@openset nb)
              (do
-               (alter g assoc nb (+ (weight graph nb) (@g x)))
+               (alter g assoc nb (+ (weight graph nb) (get @g x 0)))
                ;; (alter h assoc nb (dist nb end))
                (alter came-from assoc nb x)
                (alter openset conj nb))
@@ -87,7 +87,7 @@
 (comment
   (def +lmap+ (map-loader/load-map
                "http://advancewarsnet.com/designmaps/mapfiles/0777.aw2"))
-  (def +g+ (create-weighted-graph +lmap+  {:movement-type :foot}))
+  (def +g+ (create-weighted-graph +lmap+  {:movement-type :tires}))
 
   (def start-node (make-neighbor +lmap+ 0 0))
   (def goal-node (make-neighbor +lmap+ 0 3))
