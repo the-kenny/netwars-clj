@@ -50,11 +50,11 @@
 
 (defn- reconstruct-path [came-from start goal]
   (println "Reconstructing path...")
-  (loop [n goal, path []]
-    (if-not (= start n)
-     (when-let [n (get came-from n)]
-       (recur n (conj path n)))
-     (cons goal path))))
+  (reverse (loop [n goal, path []]
+             (if-not (= start n)
+               (when-let [n (get came-from n)]
+                 (recur n (conj path n)))
+               (cons goal path)))))
 
 (defn- a-star-path [graph start end] 
   (let [g (ref {start 0})
