@@ -75,7 +75,7 @@
                ;; (alter h assoc nb (dist nb end))
                (alter came-from assoc nb x)
                (alter openset conj nb))
-             (when (< (+ (weight graph nb) (@g x)) (@g nb))
+             (when (< (+ (weight graph nb) (get @g x 0)) (get @g nb 0))
                (alter g assoc nb (+ (weight graph nb) (@g x)))
                ;; (alter h assoc nb (dist nb end))
                ))))
