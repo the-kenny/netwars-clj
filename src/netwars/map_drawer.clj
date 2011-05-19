@@ -1,18 +1,11 @@
 (ns netwars.map-drawer
   (:use netwars.map-utils
-        netwars.sprite-loader
         netwars.map-loader)
-  (:require [clojure.contrib.str-utils2 :as str2])
+  (:require [clojure.contrib.str-utils2 :as str2]
+            [netwars.utilities :as util])
   (:import java.awt.Graphics2D
-           java.awt.image.BufferedImage))
-
-;; (defn draw-tile [map-struct x y]
-;;   (let [{:keys [north east south west
-;;                 north-east north-west
-;;                 south-east south-west]}
-;;         (neighbours map-struct x y)]
-
-;;     fun-stuff))
+           java.awt.image.BufferedImage
+           javax.imageio.ImageIO))
 
 (defmulti connectable? (fn [t1 _] t1))
 
@@ -194,15 +187,44 @@ For example: [:pipe :uldr] or [:seaside :corner :dr]"
 
 ;;; End of orientation-section
 
+(let [tile-cache (atom {})]
+  (defn- load-pixmap [#^String file]
+    (if-let [img (get @tile-cache file)]
+      img
+      (if-let [res (util/load-resource file)]
+        (get (swap! tile-cache assoc file (ImageIO/read res))
+             file)))))
+
+(defn load-terrain-tile
+  "Loads a terrain tile from pixmaps/grounds.
+  Every segment is a keyword describing a level in the filesystem structure:
+  street/lr.png would be [:street :lr]
+  If a segment is nil, it will be ignored."
+  [[& segments]]
+  (load-pixmap (str (reduce #(when %2 (str %1 "/" (name %2)))
+                            "pixmaps/ground"
+                            (remove nil? segments))
+                    ".png")))
+
+(defn load-building-tile [[building color]]
+  (load-pixmap (str "pixmaps/ground/buildings/"
+                    (name building)
+                    "/"
+                    (name color)
+                    ".png")))
+
+(defn draw-img [graphics x y tile]
+  (.drawImage graphics
+              tile
+              (- (* x 16) (- (.getWidth tile) 16))
+              (- (* y 16) (- (.getHeight tile) 16))
+              nil))
+
 (defn drawing-fn [graphics x y path]
   (if-let [tile #^BufferedImage (if (is-building? (first path))
                                   (load-building-tile path)
                                   (load-terrain-tile path))]
-    (.drawImage graphics
-                tile
-                (- (* x 16) (- (.getWidth tile) 16))
-                (- (* y 16) (- (.getHeight tile) 16))
-                nil)
+    (draw-img graphics x y tile)
     (println path " not found.")))
 
 (defn render-map-to-image [loaded-map]
@@ -219,8 +241,12 @@ For example: [:pipe :uldr] or [:seaside :corner :dr]"
     (.finalize graphics)
     image))
 
-(defn- test-drawing [file]
-  (let [m (netwars.map-loader/load-map "/Users/moritz/Development/clojure/netwars/bla.aws")]
-    (javax.imageio.ImageIO/write (time (render-map-to-image m)) "png" (java.io.File. file))))
+(defn render-path-to-map [map-img path]
+  (let [lst (:path path)
+        img (load-pixmap "pixmaps/misc/path.png")
+        graphics (.createGraphics map-img)]
+    (doseq [[x y _] lst]
+      (println x y)
+      (draw-img graphics x y img)))
+  map-img)
 
-(comment (test-drawing "/Users/moritz/7330.png"))

@@ -147,4 +147,3 @@
 
 (defn get-unit-prototype [internal-name]
   (get @*unit-prototypes* internal-name nil))
-

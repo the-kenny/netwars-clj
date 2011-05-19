@@ -98,7 +98,9 @@
 
 (defn find-unit-by-id [id]
   (when @*unit-prototypes*
-    (first (filter #(= (get % :id) (str id)) @*unit-prototypes*))))
+    (first (filter #(= (get % :id) id) (vals @*unit-prototypes*)))
+    ;; (first (filter #(= (get (second %) :id)  id)  @*unit-prototypes*))
+    ))
 
 (defn parse-unit-data [data width height]
   (if @*unit-prototypes*
@@ -109,7 +111,7 @@
                       color (get unit-color-values 
                                  (int (/ (- val 500) 40)))]
                 :when (not= val -1)]
-            [[x y] [(:internal-name (find-unit-by-id id)) color]]))
+            [[x y] [id color]]))
     :units-not-loaded)) 
 
 (def aws-spec '[[:editor-version 6 :string]
@@ -133,13 +135,13 @@
                 (read-byte buf)
                 30)
 		height (if (= filetype ".aws")
-                (read-byte buf)
-                20)
+                 (read-byte buf)
+                 20)
 		tileset (parse-tileset
                  (condp = filetype
-                   ".awd"  (dec (int (read-byte buf)))
-                   ".aws"  (int (read-byte buf))
-                   0))
+                     ".awd"  (dec (int (read-byte buf)))
+                     ".aws"  (int (read-byte buf))
+                     0))
 		terrain-data (vec (parse-terrain-data
                            (doall (for [_ (range (* width height))]
                                     (read-dword buf)))))
@@ -148,13 +150,13 @@
                             (read-dword buf)))
                    width height)
         name (read-when-possible buf
-               (read-n-string buf (read-int32 buf)))
+                                 (read-n-string buf (read-int32 buf)))
         author (read-when-possible buf
-                 (read-n-string buf (read-int32 buf)))
+                                   (read-n-string buf (read-int32 buf)))
         desc (read-when-possible buf
-               (str2/replace (read-n-string buf (read-int32 buf)) 
-                             #"\r\n"
-                             "\n"))]
+                                 (str2/replace (read-n-string buf (read-int32 buf)) 
+                                               #"\r\n"
+                                               "\n"))]
 	(struct-map map-file 
       :filename file
 	  :width width

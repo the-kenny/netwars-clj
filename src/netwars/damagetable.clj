@@ -36,3 +36,4 @@
 
 (defn get-base-damage [att def]
   (get-in @*damagetable* [att def]))
+
