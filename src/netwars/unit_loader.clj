@@ -96,8 +96,9 @@
   {:main-weapon (parse-values attrs)})  ;Parse values here too
 
 (defmethod #^{:private true} parse-element :alt_weapon
-  [{:keys [attrs]}]
-  (:alt-weapon (parse-values attrs)))
+           [{:keys [attrs]}]
+           (println "alt-weapon")
+           {:alt-weapon (parse-values attrs)})
 
 (defmethod #^{:private true} parse-element :explosive_charge
   [{attrs :attrs}]
