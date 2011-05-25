@@ -8,11 +8,7 @@
 
 (describe load-units
   (it "loads an unit-spec from a file"
-    (load-units (load-resource "units.xml")))
-  (testing load-units!
-    (it "loads an unit-spec into netwars.unit-loader/*unit-prototypes*" 
-      (do (load-units! (load-resource "units.xml"))
-          (= @*unit-prototypes* (load-units (load-resource "units.xml")))))))
+    (load-units (load-resource "units.xml"))))
 
 (def unit-spec-context
      (stateful-fn-context #(load-units (load-resource "units.xml"))
@@ -20,14 +16,29 @@
 
 (describe "The loaded unit-spec"
   (using [unit-spec unit-spec-context]
-    (it "is a map with > 0 entries"
-      (and (map? @unit-spec)
+    (it "is a sequence with >0 elements"
+      (and (seq? @unit-spec)
            (> (count @unit-spec))))
+
     (testing "every unit-prototype in this spec"
       (given [required-keys #{:internal-name :name :hp}]
-       (do-it "has the minimal required keys"
-         (doseq [spec (vals @unit-spec)]
-           (expect (subset? required-keys (-> spec keys set)))))
-       (do-it "is accessible by its internal-name"
-         (doseq [spec (vals @unit-spec)]
-           (expect (= spec (get @unit-spec (:internal-name spec))))))))))
+        (do-it "is a map"
+          (doseq [spec  @unit-spec]
+           (expect (map? spec))))
+        
+        (do-it "has the minimal required keys"
+         (doseq [spec @unit-spec]
+           (expect (subset? required-keys (-> spec keys set)))))))))
+
+(describe find-prototype
+  (given [spec (load-units (load-resource "units.xml"))]
+    (it "finds prototypes based on :id"
+      (= (:internal-name (find-prototype spec :id 0)) :infantry))
+    (it "finds prototypes based on :internal-name"
+      (= (:id (find-prototype spec :internal-name :md-tank)) 1))
+    (it "returns nil if it can't find a prototype"
+      (nil? (find-prototype spec :id 999)))
+    (it "returns nil if the key is unknown"
+      (nil? (find-prototype spec
+                            :carries-towel ;; Today is towel-day
+                            true))))) 

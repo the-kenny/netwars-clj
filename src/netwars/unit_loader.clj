@@ -97,7 +97,6 @@
 
 (defmethod #^{:private true} parse-element :alt_weapon
            [{:keys [attrs]}]
-           (println "alt-weapon")
            {:alt-weapon (parse-values attrs)})
 
 (defmethod #^{:private true} parse-element :explosive_charge
@@ -134,17 +133,11 @@
 (defn parse-units [xml-tree]
   (map (comp parse-values parse-element) (:content xml-tree)))
 
-(defn load-units [stream]
+(defn load-units
   "Load and returns a list of units.
  stream is a stream pointing to the xml-file.."
-  (let [pu (parse-units (xml/parse stream))]
-   (zipmap (map :internal-name pu) pu)))
+  [stream]
+  (parse-units (xml/parse stream)))
 
-(def *unit-prototypes* (atom nil))
-
-(defn load-units! [stream]
-  "Loads units and stores them in *unit-prototypes*"
-  (reset! *unit-prototypes* (load-units stream)))
-
-(defn get-unit-prototype [internal-name]
-  (get @*unit-prototypes* internal-name nil))
+(defn find-prototype [spec key value]
+  (first (filter #(= (get % key) value) spec)))
