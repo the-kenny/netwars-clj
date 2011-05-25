@@ -1,46 +1,8 @@
 (ns netwars.map-loader
-  (:use [clojure.contrib.def :only [defalias]]
-        netwars.unit-loader)
   (:require [clojure.contrib.str-utils2 :as str2]
             [clojure.java.io :as io])
-  (:import java.nio.ByteBuffer))
-
-(defstruct map-file
-  :filename
-  :name
-  :author
-  :description
-  :type
-  :tileset
-  :terrain-data                         ;Top-to-bottom, left-to-right
-  :unit-data)
-
-
-(def #^{:private true} tilesets
-     [:normal :snow :desert :wasteland :aw1 :aw2])
-
-(def #^{:private true} terrain-values
-	 {0   :plain
-	  60  :water
-	  3   :river
-	  1   :street
-	  32  :bridge
-	  2   :bridge
-	  16  :pipe
-	  226 :segment-pipe
-	  167 :wreckage
-	  150 :mountain
-	  90  :forest
-	  30  :reef
-	  39  :beach})
-
-(def #^{:private true} terrain-building-values
-     [:headquarter :city :base :airport :port :tower :lab])
-
-(def #^{:private true} terrain-color-values
-	 [:red :blue :green :yellow :black :white])
-
-(defalias unit-color-values terrain-color-values)
+  (:import java.nio.ByteBuffer
+           [netwars.aw-map AwMap AwMapUnit Coordinate]))
 
 (defmacro read-when-possible [buf & body]
   `(when (.hasRemaining ~buf)
@@ -74,21 +36,54 @@
 (defn read-int32 [#^ByteBuffer buf]
   (.getInt buf))
 
-(defn parse-tileset [byte]
-  (get tilesets byte))
+(let [tilesets [:normal :snow :desert :wasteland :aw1 :aw2]]
+  (defn parse-tileset [byte]
+   (get tilesets byte)))
 
-(defn parse-terrain [value]
-  (cond
-   (<= 0 value 299)
-   (get terrain-values (+ (rem value 30)
-                          (* 30 (int (/ value 30)))))
-   (<= 300 value 499)
-   (when-let [terr (get terrain-building-values (rem (- value 300) 10))]
-     [terr (get terrain-color-values (int (/ (- value 300) 10)))])
-   ;; (<= 900 value 1299) ni
-   ;; (+ 900 (rem (- value 900) 20)
-   ;;    (* 20 (int (/ (- value 900) 20))))
-   ))
+(let [terrain-values  {0   :plain
+                       60  :water
+                       3   :river
+                       1   :street
+                       32  :bridge
+                       2   :bridge
+                       16  :pipe
+                       226 :segment-pipe
+                       167 :wreckage
+                       150 :mountain
+                       90  :forest
+                       30  :reef
+                       39  :beach}
+      terrain-building-values [:headquarter :city :base :airport :port :tower :lab]
+      terrain-color-values [:red :blue :green :yellow :black :white]
+      unit-color-values terrain-color-values]
+
+  (defn parse-terrain [value]
+    (cond
+     (<= 0 value 299)
+     (get terrain-values (+ (rem value 30)
+                            (* 30 (int (/ value 30)))))
+     (<= 300 value 499)
+     (when-let [terr (get terrain-building-values (rem (- value 300) 10))]
+       [terr (get terrain-color-values (int (/ (- value 300) 10)))])))
+
+  (defn parse-unit [value]
+    (AwMapUnit. (rem (- value 500) 40) (get unit-color-values 
+                                            (int (/ (- value 500) 40)))))
+  
+  (defn is-building? [t]
+    (boolean ((set terrain-building-values) t)))
+
+  (defn is-terrain? [t]
+    (boolean ((set (vals terrain-values)) t))))
+
+
+  (defn is-water? [t]
+    (boolean (#{:water :reef :beach :bridge} t)))
+
+  (defn is-ground? [t]
+    (boolean (when t
+               (not (is-water? t)))))
+
 
 (defn parse-terrain-data [data]
   (map #(if-let [ret (parse-terrain %)]
@@ -96,23 +91,12 @@
           :unimplemented)
        data))
 
-(defn find-unit-by-id [id]
-  (when @*unit-prototypes*
-    (first (filter #(= (get % :id) id) (vals @*unit-prototypes*)))
-    ;; (first (filter #(= (get (second %) :id)  id)  @*unit-prototypes*))
-    ))
-
 (defn parse-unit-data [data width height]
-  (if @*unit-prototypes*
-    (into {}
-          (for [x (range width) y (range height)
-                :let [val (nth data (+ (* x height) y))
-                      id (rem (- val 500) 40)
-                      color (get unit-color-values 
-                                 (int (/ (- val 500) 40)))]
-                :when (not= val -1)]
-            [[x y] [id color]]))
-    :units-not-loaded)) 
+  (into {}
+        (for [x (range width) y (range height)
+              :let [val (nth data (+ (* x height) y))]
+              :when (not= val -1)]
+          [(Coordinate. x y) (parse-unit val)]))) 
 
 (def aws-spec '[[:editor-version 6 :string]
 				[:format-version 3 :string]
@@ -157,29 +141,13 @@
                                  (str2/replace (read-n-string buf (read-int32 buf)) 
                                                #"\r\n"
                                                "\n"))]
-	(struct-map map-file 
-      :filename file
-	  :width width
-	  :height height
-	  :tileset tileset
-	  :terrain-data terrain-data
-	  :unit-data unit-data
-      :name name
-      :author author
-      :description desc
-      :type editor-version)))
 
-;;; Utility-Methods
-
-(defn is-building? [t]
-  (boolean ((set terrain-building-values) t)))
-
-(defn is-terrain? [t]
-  (boolean ((set (vals terrain-values)) t)))
-
-(defn is-water? [t]
-  (boolean (#{:water :reef :beach :bridge} t)))
-
-(defn is-ground? [t]
-  (boolean (when t
-             (not (is-water? t)))))
+    (AwMap. {:filename file
+             :tileset tileset
+             :name name
+             :author author
+             :description desc
+             :version editor-version}
+            [width height]
+            (vec (map vec (partition height terrain-data)))
+            unit-data)))
