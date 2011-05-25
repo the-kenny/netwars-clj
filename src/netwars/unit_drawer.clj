@@ -1,11 +1,10 @@
 (ns netwars.unit-drawer
-  (:use [netwars.unit :as unit]
-        [netwars.utilities :as util])
+  (:use [netwars.utilities :as util])
   (:import java.awt.Graphics2D
            java.awt.image.BufferedImage
            javax.imageio.ImageIO))
 
-
+ 
 (let [tile-cache (atom {})]
   (defn- load-pixmap [#^String file]
     (if-let [img (get @tile-cache file)]

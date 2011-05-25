@@ -1,8 +1,9 @@
 (ns netwars.map-loader
   (:require [clojure.contrib.str-utils2 :as str2]
             [clojure.java.io :as io])
+  (:use [netwars.aw-map :only [coord]])
   (:import java.nio.ByteBuffer
-           [netwars.aw-map AwMap AwMapUnit Coordinate]))
+           [netwars.aw-map AwMap AwMapUnit]))
 
 (defmacro read-when-possible [buf & body]
   `(when (.hasRemaining ~buf)
@@ -96,7 +97,7 @@
         (for [x (range width) y (range height)
               :let [val (nth data (+ (* x height) y))]
               :when (not= val -1)]
-          [(Coordinate. x y) (parse-unit val)]))) 
+          [(coord x y) (parse-unit val)]))) 
 
 (def aws-spec '[[:editor-version 6 :string]
 				[:format-version 3 :string]
