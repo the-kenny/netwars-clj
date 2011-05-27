@@ -27,8 +27,7 @@
 
 
 (defn load-damagetable [source]
-  (parse-damagetable (xml/parse source) foo))
-
+  (parse-damagetable (xml/parse source)))
 
 (defn get-damage [table attacker defender]
   (get-in table [attacker defender]))
