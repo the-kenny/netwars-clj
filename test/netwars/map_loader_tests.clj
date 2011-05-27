@@ -9,7 +9,7 @@
     (it "loads a map from map-file"
       (instance? AwMap (load-map map-file)))))
 
-(describe "A loaded map" 
+(describe "A loaded map from 7330.aws" 
   (given [map-file "/Users/moritz/Development/Clojure/netwars/7330.aws"
           loaded-map (load-map map-file)]
     (it "has a width > 0"
