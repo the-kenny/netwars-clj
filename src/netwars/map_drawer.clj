@@ -1,6 +1,7 @@
 (ns netwars.map-drawer
   (:use netwars.map-utils
-        netwars.map-loader)
+        netwars.map-loader
+        [clojure.java.io :only [resource]])
   (:require [clojure.contrib.str-utils2 :as str2]
             [netwars.utilities :as util])
   (:import java.awt.Graphics2D
@@ -191,7 +192,7 @@ For example: [:pipe :uldr] or [:seaside :corner :dr]"
   (defn- load-pixmap [#^String file]
     (if-let [img (get @tile-cache file)]
       img
-      (if-let [res (util/load-resource file)]
+      (if-let [res (resource file)]
         (get (swap! tile-cache assoc file (ImageIO/read res))
              file)))))
 

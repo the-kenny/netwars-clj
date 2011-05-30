@@ -3,15 +3,15 @@
         [lazytest.context.stateful :only [stateful-fn-context]]
         [lazytest.expect :only [expect]]
         netwars.unit-loader
-        [netwars.utilities :only [load-resource]]
+        [clojure.java.io :only [resource]]
         [clojure.set :only [subset?]]))
 
 (describe load-units
   (it "loads an unit-spec from a file"
-    (load-units (load-resource "units.xml"))))
+    (load-units (resource "units.xml"))))
 
 (def unit-spec-context
-     (stateful-fn-context #(load-units (load-resource "units.xml"))
+     (stateful-fn-context #(load-units (resource "units.xml"))
                           (fn [_] nil)))
 
 (describe "The loaded unit-spec"
@@ -23,7 +23,7 @@
     (testing "every unit-prototype in this spec"
       (given [required-keys #{:internal-name :name :hp}]
         (do-it "is a map"
-          (doseq [spec  @unit-spec]
+          (doseq [spec @unit-spec]
            (expect (map? spec))))
         
         (do-it "has the minimal required keys"
@@ -31,7 +31,7 @@
            (expect (subset? required-keys (-> spec keys set)))))))))
 
 (describe find-prototype
-  (given [spec (load-units (load-resource "units.xml"))]
+  (given [spec (load-units (resource "units.xml"))]
     (it "finds prototypes based on :id"
       (= (:internal-name (find-prototype spec :id 0)) :infantry))
     (it "finds prototypes based on :internal-name"

@@ -2,7 +2,8 @@
   (:use [lazytest.describe :only [describe do-it given testing it with]]
         [lazytest.expect :only [expect]]
         netwars.map-loader
-        netwars.aw-map)
+        netwars.aw-map
+        [clojure.java.io :only [resource]])
   (:import [netwars.aw-map AwMap]))
 
 (describe load-map

@@ -1,7 +1,8 @@
 (ns netwars.unit-loader
   (:require [clojure.xml :as xml]
             [clojure.zip :as zip])
-  (:use [clojure.set :only [rename-keys]]))
+  (:use [clojure.set :only [rename-keys]]
+        [clojure.java.io :only [input-stream]]))
 
 (def #^{:private true
         :doc "A map of maps to represent the renaming of the xml-keywords."}
@@ -137,7 +138,7 @@
   "Load and returns a list of units.
  stream is a stream pointing to the xml-file.."
   [source]
-  (parse-units (xml/parse source)))
+  (parse-units (xml/parse (input-stream source))))
 
 (defn find-prototype [spec key value]
   (first (filter #(= (get % key) value) spec)))

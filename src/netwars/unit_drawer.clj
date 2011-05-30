@@ -1,6 +1,7 @@
 (ns netwars.unit-drawer
   (:use [netwars.utilities :as util]
-        [netwars.aw-unit :as unit])
+        [netwars.aw-unit :as unit]
+        [clojure.java.io :only [resource]])
   (:import java.awt.Graphics2D
            java.awt.image.BufferedImage
            javax.imageio.ImageIO))
@@ -10,7 +11,7 @@
   (defn- load-pixmap [#^String file]
     (if-let [img (get @tile-cache file)]
       img
-      (if-let [res (util/load-resource file)]
+      (if-let [res (resource file)]
         (get (swap! tile-cache assoc file (ImageIO/read res))
              file)))))
 
