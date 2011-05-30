@@ -6,9 +6,9 @@
   `(when (.hasRemaining ~buf)
      ~@body))
 
-(defn read-binary-resource [#^String uri]
+(defn read-binary-resource [source]
   (with-open [bos (java.io.ByteArrayOutputStream.)
-              is (io/input-stream uri)]
+              is (io/input-stream source)]
     (io/copy is bos)
     (java.nio.ByteBuffer/wrap (.toByteArray bos))))
 

@@ -136,8 +136,8 @@
 (defn load-units
   "Load and returns a list of units.
  stream is a stream pointing to the xml-file.."
-  [stream]
-  (parse-units (xml/parse stream)))
+  [source]
+  (parse-units (xml/parse source)))
 
 (defn find-prototype [spec key value]
   (first (filter #(= (get % key) value) spec)))

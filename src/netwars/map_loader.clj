@@ -75,11 +75,11 @@
 				[:terrain-data (* :width :height 2) :dword parse-terrain-data]
 				[:unit-data (* :width :height 2) :dword parse-unit-data]])
 
-(defn load-map [file] 
+(defn load-map [source] 
   (let [ ;; I hope Little-Endianess doesn't cause problems
-        buf (.order ( read-binary-resource file)
+        buf (.order (read-binary-resource source)
                     java.nio.ByteOrder/LITTLE_ENDIAN)
-        filetype (str2/tail file 4)
+        filetype (str2/tail source 4)
 		editor-version (read-n-string buf 6)
 		format-version (read-n-string buf 3)
 		_ (read-byte buf)
@@ -110,7 +110,7 @@
                                                #"\r\n"
                                                "\n"))]
 
-    (AwMap. {:filename file
+    (AwMap. {:source source
              :tileset tileset
              :name name
              :author author

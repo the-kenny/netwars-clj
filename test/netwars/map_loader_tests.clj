@@ -8,7 +8,10 @@
 (describe load-map
   (given [map-file "/Users/moritz/Development/Clojure/netwars/maps/7330.aws"]
     (it "loads a map from map-file"
-      (instance? AwMap (load-map map-file)))))
+      (instance? AwMap (load-map map-file))))
+  (given [url "http://www.advancewarsnet.com/designmaps/mapfiles/7330.aws"]
+    (it "loads a map from an url"
+      (instance? AwMap (load-map url)))))
 
 (describe ".aws map loading" 
   (given [map-file "/Users/moritz/Development/Clojure/netwars/maps/7330.aws"
