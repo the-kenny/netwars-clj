@@ -19,18 +19,17 @@
     (is (= 15 (height (:terrain loaded-map))))
 
     (testing "terrain integrity"
-      (let [terrain (:terrain loaded-map)]
-       (is (= :forest (at terrain (coord 0 0))))
-       (is (= :mountain (at terrain (coord 0 14))))
-       (is (= [:port :white] (at terrain (coord 8 9))))))
+      (are [x y t] (= t (at (:terrain loaded-map) (coord x y)))
+           0 0 :forest
+           0 14 :mountain
+           8 9 [:port :white]))
 
     (testing "unit integrity"
-      (is (let [unit (get (:units loaded-map) (coord 1 8))]
-          (and (= 0 (:id unit))
-               (= :red (:color unit)))))
-      (is (let [unit (get (:units loaded-map) (coord 18 14))]
-          (and (= 21 (:id unit))
-               (= :black (:color unit))))))))
+      (are [c id color] (let [u (get (:units loaded-map) c)]
+                            (and (is (= id (:id u)))
+                                 (is (= color (:color u)))))
+           (coord 1 8) 0 :red
+           (coord 18 14) 21 :black))))
 
 (testing ".aw2 loading"
     (let [map-file "maps/0035.aw2"
@@ -39,18 +38,17 @@
     (is (= 20 (height (:terrain loaded-map))))
 
     (testing "terrain integrity"
-      (let [terrain (:terrain loaded-map)]
-       (is (= :water (at terrain (coord 0 0))))
-       (is (= :mountain (at terrain (coord 28 19))))
-       (is (= [:headquarter :red] (at terrain (coord 1 14))))))
+      (are [x y t] (= t (at (:terrain loaded-map) (coord x y)))
+           0 0 :water
+           28 19 :mountain
+           1 14 [:headquarter :red]))
 
     (testing "unit integrity"
-      (is (let [unit (get (:units loaded-map) (coord 1 4))]
-          (and (= 7 (:id unit))
-               (= :red (:color unit)))))
-      (is (let [unit (get (:units loaded-map) (coord 18 10))]
-          (and (= 23 (:id unit))
-               (= :yellow (:color unit))))))))
+      (are [c id color] (let [u (get (:units loaded-map) c)]
+                          (and (is (= id (:id u)))
+                               (is (= color (:color u)))))
+           (coord 1 4) 7 :red
+           (coord 18 10) 23 :yellow))))
 
 (testing ".awm loading"
     (let [map-file "maps/1795.awm"
@@ -59,10 +57,10 @@
     (is (= 20 (height (:terrain loaded-map))))
 
     (testing "terrain integrity"
-      (let [terrain (:terrain loaded-map)]
-       (is (= :water (at terrain (coord 0 0))))
-       (is (= :mountain (at terrain (coord 5 11))))
-       (is (= [:headquarter :blue] (at terrain (coord 7 13))))))
+      (are [x y t] (= t (at (:terrain loaded-map) (coord x y)))
+           0 0 :water
+           5 11 :mountain
+           7 13 [:headquarter :blue]))
 
     (testing "unit integrity"
       (doseq [x (range (width (:terrain loaded-map)))
