@@ -21,9 +21,10 @@
 
 (defn read-null-string [buf]
   (loop [s ""]
-	(if-let [c #(let [c (.getChar buf)] (if (= % 0) nil %))]
-	  (recur (str s c))
-	  s)))
+    (if (and (.hasRemaining buf)
+             (not= 0 (.get buf (.position buf))))
+      (recur (str s (char (.get buf))))
+      s)))
 
 (defn read-byte [#^ByteBuffer buf]
   (.get buf))
