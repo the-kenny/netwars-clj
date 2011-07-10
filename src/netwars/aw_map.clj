@@ -25,3 +25,17 @@
 (defn make-terrain-board [[width height] data]
   (TerrainBoard. width height data))
 
+;;; Functions to check for different types of terrain
+
+(defn is-building? [t]
+  (get #{:headquarter :city :base :airport :port :tower :lab} t))
+
+(defn is-terrain? [t]
+  (get #{:plain :street :bridge :segment-pipe :river :beach :wreckage :pipe
+         :mountain :forest :water :reef} t))
+
+(defn is-water? [t]
+  (get #{:water :reef :beach :bridge} t))
+
+(defn is-ground? [t]
+  (not (is-water? t)))

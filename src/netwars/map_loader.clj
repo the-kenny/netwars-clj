@@ -38,21 +38,7 @@
 
   (defn parse-unit [value]
     (AwMapUnit. (rem (- value 500) 40) (get unit-color-values
-                                            (int (/ (- value 500) 40)))))
-
-  (defn is-building? [t]
-    (boolean ((set terrain-building-values) t)))
-
-  (defn is-terrain? [t]
-    (boolean ((set (vals terrain-values)) t))))
-
-
-  (defn is-water? [t]
-    (boolean (#{:water :reef :beach :bridge} t)))
-
-  (defn is-ground? [t]
-    (boolean (when t
-               (not (is-water? t)))))
+                                            (int (/ (- value 500) 40))))))
 
 
 (defn parse-terrain-data [data]
