@@ -1,5 +1,4 @@
 (ns netwars.map-utils-tests
-  (:use [lazytest.describe :only [describe do-it it given testing using with]]
-        [lazytest.context.stateful :only [stateful-fn-context]]
-        [lazytest.expect :only [expect]]
+  (:use clojure.test
         netwars.map-utils))
+
