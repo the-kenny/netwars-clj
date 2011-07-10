@@ -1,10 +1,12 @@
 (ns netwars.map-utils
-  (:use netwars.map-loader)
+  (:use netwars.map-loader
+        [netwars.aw-map :only [at]])
   (:require clojure.inspector))
 
-
-(defn neighbours [map-struct x y]
-  (let [msta (partial terrain-at map-struct)]
+;;; TODO: Simplify
+(defn neighbours [terrain c]
+  (let [msta (partial at terrain)
+        x (:x c) y (:y c)]
    (hash-map
     :north (msta x (dec y))
     :east (msta (inc x) y)
@@ -42,7 +44,7 @@
  (defn inspect-terrain [loaded-map]
    (clojure.inspector/inspect
     (apply merge (for [x (range 30) y (range 20)]
-                   {[x y] (terrain-at loaded-map x y)})))))
+                   {[x y] (at terrain (coord x y))})))))
 
 ;; (defn is-ground [terrain]
 ;;   (boolean (and terrain

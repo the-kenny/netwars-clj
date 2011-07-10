@@ -29,7 +29,7 @@
 
 (defn- dispatch-fn [terrain _ _]
   ;; Buildings are [type color] terrains just type
-  (if (vector? terrain)           
+  (if (vector? terrain)
     :building
     terrain))
 
@@ -40,9 +40,6 @@ drawing-fn takes a vector as the only argument, defining the path to the tile dr
 
 For example: [:pipe :uldr] or [:seaside :corner :dr]"
   dispatch-fn)
-
-(defn- get-coordinate [seq width height x y] 
-  (nth seq (+ y (* x height)) nil))
 
 ;;; Utility Functions
 
@@ -83,7 +80,7 @@ For example: [:pipe :uldr] or [:seaside :corner :dr]"
   [type [neighbours] & body]
   `(defmethod draw-tile ~type [~'_ ~neighbours drawing-fn#]
      (when-let [dirs# (do ~@body)]
-       (drawing-fn# 
+       (drawing-fn#
         [~type (stringify-directions dirs#)]))))
 
 (defn get-connectables-directions
@@ -134,7 +131,7 @@ For example: [:pipe :uldr] or [:seaside :corner :dr]"
 (def-straighten-orientation-method :pipe)
 (def-straighten-orientation-method :segment-pipe)
 
-(def-orientation-method :beach [nbs] 
+(def-orientation-method :beach [nbs]
   (get-connectables-directions (fn [_ t] (is-ground? t)) :beach nbs))
 
 (defmacro river-mouth-cond [dir nbs]
@@ -175,7 +172,7 @@ For example: [:pipe :uldr] or [:seaside :corner :dr]"
         (drawing-fn [:seaside :corner (stringify-directions dirs)])))))
 
 (defmethod draw-tile :water [_ nbs drawing-fn]
-  (do 
+  (do
    (seaside nbs drawing-fn)
    (seaside-corners nbs drawing-fn)
    (river-mouth nbs drawing-fn)))
@@ -214,40 +211,42 @@ For example: [:pipe :uldr] or [:seaside :corner :dr]"
                     (name color)
                     ".png")))
 
-(defn draw-img [graphics x y tile]
+(defn draw-img [graphics c tile]
   (.drawImage graphics
               tile
-              (- (* x 16) (- (.getWidth tile) 16))
-              (- (* y 16) (- (.getHeight tile) 16))
+              (- (* (:x c) 16) (- (.getWidth tile) 16))
+              (- (* (:y c) 16) (- (.getHeight tile) 16))
               nil))
 
-(defn drawing-fn [graphics x y path]
+(defn drawing-fn [graphics c path]
   (if-let [tile #^BufferedImage (if (is-building? (first path))
                                   (load-building-tile path)
                                   (load-terrain-tile path))]
-    (draw-img graphics x y tile)
+    (draw-img graphics c tile)
     (println path " not found.")))
 
 (defn render-map-to-image [loaded-map]
-  (let [image (BufferedImage. (* 16 (:width loaded-map))
-                              (* 16 (:height loaded-map))
+  (let [terrain (:terrain loaded-map)
+        image (BufferedImage. (* 16 (width terrain))
+                              (* 16 (height terrain))
                               BufferedImage/TYPE_INT_ARGB)
         graphics (.createGraphics image)]
     (.drawImage graphics (load-pixmap "pixmaps/background.png") 0 0 nil)
-    (doseq [x (range (:width loaded-map))
-            y (range (:height loaded-map))]
-      (when-let [terr (terrain-at loaded-map x y)]
-        (draw-tile terr (neighbours loaded-map x y)
-                          (partial drawing-fn graphics x y))))
+    (doseq [x (range (width terrain))
+            y (range (height terrain))
+            c (coord x y)]
+      (when-let [terr (at terrain c)]
+        (draw-tile terr (neighbours loaded-map c)
+                          (partial drawing-fn graphics c))))
     (.finalize graphics)
     image))
 
-(defn render-path-to-map [map-img path]
-  (let [lst (:path path)
-        img (load-pixmap "pixmaps/misc/path.png")
-        graphics (.createGraphics map-img)]
-    (doseq [[x y _] lst]
-      (println x y)
-      (draw-img graphics x y img)))
-  map-img)
+;; (defn render-path-to-map [map-img path]
+;;   (let [lst (:path path)
+;;         img (load-pixmap "pixmaps/misc/path.png")
+;;         graphics (.createGraphics map-img)]
+;;     (doseq [[x y _] lst]
+;;       (println x y)
+;;       (draw-img graphics c img)))
+;;   map-img)
 
