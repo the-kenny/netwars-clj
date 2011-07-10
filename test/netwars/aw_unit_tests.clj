@@ -6,7 +6,7 @@
 
 (deftest unit-preparation
   (let [spec (loader/load-units (resource "units.xml"))
-        weapon-unit (make-unit spec 0 :red)]
+        weapon-unit (make-unit spec 0 :red)]  ;Infantry
     (is (instance? netwars.aw_unit.AwUnit weapon-unit))
     (is (= (:internal-name weapon-unit) :infantry))
     (is (= (:color weapon-unit :red)))
