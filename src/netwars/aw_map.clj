@@ -9,26 +9,19 @@
 (defprotocol Board
   (width [board])
   (height [board])
-  (in-bounds? [board ^Coordinate c])
-  (element-at [board ^Coordinate c]))
+  (at [board ^Coordinate c]))
 
-(declare unit-at
-         terrain-at)
+(defn in-bounds? [^Board b ^Coordinate c]
+  (and (< -1 (:x c) (width b))
+       (< -1 (:y c) (height b))))
 
-(defrecord AwMapUnit [id color])
-(defrecord AwMap [info
-                  dimensions ; [width height]
-                  terrain ; list of columns 
-                  units]
+
+(defrecord TerrainBoard [width height data]
   Board
-  (width [t] (first (:dimensions t)))
-  (height [t] (second (:dimensions t)))
-  (in-bounds? [t c] (and (< -1 (:x c) (width t))
-                         (< -1 (:y c) (height t))))
-  (element-at [t c] [(terrain-at t c) (unit-at t c)]))
+  (width [t] (:width t))
+  (height [t] (:height t))
+  (at [t c] (get-in (:data t) [(:x c) (:y c)])))
 
-(defn unit-at [m ^Coordinate c]
-  (get (:units m) c))
+(defn make-terrain-board [[width height] data]
+  (TerrainBoard. width height data))
 
-(defn terrain-at [m c]
-  (get-in (:terrain m) [(:x c) (:y c)]))

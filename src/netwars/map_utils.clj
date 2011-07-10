@@ -2,15 +2,6 @@
   (:use netwars.map-loader)
   (:require clojure.inspector))
 
-(defn on-map [map-struct x y]
-  (and (< -1 x (:width map-struct))
-       (< -1 y (:height map-struct))))
-
-(defn terrain-at [map-struct x y]
-  (if-not (on-map map-struct x y)
-    nil
-    (get (:terrain-data map-struct) (+ y (* x (:height map-struct))))))
-
 
 (defn neighbours [map-struct x y]
   (let [msta (partial terrain-at map-struct)]
@@ -68,14 +59,14 @@
                    :mountain :pipe :street :silo :river :beach}
       :transport #{:plain :forest :building :bridge :hq
                    :mointain :pipe :street :silo :river}
-      :oozium    #{:pipe :reef :water}}) 
+      :oozium    #{:pipe :reef :water}})
 
 (defn can-pass? [move-type terrain]
   (when-let [npt (move-type +not-traversable-types+)]
     (not (boolean (npt terrain)))))
 
 (def ^{:private true} +movement-costs+
-     ;; movement-costs = 1 and not-traversable were omitted 
+     ;; movement-costs = 1 and not-traversable were omitted
      {:plain {:tires 2}
       :forest {:tread 2
                :tires 3}

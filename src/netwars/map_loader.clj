@@ -1,8 +1,10 @@
 (ns netwars.map-loader
   (:require [clojure.contrib.str-utils2 :as str2])
-  (:use [netwars.aw-map :only [coord]]
-        netwars.impl.map-loader)
-  (:import [netwars.aw-map AwMap AwMapUnit]))
+  (:use netwars.aw-map
+        netwars.impl.map-loader))
+
+(defrecord AwMapUnit [id color])
+(defrecord LoadedMap [^netwars.aw_map.TerrainBoard terrain units info])
 
 (let [tilesets [:normal :snow :desert :wasteland :aw1 :aw2]]
   (defn parse-tileset [byte]
@@ -35,9 +37,9 @@
        [terr (get terrain-color-values (int (/ (- value 300) 10)))])))
 
   (defn parse-unit [value]
-    (AwMapUnit. (rem (- value 500) 40) (get unit-color-values 
+    (AwMapUnit. (rem (- value 500) 40) (get unit-color-values
                                             (int (/ (- value 500) 40)))))
-  
+
   (defn is-building? [t]
     (boolean ((set terrain-building-values) t)))
 
@@ -64,7 +66,7 @@
         (for [x (range width) y (range height)
               :let [val (nth data (+ (* x height) y))]
               :when (not= val -1)]
-          [(coord x y) (parse-unit val)]))) 
+          [(coord x y) (parse-unit val)])))
 
 (def aws-spec '[[:editor-version 6 :string]
 				[:format-version 3 :string]
@@ -75,7 +77,7 @@
 				[:terrain-data (* :width :height 2) :dword parse-terrain-data]
 				[:unit-data (* :width :height 2) :dword parse-unit-data]])
 
-(defn load-map [source] 
+(defn load-map [source]
   (let [ ;; I hope Little-Endianess doesn't cause problems
         buf (.order (read-binary-resource source)
                     java.nio.ByteOrder/LITTLE_ENDIAN)
@@ -106,16 +108,17 @@
         author (read-when-possible buf
                                    (read-n-string buf (read-int32 buf)))
         desc (read-when-possible buf
-                                 (str2/replace (read-n-string buf (read-int32 buf)) 
+                                 (str2/replace (read-n-string buf (read-int32 buf))
                                                #"\r\n"
                                                "\n"))]
 
-    (AwMap. {:source source
-             :tileset tileset
-             :name name
-             :author author
-             :description desc
-             :version editor-version}
-            [width height]
-            (vec (map vec (partition height terrain-data)))
-            unit-data)))
+    (LoadedMap.
+     (make-terrain-board [width height]
+                         (vec (map vec (partition height terrain-data))))
+     unit-data
+     {:source source
+      :tileset tileset
+      :name name
+      :author author
+      :description desc
+      :version editor-version})))

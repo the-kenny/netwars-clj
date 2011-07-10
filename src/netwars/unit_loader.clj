@@ -51,11 +51,12 @@
       :hp parseInt
       :can-counterattack parseBoolean
       :can-knock-down-units parseBoolean
+      :name identity
       :ammo parseInt
       :range parseInt
       :distance parseInt
       :damage-multiplier parseInt       ;Used in dummy_units
-              
+
       ;; Supply
       :repair-points parseInt
       :repair-types #(set (map keyword %))
@@ -142,3 +143,6 @@
 
 (defn find-prototype [spec key value]
   (first (filter #(= (get % key) value) spec)))
+
+
+
