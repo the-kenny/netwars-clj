@@ -52,7 +52,7 @@
       :can-counterattack parseBoolean
       :can-knock-down-units parseBoolean
       :name identity
-      :ammo parseInt
+      :ammo #(let [n (parseInt %)] (if (= -1 n) :infinity n))
       :range parseInt
       :distance parseInt
       :damage-multiplier parseInt       ;Used in dummy_units
