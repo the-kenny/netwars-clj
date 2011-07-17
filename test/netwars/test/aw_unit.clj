@@ -1,4 +1,4 @@
-(ns netwars.aw-unit-tests
+(ns netwars.test.aw-unit
   (:use netwars.aw-unit
         [clojure.java.io :only [resource]]
         [netwars.unit-loader :as loader]

@@ -1,4 +1,4 @@
-(ns netwars.impl.map-loader-tests
+(ns netwars.test.impl.map-loader
   (:use netwars.impl.map-loader
         clojure.test))
 

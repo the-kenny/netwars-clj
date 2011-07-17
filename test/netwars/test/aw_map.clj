@@ -1,4 +1,4 @@
-(ns netwars.aw-map-tests
+(ns netwars.test.aw-map
   (:use netwars.aw-map
         clojure.test))
 
