@@ -9,7 +9,8 @@
 (defprotocol Board
   (width [board])
   (height [board])
-  (at [board ^Coordinate c]))
+  (at [board ^Coordinate c])
+  (update-board [board c v]))
 
 (defn in-bounds? [^Board b ^Coordinate c]
   (and (< -1 (:x c) (width b))
@@ -20,7 +21,8 @@
   Board
   (width [t] (:width t))
   (height [t] (:height t))
-  (at [t c] (get-in (:data t) [(:x c) (:y c)])))
+  (at [t c] (get-in (:data t) [(:x c) (:y c)]))
+  (update-board [t c v] (assoc-in t [:data (:x c) (:y c)] v)))
 
 (defn make-terrain-board [[width height] data]
   (TerrainBoard. width height data))
