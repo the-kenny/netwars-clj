@@ -24,7 +24,9 @@
       (doseq [w (:weapons weapon-unit)]
         (is (every? #{:name :ammo :range :distance} (keys w)))
         (is (instance? String (:name w)))
-        (is (every? integer? (vals (dissoc w :name))))))
+        (is (or (integer? (:ammo w)) (= :infinity (:ammo w))))
+        (is (every? integer? (vals (dissoc w :name :ammo))))
+        (is (meta w) "Has the weapon metadata (the spec) attached?")))
 
     (testing "freight"
       (is (contains? transport-unit :transport))
@@ -53,3 +55,15 @@
         (is (thrown? java.lang.Exception (unload-unit loaded -1)))
         (is (thrown? java.lang.Exception (unload-unit loaded 1)))
         (is (thrown? java.lang.Exception (unload-unit transporter 0)))))))
+
+(deftest test-weapons
+  (let [spec (loader/load-units (resource "units.xml"))
+        unit (make-unit spec 0 :red)  ;Infantry
+        ]
+    (is (can-attack? unit))
+    (is (= 1 (count (available-weapons unit))))
+    (doseq [weapon (available-weapons unit)]
+     (is (= false (low-ammo? weapon))))))
+
+
+

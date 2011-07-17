@@ -10,11 +10,17 @@
   (let [partials (map #(partial % prototype) @fabrication-process)]
     ((apply comp partials) unit)))
 
-(defn- prepare-weapons [prototype unit]
+(defn- prepare-main-weapon [prototype unit]
   (if-let [main (:main-weapon prototype)]
-   (assoc unit :weapons (if-let [alt (:alt-weapon prototype)] [main alt] [main]))
-   unit))
-(swap! fabrication-process conj #'prepare-weapons)
+    (assoc unit :weapons [(with-meta main main)])
+    unit))
+(swap! fabrication-process conj #'prepare-main-weapon)
+
+(defn- prepare-alt-weapon [prototype unit]
+  (if-let [alt (:alt-weapon prototype)]
+    (update-in unit [:weapons] conj (with-meta alt alt))
+    unit))
+(swap! fabrication-process conj #'prepare-alt-weapon)
 
 
 (defn- prepare-loading [prototype unit]
@@ -60,6 +66,21 @@
   (let [u (get-in transporter [:transport :freight i])
         newlst (remove #{u} (-> transporter :transport :freight))]
     [(assoc-in transporter [:transport :freight] newlst) u]))
+
+;;; Weapon methods
+
+(defn can-attack? [u]
+  (contains? u :weapons))
+
+(defn available-weapons [u]
+  (filter #(not= 0 (:ammo %)) (:weapons u)))
+
+(defn low-ammo? [weapon]
+  {:pre [(contains? (meta weapon) :ammo)]}
+  (if (= (:ammo weapon) :infinity)
+    false
+    (< (:ammo weapon) (/ (:ammo (meta weapon)) 2))))
+
 
 (comment
   (def +spec+ (loader/load-units
