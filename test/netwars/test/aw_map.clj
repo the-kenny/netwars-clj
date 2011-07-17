@@ -15,17 +15,17 @@
 ;;;  -------
 (deftest TerrainBoard
   (let [m (make-terrain-board [3 2] [[:water :water]
-                                       [:plain :water]
-                                       [:water :water]])]
+                                     [:plain :water]
+                                     [:water :water]])]
     (is (= (width m) 3) "has a width of 3")
     (is (= (height m) 2) "has a height of 2")
 
-    (testing in-bounds?
-      (is (every? #(not (in-bounds? m %)) [(coord -1 0)
-                                           (coord 3 0)
-                                           (coord 0 2)])
-          "returns false for coordinates outside of the map")
-      (is (every? #(in-bounds? m %) [(coord 0 0)
-                                     (coord 1 1)
-                                     (coord 2 1)])
-          "returns true for coordinates inside the bounds of the map"))))
+    (doseq [[x y] [[-1 0] [3 0] [0 2]]]
+      (is (not (in-bounds? m (coord x y)))))
+    (doseq [[x y] [[0 0] [1 1] [2 1]]]
+      (is (in-bounds? m (coord x y))))
+
+    (is (= :water (at m (coord 0 0))))
+    (is (= :plain (at m (coord 1 0))))
+
+    (is (= :foobar (at (update-board m (coord 0 0) :foobar) (coord 0 0))))))
