@@ -28,7 +28,8 @@
 ;;; Functions to check for different types of terrain
 
 (defn is-building? [t]
-  (get #{:headquarter :city :base :airport :port :tower :lab} t))
+  (and (vector? t)
+       (get #{:headquarter :city :base :airport :port :tower :lab} (first t))))
 
 (defn is-terrain? [t]
   (get #{:plain :street :bridge :segment-pipe :river :beach :wreckage :pipe
