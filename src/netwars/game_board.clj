@@ -8,6 +8,13 @@
 (defn make-game-board [terrain units]
   (GameBoard. terrain units))
 
+(defn generate-game-board [game-map unit-spec]
+  (let [terrain (:terrain game-map)
+        units (zipmap (keys (:units game-map))
+                      (map #(netwars.aw-unit/make-unit unit-spec (:id %) (:color %))
+                           (vals (:units game-map))))]
+    (make-game-board terrain units)))
+
 (defn get-terrain [^GameBoard board coord]
   (at (:terrain board) coord))
 
