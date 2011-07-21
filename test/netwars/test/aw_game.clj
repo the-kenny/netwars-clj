@@ -11,7 +11,19 @@
                         (f))))
 
 (deftest test-aw-game
-  (is (instance? netwars.aw_game.AwGame *game*)))
+  (is (instance? netwars.aw_game.AwGame *game*))
+  (is (= :game-started (-> *game* :moves deref first :type))))
+
+(deftest test-action-logging
+  (is (thrown? java.lang.IllegalStateException
+               (log-event! *game* {:type 42})))
+  (dosync
+   (is (thrown? java.lang.AssertionError
+                (log-event! *game* {})))
+
+   (is (= 1 (count (game-events *game*))))
+   (log-event! *game* {:type :foobar})
+   (is (= {:type :foobar} (second (game-events *game*))))))
 
 (deftest test-player-functions
   (dosync
@@ -24,4 +36,8 @@
    (is (= :player1 @(current-player *game*))))
 
   (is (thrown? java.lang.IllegalStateException (next-player! *game*))
-      "Throws exception outside of transaction"))
+      "Throws exception outside of transaction")
+
+  (is (= 4 (count (game-events *game*))))
+  (doseq [event (rest (game-events *game*))]
+    (is (= :turn-completed (:type event)))))
