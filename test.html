@@ -1,0 +1,32 @@
+<script type="text/javascript">
+var socket = new WebSocket("ws://localhost:8080");
+
+socket.onopen = function(){
+    document.getElementById('connectionIndicator').innerHTML = "opened!";
+}
+
+socket.onmessage = function(msg){
+    var obj = JSON.parse(msg.data);
+    var map = obj["map-image"];
+    document.getElementById('debug').innerHTML = map;
+    document.getElementById('image').setAttribute('src', map);
+}
+
+socket.onclose = function() {
+    document.getElementById('connectionIndicator').innerHTML = "closed...";
+}
+
+</script>
+
+<span id="connectionIndicator">
+Disconnected...
+</span>
+
+<div>
+  <img id="image"/>
+</div>
+
+<div>
+<span id="debug"></span>
+</div>
+
