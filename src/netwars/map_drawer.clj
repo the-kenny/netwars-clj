@@ -1,5 +1,6 @@
 (ns netwars.map-drawer
-  (:use netwars.map-utils
+  (:use netwars.aw-map
+        netwars.map-utils
         netwars.map-loader
         [clojure.java.io :only [resource]])
   (:require [clojure.contrib.str-utils2 :as str2]
@@ -225,21 +226,36 @@ For example: [:pipe :uldr] or [:seaside :corner :dr]"
     (draw-img graphics c tile)
     (println path " not found.")))
 
-(defn render-map-to-image [loaded-map]
-  (let [terrain (:terrain loaded-map)
-        image (BufferedImage. (* 16 (width terrain))
-                              (* 16 (height terrain))
+(defn render-terrain-board [terrain-board]
+  (let [image (BufferedImage. (* 16 (width terrain-board))
+                              (* 16 (height terrain-board))
                               BufferedImage/TYPE_INT_ARGB)
         graphics (.createGraphics image)]
     (.drawImage graphics (load-pixmap "pixmaps/background.png") 0 0 nil)
-    (doseq [x (range (width terrain))
-            y (range (height terrain))
-            c (coord x y)]
-      (when-let [terr (at terrain c)]
-        (draw-tile terr (neighbours loaded-map c)
-                          (partial drawing-fn graphics c))))
+    (doseq [x (range (width terrain-board))
+            y (range (height terrain-board))
+            :let [c (coord x y)]]
+      (when-let [terr (at terrain-board c)]
+        (draw-tile terr (neighbours terrain-board c)
+                   (partial drawing-fn graphics c))))
     (.finalize graphics)
     image))
+
+;; (defn render-map-to-image [loaded-map]
+;;   (let [terrain (:terrain loaded-map)
+;;         image (BufferedImage. (* 16 (width terrain))
+;;                               (* 16 (height terrain))
+;;                               BufferedImage/TYPE_INT_ARGB)
+;;         graphics (.createGraphics image)]
+;;     (.drawImage graphics (load-pixmap "pixmaps/background.png") 0 0 nil)
+;;     (doseq [x (range (width terrain))
+;;             y (range (height terrain))
+;;             c (coord x y)]
+;;       (when-let [terr (at terrain c)]
+;;         (draw-tile terr (neighbours loaded-map c)
+;;                           (partial drawing-fn graphics c))))
+;;     (.finalize graphics)
+;;     image))
 
 ;; (defn render-path-to-map [map-img path]
 ;;   (let [lst (:path path)

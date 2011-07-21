@@ -1,11 +1,11 @@
 (ns netwars.map-utils
   (:use netwars.map-loader
-        [netwars.aw-map :only [at]])
+        [netwars.aw-map :only [at coord]])
   (:require clojure.inspector))
 
 ;;; TODO: Simplify
 (defn neighbours [terrain c]
-  (let [msta (partial at terrain)
+  (let [msta #(at terrain (coord %1 %2))
         x (:x c) y (:y c)]
    (hash-map
     :north (msta x (dec y))
