@@ -69,6 +69,18 @@
 
 ;;; Weapon methods
 
+(defn main-weapon [u]
+  (first (:weapons u)))
+
+(defn alt-weapon [u]
+  (second (:weapons u)))
+
+(defn weapons [u]
+  (when-let [m {:main-weapon (main-weapon u)}]
+    (if-let [alt (alt-weapon u)]
+      (assoc m :alt-weapon alt)
+      m)))
+
 (defn can-attack? [u]
   (contains? u :weapons))
 
@@ -76,7 +88,7 @@
   (not= 0 (:ammo weapon)))
 
 (defn available-weapons [u]
-  (filter weapon-available? (:weapons u)))
+  (into {} (filter #(weapon-available? (val %)) (weapons u))))
 
 (defn low-ammo? [weapon]
   {:pre [(contains? (meta weapon) :ammo)]}

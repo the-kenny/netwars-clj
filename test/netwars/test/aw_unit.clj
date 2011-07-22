@@ -63,9 +63,7 @@
     (is (can-attack? infantry))
     (is (= 1 (count (available-weapons infantry))))
     (doseq [weapon (available-weapons infantry)]
-     (is (= false (low-ammo? weapon))))
-
-    (println megatank)
+     (is (= false (low-ammo? (val weapon)))))
     (is (= 2 (count (available-weapons megatank))))))
 
 
