@@ -1,6 +1,7 @@
 (ns netwars.test.aw-game
   (:use clojure.test
-        netwars.aw-game))
+        netwars.aw-game
+        [netwars.aw-map :only [coord]]))
 
 (def *game* nil)
 
@@ -9,6 +10,10 @@
                                                   "maps/7330.aws"
                                                   [:player1 :player2 :player3])]
                         (f))))
+
+(def artillery-coord (coord 1 11))
+(def infantry-coord (coord 1 13))
+
 
 (deftest test-aw-game
   (is (instance? netwars.aw_game.AwGame *game*))
@@ -41,3 +46,13 @@
   (is (= 4 (count (game-events *game*))))
   (doseq [event (rest (game-events *game*))]
     (is (= :turn-completed (:type event)))))
+
+(deftest test-attack-functions
+  (testing "in-attack-range?"
+    (is (in-attack-range? *game* artillery-coord infantry-coord))
+    (is (not (in-attack-range? *game* infantry-coord artillery-coord)))
+
+    ;; Other infantry vs. Artillery (diagonal)
+    (is (in-attack-range? *game* (coord 4 13) (coord 3 14)))
+    ;; Non-Range unit vs. unit right next to it
+    (is (in-attack-range? *game* (coord 15 14) (coord 15 13)))))

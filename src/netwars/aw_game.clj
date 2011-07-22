@@ -52,3 +52,13 @@
              0
              (inc idx))))
   (current-player game))
+
+;;; Attacking
+
+(defn in-attack-range? [game att-coord vic-coord]
+  (let [dist (distance att-coord vic-coord)
+        att (get-unit @(:board game) att-coord)
+        def (get-unit @(:board game) vic-coord)]
+    (or (contains? (:range (unit/main-weapon att)) dist)
+        (contains? (:range (unit/alt-weapon att)) dist))))
+
