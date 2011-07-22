@@ -12,7 +12,7 @@
 
 (defn- prepare-main-weapon [prototype unit]
   (if-let [main (:main-weapon prototype)]
-    (assoc unit :weapons [(with-meta main main)])
+    (update-in unit [:weapons] conj (with-meta main main))
     unit))
 (swap! fabrication-process conj #'prepare-main-weapon)
 
@@ -32,7 +32,7 @@
 
 
 ;;; Public methods
-
+;;; TODO: Make it possible to create units by internal-name
 (defn make-unit [spec id color]
   (when-let [prototype (loader/find-prototype spec :id id)]
     (with-meta (-> (AwUnit. (:internal-name prototype)
@@ -72,8 +72,11 @@
 (defn can-attack? [u]
   (contains? u :weapons))
 
+(defn weapon-available? [weapon]
+  (not= 0 (:ammo weapon)))
+
 (defn available-weapons [u]
-  (filter #(not= 0 (:ammo %)) (:weapons u)))
+  (filter weapon-available? (:weapons u)))
 
 (defn low-ammo? [weapon]
   {:pre [(contains? (meta weapon) :ammo)]}

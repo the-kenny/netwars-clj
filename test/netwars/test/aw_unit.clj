@@ -38,32 +38,35 @@
 (deftest test-transporting
   (let [spec (loader/load-units (resource "units.xml"))
         transporter (make-unit spec 22 :green)
-        unit (make-unit spec 0 :red)  ;Infantry
+        infantry (make-unit spec 0 :red)  ;Infantry
         ]
     (is (can-transport? transporter))
     (is (= #{:infantry :mech} (transport-types transporter)))
 
     (testing "loading"
-      (is (contains? (transport-types transporter) (:internal-name unit)))
-      (let [loaded (transport-unit transporter unit)]
+      (is (contains? (transport-types transporter) (:internal-name infantry)))
+      (let [loaded (transport-unit transporter infantry)]
         (is (= [] (-> transporter :transport :freight)))
-        (is (= unit (get-in loaded [:transport :freight 0])))))
+        (is (= infantry (get-in loaded [:transport :freight 0])))))
 
     (testing "unloading"
-      (let [loaded (transport-unit transporter unit)]
-        (is (= [transporter unit] (unload-unit loaded 0)))
+      (let [loaded (transport-unit transporter infantry)]
+        (is (= [transporter infantry] (unload-unit loaded 0)))
         (is (thrown? java.lang.Exception (unload-unit loaded -1)))
         (is (thrown? java.lang.Exception (unload-unit loaded 1)))
         (is (thrown? java.lang.Exception (unload-unit transporter 0)))))))
 
 (deftest test-weapons
   (let [spec (loader/load-units (resource "units.xml"))
-        unit (make-unit spec 0 :red)  ;Infantry
-        ]
-    (is (can-attack? unit))
-    (is (= 1 (count (available-weapons unit))))
-    (doseq [weapon (available-weapons unit)]
-     (is (= false (low-ammo? weapon))))))
+        infantry (make-unit spec 0 :red)
+        megatank (make-unit spec 10 :red)]
+    (is (can-attack? infantry))
+    (is (= 1 (count (available-weapons infantry))))
+    (doseq [weapon (available-weapons infantry)]
+     (is (= false (low-ammo? weapon))))
+
+    (println megatank)
+    (is (= 2 (count (available-weapons megatank))))))
 
 
 
