@@ -1,4 +1,4 @@
-(ns netwars.tests.player
+(ns netwars.test.player
   (:use clojure.test
         netwars.player))
 
