@@ -60,7 +60,7 @@
   (let [spec (loader/load-units (resource "units.xml"))
         infantry (make-unit spec 0 :red)
         megatank (make-unit spec 10 :red)]
-    (is (can-attack? infantry))
+    (is (has-weapons? infantry))
     (is (= 1 (count (available-weapons infantry))))
     (doseq [weapon (available-weapons infantry)]
      (is (= false (low-ammo? (val weapon)))))

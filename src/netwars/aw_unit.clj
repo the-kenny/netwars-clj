@@ -81,7 +81,7 @@
       (assoc m :alt-weapon alt)
       m)))
 
-(defn can-attack? [u]
+(defn has-weapons? [u]
   (contains? u :weapons))
 
 (defn weapon-available? [weapon]
