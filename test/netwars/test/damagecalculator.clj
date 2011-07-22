@@ -37,7 +37,24 @@
         infantry (unit/make-unit unit-spec 0 :red)
         tank (unit/make-unit unit-spec 21 :red)
         megatank (unit/make-unit unit-spec 10 :red)]
-    (is (= 49.0 (calculate-unrounded-damage table
-                                            [infantry :plain]
-                                            [infantry :plain])))
-    (is (= 50.0 (round-damage 49.0)))))
+    ;; These values are taken from Advance Wars Dual Strike
+    (is (= 55.0 (calculate-unrounded-damage table
+                                            [infantry :street]
+                                            [infantry :street])))
+    (is (= 22.0 (calculate-unrounded-damage table
+                                            [(assoc infantry :hp 4) :street]
+                                            [infantry :street])))
+    (is (= 20.0 (round-damage 22.0)))
+    (is (= 20.0 (round-damage 18.0)))
+
+    ;; Values taken from Advance Wars Dual Strike
+    (let [[att vic] (attack-unit table
+                                 [(assoc infantry :hp 4) :forest]
+                                 [(assoc infantry :hp 8) :street])]
+      (is (= 1 (:hp att)))
+      (is (= 6 (:hp vic))))
+    (let [[att vic] (attack-unit table
+                                 [(assoc infantry :hp 2) :street]
+                                 [(assoc infantry :hp 8) :street])]
+      (is (nil? att))
+      (is (= 7 (:hp vic))))))

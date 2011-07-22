@@ -49,3 +49,19 @@
        (< i 5) (* (Math/floor (/ damage 10)) 10)
        (= i 5) (* ((rand-nth [#(Math/floor %) #(Math/ceil %)]) (/ damage 10)) 10)))
     damage))
+
+(defn attack-unit [damagetable
+                   [attacker t1]
+                   [victim   t2]]
+  (let [newvic (update-in victim [:hp] -
+                      (int (/ (round-damage (calculate-unrounded-damage damagetable
+                                                                    [attacker t1]
+                                                                    [victim t2]))
+                          10)))
+        newatt (update-in attacker [:hp] -
+                          (int (/ (round-damage (calculate-unrounded-damage damagetable
+                                                                        [newvic t2]
+                                                                        [attacker t1]))
+                              10)))]
+    [(if (<= (:hp newatt) 0) nil newatt)
+     (if (<= (:hp newvic) 0) nil newvic)]))
