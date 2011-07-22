@@ -6,6 +6,18 @@
   ([x y] (Coordinate. x y))
   ([[x y]] (Coordinate. x y)))
 
+(defn distance
+  "Manhattan metric distance"
+  [c1 c2]
+  (+ (Math/abs (- (:x c2) (:x c1)))
+     (Math/abs (- (:y c2) (:y c1)))))
+
+;; (defn distance
+;;  "Euclidean distance between 2 points"
+;;  [p1 p2]
+;;  (Math/ceil (Math/sqrt (+ (Math/pow (- (:x p1) (:x p2)) 2)
+;;                 (Math/pow (- (:y p1) (:y p2)) 2)))))
+
 (defprotocol Board
   (width [board])
   (height [board])
