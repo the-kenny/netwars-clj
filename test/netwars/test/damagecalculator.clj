@@ -30,3 +30,14 @@
     (let [bare-megatank (assoc megatank :weapons (assoc-in (vec (:weapons megatank))
                                                            [0 :ammo] 0))]
       (is (contains? (choose-weapon table bare-megatank tank) :alt-weapon)))))
+
+(deftest test-damage-calculation
+  (let [table (damagetable/load-damagetable "resources/damagetable.xml")
+        unit-spec (unit-loader/load-units "resources/units.xml")
+        infantry (unit/make-unit unit-spec 0 :red)
+        tank (unit/make-unit unit-spec 21 :red)
+        megatank (unit/make-unit unit-spec 10 :red)]
+    (is (= 49.0 (calculate-unrounded-damage table
+                                            [infantry :plain]
+                                            [infantry :plain])))
+    (is (= 50.0 (round-damage 49.0)))))
