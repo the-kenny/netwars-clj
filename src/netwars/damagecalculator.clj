@@ -59,19 +59,3 @@
                                                     [victim t2]))
           10)))
 
-;;; If the victim can fire back shouldn't be handled in this method
-(defn attack-unit [damagetable
-                   [attacker t1]
-                   [victim   t2]]
-  (let [newvic (update-in victim [:hp] -
-                      (int (/ (round-damage (calculate-unrounded-damage damagetable
-                                                                    [attacker t1]
-                                                                    [victim t2]))
-                          10)))
-        newatt (update-in attacker [:hp] -
-                          (int (/ (round-damage (calculate-unrounded-damage damagetable
-                                                                        [newvic t2]
-                                                                        [attacker t1]))
-                              10)))]
-    [(if (<= (:hp newatt) 0) nil newatt)
-     (if (<= (:hp newvic) 0) nil newvic)]))

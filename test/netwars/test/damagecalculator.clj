@@ -48,18 +48,17 @@
     (is (= 20.0 (round-damage 22.0)))
     (is (= 20.0 (round-damage 18.0)))
 
-    (is (= 5  (calculate-damage table
+    ;; (round-damage 15.0) can return either 10.0 or 20.0.
+    ;; Test in a loop for both values
+    (doseq [x (range 10)]
+      (is (contains? #{20.0 10.0} (round-damage 15.0))))
+
+    (is (= 5 (calculate-damage table
                                 [artillery :plain]
                                 [infantry [:headquarter :red]])))
-
-    ;; Values taken from Advance Wars Dual Strike
-    (let [[att vic] (attack-unit table
-                                 [(assoc infantry :hp 4) :forest]
-                                 [(assoc infantry :hp 8) :street])]
-      (is (= 1 (:hp att)))
-      (is (= 6 (:hp vic))))
-    (let [[att vic] (attack-unit table
-                                 [(assoc infantry :hp 2) :street]
-                                 [(assoc infantry :hp 8) :street])]
-      (is (nil? att))
-      (is (= 7 (:hp vic))))))
+    (is (= 2 (calculate-damage table
+                               [(assoc infantry :hp 4) :forest]
+                               [(assoc infantry :hp 8) :street])))
+    (is (= 1 (calculate-damage table
+                               [(assoc infantry :hp 2) :forest]
+                               [(assoc infantry :hp 8) :street])))))
