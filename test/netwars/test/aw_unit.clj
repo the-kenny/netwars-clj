@@ -25,7 +25,7 @@
         (is (every? #{:name :ammo :range :distance} (keys w)))
         (is (instance? String (:name w)))
         (is (or (integer? (:ammo w)) (= :infinity (:ammo w))))
-        (is (every? integer? (vals (dissoc w :name :ammo))))
+        (is (set? (:range w)))
         (is (meta w) "Has the weapon metadata (the spec) attached?")))
 
     (testing "freight"
