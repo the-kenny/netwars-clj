@@ -31,7 +31,6 @@
 (swap! fabrication-process conj #'prepare-loading)
 
 
-;;; Public methods
 ;;; TODO: Make it possible to create units by internal-name
 (defn make-unit [spec id color]
   (when-let [prototype (loader/find-prototype spec :id id)]
@@ -42,7 +41,14 @@
                    (prepare-unit prototype))
       prototype)))
 
-;;; Transport Methods
+;;; Misc Functions
+
+(defn apply-damage [u d]
+  (let [newu (update-in u [:hp] - d)]
+    (when (> (:hp newu) 0)
+      newu)))
+
+;;; Transport Functions
 
 (defn can-transport? [u]
   (contains? u :transport))
