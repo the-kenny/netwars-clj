@@ -44,6 +44,15 @@
    (assoc board :terrain (update-board terrain c
                                        (assoc (get-terrain board c) 1 color)))))
 
+;;; Attacking
+
+(defn in-attack-range? [board att-coord vic-coord]
+  (let [dist (distance att-coord vic-coord)
+        att (get-unit board att-coord)
+        def (get-unit board vic-coord)]
+    (or (contains? (:range (main-weapon att)) dist)
+        (contains? (:range (alt-weapon att)) dist))))
+
 (comment
   (require netwars.map-loader
            netwars.unit-loader

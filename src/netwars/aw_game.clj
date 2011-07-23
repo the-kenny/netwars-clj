@@ -1,5 +1,6 @@
 (ns netwars.aw-game
-  (:use netwars.game-board)
+  (:use [netwars.game-board :as board]
+        [netwars.aw-unit :as unit])
   (:require netwars.map-loader
             netwars.unit-loader))
 
@@ -14,7 +15,7 @@
 (defn make-game [info mapsource players]
   (let [loaded-map (netwars.map-loader/load-map mapsource)
         unit-spec (netwars.unit-loader/load-units "resources/units.xml")
-        board (generate-game-board loaded-map unit-spec)
+        board (board/generate-game-board loaded-map unit-spec)
         newplayers (clojure.core/map ref players)
         newinfo (assoc info :map mapsource)
         initial-event {:type :game-started
@@ -54,11 +55,4 @@
   (current-player game))
 
 ;;; Attacking
-
-(defn in-attack-range? [game att-coord vic-coord]
-  (let [dist (distance att-coord vic-coord)
-        att (get-unit @(:board game) att-coord)
-        def (get-unit @(:board game) vic-coord)]
-    (or (contains? (:range (unit/main-weapon att)) dist)
-        (contains? (:range (unit/alt-weapon att)) dist))))
 
