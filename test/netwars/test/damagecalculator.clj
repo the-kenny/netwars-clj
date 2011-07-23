@@ -36,6 +36,7 @@
         unit-spec (unit-loader/load-units "resources/units.xml")
         infantry (unit/make-unit unit-spec 0 :red)
         tank (unit/make-unit unit-spec 21 :red)
+        artillery (unit/make-unit unit-spec 3 :red)
         megatank (unit/make-unit unit-spec 10 :red)]
     ;; These values are taken from Advance Wars Dual Strike
     (is (= 55.0 (calculate-unrounded-damage table
@@ -46,6 +47,10 @@
                                             [infantry :street])))
     (is (= 20.0 (round-damage 22.0)))
     (is (= 20.0 (round-damage 18.0)))
+
+    (is (= 5  (calculate-damage table
+                                [artillery :plain]
+                                [infantry [:headquarter :red]])))
 
     ;; Values taken from Advance Wars Dual Strike
     (let [[att vic] (attack-unit table

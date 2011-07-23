@@ -41,6 +41,7 @@
                       :alt-weapon (:alt-damage damages))]
     (Math/floor (/ (* base-damage (- 100 (* td2 hp2)) (/ hp1 10) 100) 10000))))
 
+;;; TODO: Values in Advance Wars look more random
 (defn round-damage [damage]
   (if (> (rem (int damage) 10) 0)
     (let [i (rem (int damage) 10)]
@@ -50,6 +51,15 @@
        (= i 5) (* ((rand-nth [#(Math/floor %) #(Math/ceil %)]) (/ damage 10)) 10)))
     damage))
 
+(defn calculate-damage [damagetable
+                        [attacker t1]
+                        [victim   t2]]
+  (int (/ (round-damage (calculate-unrounded-damage damagetable
+                                                    [attacker t1]
+                                                    [victim t2]))
+          10)))
+
+;;; If the victim can fire back shouldn't be handled in this method
 (defn attack-unit [damagetable
                    [attacker t1]
                    [victim   t2]]
