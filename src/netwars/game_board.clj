@@ -26,6 +26,10 @@
    :post [(= unit (get-unit % coord))]}
   (assoc-in board [:units coord] unit))
 
+(defn update-unit [^GameBoard board coord f & args]
+  {:pre [(not (nil? (get-unit board coord)))]}
+  (assoc-in board [:units coord] (apply f (get-in board [:units coord]) args)))
+
 (defn remove-unit [^GameBoard board coord]
   {:pre [(not (nil? (get-unit board coord)))]
    :post [(nil? (get-unit % coord))]}
@@ -53,14 +57,3 @@
     (or (contains? (:range (main-weapon att)) dist)
         (contains? (:range (alt-weapon att)) dist))))
 
-(comment
-  (require netwars.map-loader
-           netwars.unit-loader
-           netwars.aw-unit)
-  (let [loaded-map (netwars.map-loader/load-map "maps/7330.aws")
-        unit-spec (netwars.unit-loader/load-units "resources/units.xml")
-        terrain (:terrain loaded-map)
-        units (zipmap (keys (:units loaded-map))
-                      (map #(netwars.aw-unit/make-unit unit-spec (:id %) (:color %))
-                           (vals (:units loaded-map))))]
-   (def +board+ (make-game-board terrain units))))
