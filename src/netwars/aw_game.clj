@@ -73,11 +73,14 @@
                                        [vic vic-terr])
           newvic (unit/apply-damage vic dam)]
       (if newvic
-       (alter (:board game) board/update-unit vic-coord #(unit/apply-damage % dam))
-       (alter (:board game) board/remove-unit vic-coord))
+        (alter (:board game) board/update-unit vic-coord #(unit/apply-damage % dam))
+        (alter (:board game) board/remove-unit vic-coord))
+      (log-event! game {:type (if counterattack :counter-attack :attack)
+                        :from att-coord, :to vic-coord
+                        :attacker att, :victim newvic
+                        :damage dam})
       (when (and newvic
                  (board/in-attack-range? @(:board game) vic-coord att-coord)
                  (not counterattack))
         (perform-attack! game vic-coord att-coord :counterattack true))
-      ;; TODO: Logging of events
       game)))
