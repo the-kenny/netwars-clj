@@ -35,6 +35,15 @@
    :post [(nil? (get-unit % coord))]}
   (assoc board :units (dissoc (:units board) coord)))
 
+(defn can-walk-on-field?
+  "Returns true if unit can pass a field.
+   Checks if the movement-type can pass the field and if an unit is on the field,
+   it checks if both units have the same color."
+  [board unit c]
+  (and (or (nil? (get-unit board c)) (= (:color unit) (:color (get-unit board c))))
+       (can-pass? (get-terrain board c) (:movement-type (meta unit)))
+       ))
+
 (defn move-unit [^GameBoard board c1 c2]
   {:pre [(not (nil? (get-unit board c1))) (nil? (get-unit board c2))]
    :post [(nil? (get-unit % c1)) (not (nil? (get-unit % c2)))]}
@@ -71,6 +80,7 @@
     ;; (println "movement-type:" movement-type)
     ;; (println "movement-range:" movement-range)
     ;; (println "fuel:" fuel)
+    ;; (println "unit:" unit)
     (letfn [(helper [c rest & {:keys [initial?]}]
               (let [t (get-terrain board c)
                     costs (if initial? 0 (movement-costs t movement-type))]
@@ -79,6 +89,7 @@
                 (nil? c) #{}
                 (not (in-bounds? (:terrain board) c)) #{}
                 (not (can-pass? t movement-type)) #{}
+                (and (not initial?) (not (can-walk-on-field? board unit c))) #{}
                 (> rest costs) (set/union #{c}
                                             (helper (coord (inc (:x c)) (:y c))
                                                     (- rest costs))

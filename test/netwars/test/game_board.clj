@@ -33,21 +33,20 @@
      (is (in-attack-range? board (coord 15 14) (coord 15 13))))))
 
 (deftest test-movement-range
-  ;; Ugly... but is definately correct
-  (is (set? (reachable-fields (make-testboard) (coord 1 11))))
-  (is (= #{}
-         (set/difference
-          (reachable-fields (make-testboard) (coord 1 11))
-          (set (map #(apply coord %)
-                    [[0 13] [1 14] [1 13] [2 14] [0 12] [1 12] [2 13]
-                     [3 14] [0 11] [2 12] [3 13] [1 11] [0 10] [2 11]
-                     [3 12] [4 13] [0 9] [4 12] [3 11] [2 10] [0 8]
-                     [1 9] [4 11] [5 12] [1 8] [5 11] [5 10] [6 11]])))))
-    (is (= #{}
-         (set/difference
-          (reachable-fields (make-testboard) (coord 4 13))
-          (set (map #(apply coord %)
-                    [[8 12] [0 13] [1 14] [0 12] [1 13] [2 14] [1 12]
-                     [2 13] [3 14] [1 11] [2 12] [3 13] [4 14] [2 11]
-                     [3 12] [4 13] [2 10] [3 11] [4 12] [5 13] [5 12]
-                     [4 11] [5 11] [6 12] [7 12] [6 11] [5 10] [7 11] [5 9]]))))))
+  ;; Ugly... but correct
+  (let [reachable (reachable-fields (make-testboard) (coord 1 11))]
+    (is (set? reachable))
+    (is (not (empty? reachable)))
+    (is (= reachable (set (map #(apply coord %)
+                               [[0 13] [1 14] [2 14] [0 12] [1 12] [2 13]
+                                [2 14] [0 11] [2 12] [1 11] [0 10] [3 13]
+                                [3 12] [4 13] [0 9]  [4 12] [3 11] [0 8] [1 9]])))))
+  (let [reachable (reachable-fields (make-testboard) (coord 4 13))]
+    (is (set? reachable))
+    (is (not (empty? reachable)))
+    (is (= reachable
+           (set (map #(apply coord %)
+                     [[1 14] [0 12] [1 12] [2 14] [5 13]
+                      [2 13] [1 11] [2 12] [3 13] [4 14]
+                      [3 12] [4 13] [3 11] [4 12]
+                      ]))))))
