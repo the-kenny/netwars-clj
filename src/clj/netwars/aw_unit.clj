@@ -1,7 +1,11 @@
 (ns netwars.aw-unit
-  (:use [netwars.unit-loader :as loader]))
+  (:use [netwars.unit-loader :as loader]
+        [clojure.contrib.json :as json]))
 
-(defrecord AwUnit [internal-name color hp fuel])
+(defrecord AwUnit [internal-name color hp fuel]
+  json/Write-JSON
+  (write-json [obj out]
+    (write-json (into {} obj) out)))
 
 ;;; Private methods for generating units
 
