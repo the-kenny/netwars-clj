@@ -1,1 +1,3 @@
 lib/
+web/
+!web/netwars.html
