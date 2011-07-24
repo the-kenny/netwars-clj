@@ -1,9 +1,8 @@
 (ns netwars.core
-  (:require
-   [goog.events :as events]
-   [goog.dom :as dom]
-   [goog.json :as json]
-   [goog.graphics :as graphics]))
+  (:require [goog.events :as events]
+            [goog.dom :as dom]
+            [goog.json :as json]
+            [netwars.drawing :as drawing]))
 
 ;;; Logging Stuff
 
@@ -11,19 +10,7 @@
   (dom/appendChild (dom/getElement "messageLog")
                    (dom/createDom "div" nil message)))
 
-;;; Drawing
-
-(def graphics
-  (.getContext (dom/getElement "gameBoard") "2d"))
-;(.setAttribute (. graphics (getElement)) "id" "gameCanvas")
-
-(defn draw-terrain [data]
-  (let [image (js/Image.)
-        canvas (dom/getElement "gameBoard")]
-    (set! (. image src) data)
-    (.drawImage graphics image
-                (/ (- (.width canvas) (.width image)) 2)
-                (/ (- (.height canvas) (.height image)) 2))))
+(def board-context (drawing/make-graphics (dom/getElement "gameBoard")))
 
 ;;; Network stuff
 
@@ -33,11 +20,14 @@
 (let [i (atom 0)]
  (defn on-message [event]
    (let [obj (json/parse (.data event))
-         encoded-map (.map-image obj)]
+         encoded-map (.map-image obj)
+         units (.units obj)]
      (log-message (str "got message... " @i))
+     (log-message (str (.data event)))
+     (when units
+      (log-message (str "got " units " units")))
      (when encoded-map
-       ;(set! (. (dom/getElement "image") src) encoded-map)
-       (draw-terrain encoded-map))
+       (drawing/draw-terrain board-context encoded-map))
      (swap! i inc))))
 
 (defn start-socket [uri]
@@ -46,7 +36,6 @@
     (events/listen ws "open" #(set-connection-status "opened!"))
     (events/listen ws "close" #(set-connection-status "closed!"))
     ;; (events/listen ws "message" on-message)
-    (set! (. ws onmessage) on-message)
-    ))
+    (set! (. ws onmessage) on-message)))
 
 (start-socket "ws://localhost:8080")
