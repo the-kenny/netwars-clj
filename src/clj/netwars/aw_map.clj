@@ -1,6 +1,10 @@
-(ns netwars.aw-map)
+(ns netwars.aw-map
+  (:use [clojure.contrib.json :as json]))
 
-(defrecord Coordinate [^int x ^int y])
+(defrecord Coordinate [^int x ^int y]
+  json/Write-JSON
+  (write-json [obj out]
+    (write-json [(:x obj) (:y obj)] out)))
 
 (defn coord
   ([x y] (Coordinate. x y))
