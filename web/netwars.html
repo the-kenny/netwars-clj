@@ -1,40 +1,34 @@
-<script type="text/javascript" src="goog/base.js"></script>
-<script type="text/javascript" src="netwars.js"></script>
-<script type="text/javascript">
-    goog.require('netwars.core');
-</script>
+<html>
+  <head>
+    <link rel="stylesheet" type="text/css" href="style.css"/>
+    <script type="text/javascript" src="goog/base.js"></script>
+    <script type="text/javascript" src="netwars.js"></script>
+  </head>
 
+  <body>
+    <div id="connectionIndicator">
+      Disconnected...
+    </div>
 
-<!-- <script type="text/javascript"> -->
-<!-- var socket = new WebSocket("ws://localhost:8080"); -->
+    <div id="normal">
+      <div id="mapBox">
+        <canvas id="gameBoard" width="600" height="400"></canvas>
+      </div>
 
-<!-- socket.onopen = function(){ -->
-<!--     document.getElementById('connectionIndicator').innerHTML = "opened!"; -->
-<!-- } -->
+      <div id="sidebar">
+        It's awesome
+      </div>
 
-<!-- socket.onmessage = function(msg){ -->
-<!--     var obj = JSON.parse(msg.data); -->
-<!--     var map = obj["map-image"]; -->
-<!--     document.getElementById('debug').innerHTML = map; -->
-<!--     document.getElementById('image').setAttribute('src', map); -->
-<!-- } -->
+      <canvas id="minimap" width="200" height="100">
+        Foobar
+      </canvas>
 
-<!-- socket.onclose = function() { -->
-<!--     document.getElementById('connectionIndicator').innerHTML = "closed..."; -->
-<!-- } -->
+      <div id="messageLog">
+      </div>
+    </div>
 
-<!-- </script> -->
-
-<body onload="netwars.core.on_load()">
-
-<span id="connectionIndicator">
-Disconnected...
-</span>
-
-<div>
-  <img id="image"/>
-</div>
-
-<div id="messageLog">
-</div>
-</body
+    <script type="text/javascript">
+      goog.require('netwars.core');
+    </script>
+  </body>
+</html>
