@@ -1,22 +1,31 @@
+<script type="text/javascript" src="goog/base.js"></script>
+<script type="text/javascript" src="netwars.js"></script>
 <script type="text/javascript">
-var socket = new WebSocket("ws://localhost:8080");
-
-socket.onopen = function(){
-    document.getElementById('connectionIndicator').innerHTML = "opened!";
-}
-
-socket.onmessage = function(msg){
-    var obj = JSON.parse(msg.data);
-    var map = obj["map-image"];
-    document.getElementById('debug').innerHTML = map;
-    document.getElementById('image').setAttribute('src', map);
-}
-
-socket.onclose = function() {
-    document.getElementById('connectionIndicator').innerHTML = "closed...";
-}
-
+    goog.require('netwars.core');
 </script>
+
+
+<!-- <script type="text/javascript"> -->
+<!-- var socket = new WebSocket("ws://localhost:8080"); -->
+
+<!-- socket.onopen = function(){ -->
+<!--     document.getElementById('connectionIndicator').innerHTML = "opened!"; -->
+<!-- } -->
+
+<!-- socket.onmessage = function(msg){ -->
+<!--     var obj = JSON.parse(msg.data); -->
+<!--     var map = obj["map-image"]; -->
+<!--     document.getElementById('debug').innerHTML = map; -->
+<!--     document.getElementById('image').setAttribute('src', map); -->
+<!-- } -->
+
+<!-- socket.onclose = function() { -->
+<!--     document.getElementById('connectionIndicator').innerHTML = "closed..."; -->
+<!-- } -->
+
+<!-- </script> -->
+
+<body onload="netwars.core.on_load()">
 
 <span id="connectionIndicator">
 Disconnected...
@@ -26,7 +35,6 @@ Disconnected...
   <img id="image"/>
 </div>
 
-<div>
-<span id="debug"></span>
+<div id="messageLog">
 </div>
-
+</body

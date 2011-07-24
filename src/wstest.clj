@@ -25,6 +25,7 @@
     (str "data:image/png;base64,"
          (Base64/encodeBase64String (.toByteArray os)))))
 
+
 (enqueue broadcast-channel
-         (json/json-str {:map-image (serve-terrain-image (map-loader/load-map
+         (json/json-str {:map_image (serve-terrain-image (map-loader/load-map
                                                           "maps/7330.aws"))}))
