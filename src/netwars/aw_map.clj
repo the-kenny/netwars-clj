@@ -57,8 +57,10 @@
 
 (let [cost
       {:plain        {:infantry 1   :mech 1   :tread 1   :tires 2   :air 1   :sea nil :transport nil :oozium 1   :pipe nil :hover 1}
+       :wreckage     {:infantry 1   :mech 1   :tread 1   :tires 2   :air 1   :sea nil :transport nil :oozium 1   :pipe nil :hover 1}
        :forest       {:infantry 1   :mech 1   :tread 2   :tires 3   :air 1   :sea nil :transport nil :oozium 1   :pipe nil :hover 1}
-       :building     {:infantry 1   :mech 1   :tread 1   :tires 1   :air 1   :sea nil :transport nil :oozium 1   :pipe nil :hover 1}
+       :city         {:infantry 1   :mech 1   :tread 1   :tires 1   :air 1   :sea nil :transport nil :oozium 1   :pipe nil :hover 1}
+       :base         {:infantry 1   :mech 1   :tread 1   :tires 1   :air 1   :sea nil :transport nil :oozium 1   :pipe nil :hover 1}
        :bridge       {:infantry 1   :mech 1   :tread 1   :tires 1   :air 1   :sea nil :transport nil :oozium 1   :pipe nil :hover 1}
        :headquarter  {:infantry 1   :mech 1   :tread 1   :tires 1   :air 1   :sea nil :transport nil :oozium 1   :pipe 1   :hover 1}
        :mountain     {:infantry 2   :mech 1   :tread nil :tires nil :air 1   :sea nil :transport nil :oozium 1   :pipe nil :hover 0}
@@ -71,7 +73,7 @@
        :beach        {:infantry 1   :mech 1   :tread 1   :tires 1   :air 1   :sea nil :transport 1   :oozium 1   :pipe nil :hover nil}
        :port         {:infantry 1   :mech 1   :tread 1   :tires 1   :air 1   :sea nil :transport 1   :oozium 1   :pipe nil :hover nil}}]
   (defn movement-costs [terrain type]
-    (get-in cost [terrain type])))
+    (get-in cost [(if (vector? terrain) (first terrain) terrain) type])))
 
 (defn can-pass? [terrain movement-type]
   (boolean (movement-costs terrain movement-type)))
