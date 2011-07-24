@@ -12,6 +12,8 @@
 (use '[clojure.contrib.base64 :as base64]
      '[netwars.map-loader :as map-loader]
      '[netwars.map-drawer :as map-drawer]
+     '[netwars.unit-loader :as unit-loader]
+     '[netwars.game-board :as board]
      '[clojure.java.io :as io]
      '[clojure.contrib.json :as json])
 
@@ -25,7 +27,10 @@
     (str "data:image/png;base64,"
          (Base64/encodeBase64String (.toByteArray os)))))
 
-
-(enqueue broadcast-channel
-         (json/json-str {:map_image (serve-terrain-image (map-loader/load-map
-                                                          "maps/7330.aws"))}))
+(let [loaded-map (map-loader/load-map "maps/7330.aws")
+      unit-spec  (unit-loader/load-units "resources/units.xml")
+      board      (board/generate-game-board loaded-map unit-spec)
+      units (for [[{:keys [x y]} u] (:units board)] [(str x "," y) u])]
+ (enqueue broadcast-channel
+          (json/json-str {:map_image (serve-terrain-image loaded-map)
+                          :units units})))
