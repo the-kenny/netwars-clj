@@ -57,3 +57,60 @@
     (or (contains? (:range (main-weapon att)) dist)
         (contains? (:range (alt-weapon att)) dist))))
 
+;;; Movement Range
+
+(use '[clojure.set :as set])
+
+(defn reachable-fields
+  "Returns a set of all coordinates reachable by unit on coordinate c"
+  [board c]
+  (let [unit (get-unit board c)
+        movement-range (:movement-range (meta unit))
+        movement-type (:movement-type (meta unit))
+        fuel (:fuel unit)]
+    ;; (println "movement-type:" movement-type)
+    ;; (println "movement-range:" movement-range)
+    ;; (println "fuel:" fuel)
+    (letfn [(helper [c rest & {:keys [initial?]}]
+              (let [t (get-terrain board c)
+                    costs (if initial? 0 (movement-costs t movement-type))]
+                ;; (println (str "[" (:x c) "," (:y c) "]") ";" t "costs:" costs)
+               (cond
+                (nil? c) #{}
+                (not (in-bounds? (:terrain board) c)) #{}
+                (not (can-pass? t movement-type)) #{}
+                (> rest costs) (set/union #{c}
+                                            (helper (coord (inc (:x c)) (:y c))
+                                                    (- rest costs))
+                                            (helper (coord (dec (:x c)) (:y c))
+                                                    (- rest costs))
+                                            (helper (coord (:x c) (inc (:y c)))
+                                                    (- rest costs))
+                                            (helper (coord (:x c) (dec (:y c)))
+                                                    (- rest costs)))
+                true #{c})))]
+      (helper c (min movement-range fuel) :initial? true))))
+
+(comment
+  (require 'netwars.map-loader)
+  (require 'netwars.unit-loader)
+
+  (let [loaded-map (netwars.map-loader/load-map "maps/7330.aws")
+        unit-spec (netwars.unit-loader/load-units "resources/units.xml")
+        terrain (:terrain loaded-map)
+        units (zipmap (keys (:units loaded-map))
+                      (map #(netwars.aw-unit/make-unit unit-spec (:id %) (:color %))
+                           (vals (:units loaded-map))))
+        testboard (make-game-board terrain units)]
+    (defn dump-coords [c] (reachable-fields testboard c))
+
+    (defn draw-reachables [c]
+      (let [cs (reachable-fields testboard c)]
+       (doseq [y (range 0 (height (:terrain testboard)))
+               x (range 0 (width (:terrain testboard)))]
+         (print (cond
+                 (= c (coord x y)) " o"
+                 (contains? cs (coord x y)) " x"
+                 :true "  "))
+         (when (= 0 (rem (inc x) (width (:terrain testboard))))
+           (prn)))))))
