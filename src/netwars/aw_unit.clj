@@ -12,7 +12,7 @@
 
 (defn- prepare-main-weapon [prototype unit]
   (if-let [main (:main-weapon prototype)]
-    (assoc unit :weapons [(with-meta main main)])
+    (update-in unit [:weapons] conj (with-meta main main))
     unit))
 (swap! fabrication-process conj #'prepare-main-weapon)
 
@@ -31,8 +31,7 @@
 (swap! fabrication-process conj #'prepare-loading)
 
 
-;;; Public methods
-
+;;; TODO: Make it possible to create units by internal-name
 (defn make-unit [spec id color]
   (when-let [prototype (loader/find-prototype spec :id id)]
     (with-meta (-> (AwUnit. (:internal-name prototype)
@@ -42,7 +41,14 @@
                    (prepare-unit prototype))
       prototype)))
 
-;;; Transport Methods
+;;; Misc Functions
+
+(defn apply-damage [u d]
+  (let [newu (update-in u [:hp] - d)]
+    (when (> (:hp newu) 0)
+      newu)))
+
+;;; Transport Functions
 
 (defn can-transport? [u]
   (contains? u :transport))
@@ -69,11 +75,26 @@
 
 ;;; Weapon methods
 
-(defn can-attack? [u]
+(defn main-weapon [u]
+  (first (:weapons u)))
+
+(defn alt-weapon [u]
+  (second (:weapons u)))
+
+(defn weapons [u]
+  (when-let [m {:main-weapon (main-weapon u)}]
+    (if-let [alt (alt-weapon u)]
+      (assoc m :alt-weapon alt)
+      m)))
+
+(defn has-weapons? [u]
   (contains? u :weapons))
 
+(defn weapon-available? [weapon]
+  (not= 0 (:ammo weapon)))
+
 (defn available-weapons [u]
-  (filter #(not= 0 (:ammo %)) (:weapons u)))
+  (into {} (filter #(weapon-available? (val %)) (weapons u))))
 
 (defn low-ammo? [weapon]
   {:pre [(contains? (meta weapon) :ammo)]}

@@ -93,13 +93,24 @@
 ;;; Weapon-Specific Methods
 (def-recursive-replace-parse :combat)
 
+(defn- parse-weapon-range [distance range]
+  (set (clojure.core/range (inc distance)
+                           (+ (inc distance) range))))
+
+(defn- parse-weapon [attrs]
+  (let [values (parse-values attrs)]
+    {:name (:name values)
+     :ammo (:ammo values)
+     :range (parse-weapon-range (:distance values)
+                                (:range values))}))
+
 (defmethod #^{:private true} parse-element :main_weapon
   [{:keys [attrs]}]
-  {:main-weapon (parse-values attrs)})  ;Parse values here too
+  {:main-weapon (parse-weapon attrs)})
 
 (defmethod #^{:private true} parse-element :alt_weapon
-           [{:keys [attrs]}]
-           {:alt-weapon (parse-values attrs)})
+  [{:keys [attrs]}]
+  {:alt-weapon (parse-weapon attrs)})
 
 (defmethod #^{:private true} parse-element :explosive_charge
   [{attrs :attrs}]

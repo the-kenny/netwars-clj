@@ -1,6 +1,8 @@
 (ns netwars.test.aw-game
   (:use clojure.test
-        netwars.aw-game))
+        netwars.aw-game
+        [netwars.game-board :as board]
+        [netwars.aw-map :only [coord]]))
 
 (def *game* nil)
 
@@ -9,6 +11,7 @@
                                                   "maps/7330.aws"
                                                   [:player1 :player2 :player3])]
                         (f))))
+
 
 (deftest test-aw-game
   (is (instance? netwars.aw_game.AwGame *game*))
@@ -41,3 +44,47 @@
   (is (= 4 (count (game-events *game*))))
   (doseq [event (rest (game-events *game*))]
     (is (= :turn-completed (:type event)))))
+
+(defn check-attack-event [attack-event
+                          from to
+                          att-internal vic-internal]
+  (is (boolean attack-event))
+  (is (= from (:from attack-event)))
+  (is (= to (:to attack-event)))
+  (is (= att-internal (-> attack-event :attacker :internal-name)))
+  (is (= vic-internal (-> attack-event :victim :internal-name))))
+
+(deftest test-perform-attack!
+  (let [artillery (coord 1 11)
+        infantry (coord 1 13)]
+    (dosync
+     (is (= 10 (:hp (board/get-unit @(:board *game*) artillery))))
+     (is (= 10 (:hp (board/get-unit @(:board *game*) infantry))))
+     (perform-attack! *game* artillery infantry)
+     (is (= 10 (:hp (board/get-unit @(:board *game*) artillery))))
+     (is (= 5 (:hp (board/get-unit @(:board *game*) infantry))))
+     (check-attack-event (first (filter #(= :attack (:type %))
+                                       (game-events *game*)))
+                         artillery infantry
+                         :artillery :infantry))))
+
+(deftest test-counter-attack
+  (let [infantry (coord 1 13)
+        infantry2 (coord 2 13)]
+    (dosync
+     ;; Add a new infantry next to another for testing
+       (alter (:board *game*) board/add-unit infantry2
+            (board/get-unit @(:board *game*) infantry))
+     (is (= 10 (:hp (board/get-unit @(:board *game*) infantry))))
+     (is (= 10 (:hp (board/get-unit @(:board *game*) infantry2))))
+     (perform-attack! *game* infantry infantry2)
+     (is (contains? #{9 8} (:hp (board/get-unit @(:board *game*) infantry))))
+     (is (contains? #{4 5} (:hp (board/get-unit @(:board *game*) infantry2))))
+     (check-attack-event (first (filter #(= :attack (:type %))
+                                        (game-events *game*)))
+                         infantry infantry2
+                         :infantry :infantry)
+     (check-attack-event (first (filter #(= :counter-attack (:type %))
+                                        (game-events *game*)))
+                         infantry2 infantry
+                         :infantry :infantry))))

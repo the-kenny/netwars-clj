@@ -17,10 +17,14 @@
     (testing "every unit-prototype in this spec"
       (let [required-keys #{:internal-name :name :hp}]
         (doseq [spec unit-spec]
-          (is (map? spec)))
+          (is (map? spec))
+          (is (subset? required-keys (-> spec keys set)))
 
-        (doseq [spec unit-spec]
-          (is (subset? required-keys (-> spec keys set))))))))
+          ;; Weapons
+          (doseq [weapon ((juxt :main-weapon :alt-weapon) spec)
+                  :when weapon]
+            (is (every? #{:name :ammo :range} (keys weapon)))
+            (is (set? (:range weapon)) "range is a set of reachable distances")))))))
 
 (deftest prototype-finding
   (let [spec (load-units (resource "units.xml"))]

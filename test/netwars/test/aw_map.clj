@@ -7,6 +7,8 @@
     (is (= (:x c) 2) "has an x component of 2")
     (is (= (:y c) 3) "has an y component of 3")))
 
+(deftest test-distance
+  (is (= 3 (distance (coord 0 0) (coord 2 1)))))
 
 ;;; Given map:
 ;;;  -------
