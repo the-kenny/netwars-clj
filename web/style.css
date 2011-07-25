@@ -1,0 +1,54 @@
+#connectionIndicator {
+    z-index: 100;
+    width: 100pt;
+    position: fixed;
+    bottom: 0.3em;
+    right: 0.3em;
+    float: left;
+    text-align: right;
+    background-color: gray;
+    border: 2pt solid black;
+}
+
+#normal {
+    display: block;
+}
+
+
+#sidebar {
+    top: 8pt;
+    /* left: 610pt;*/
+    right: 10pt;
+    vertical-align: top;
+    position: absolute;
+    display: inline-block;
+    background-color: #ff0000;
+    height: 140pt;
+}
+
+#minimap {
+    position: absolute;
+    right: 10pt;
+    top: 150pt;
+    background-color: #353221;
+    height: 200pt;
+}
+
+#mapBox {
+    width: 600pt; height: 400pt;
+}
+
+#gameBoard {
+    background-color: #f00fff;
+    border: 1pt solid black;
+}
+
+#messageLog {
+    background-color: red;
+    width: 100%;
+    height: 25%;
+    min-height 80pt;
+    position: absolute;
+    overflow: auto;
+    border: 1pt solid black;
+}
