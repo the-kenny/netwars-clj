@@ -1,8 +1,8 @@
 (ns netwars.core
   (:require [goog.events :as events]
             [goog.dom :as dom]
-            [goog.json :as json]
-            [netwars.drawing :as drawing]))
+            [netwars.drawing :as drawing]
+            [netwars.connection :as connection]))
 
 ;;; Logging Stuff
 
@@ -17,24 +17,16 @@
 (defn set-connection-status [status]
   (dom/setTextContent (dom/getElement "connectionIndicator") status))
 
-(defn on-message [event]
-  (let [obj (json/parse (.data event))
-        encoded-map (.map-image obj)
-        units (.units obj)]
-    (when-let [message (.message obj)]
-     (log-message (str "got message: " message)))
-    (log-message (str (.data event)))
-    (when units
-      (log-message (str "got " units " units")))
-    (when encoded-map
-      (drawing/draw-terrain board-context encoded-map))))
+(def socket (connection/open-socket "ws://localhost:8080"))
 
-(defn start-socket [uri]
-  (let [ws (js/WebSocket. uri)]
-    ;; (set! (. ws onopen) #(set-connection-status "opened!"))
-    (events/listen ws "open" #(set-connection-status "connected"))
-    (events/listen ws "close" #(set-connection-status "closed"))
-    ;; (events/listen ws "message" on-message)
-    (set! (. ws onmessage) on-message)))
+(defn request-map-data [m]
+  (connection/send-data socket {"type" "request-map", "map" m}
+                        (fn [obj]
+                          (drawing/draw-terrain board-context
+                                                (get obj "map-data")))))
 
-(start-socket "ws://localhost:8080")
+(events/listen (dom/getElement "request-button") events/EventType.CLICK
+               #(do (connection/log "Clicked request-button")
+                    (request-map-data "7330.aws")))
+
+;(request-map-data "7330.aws")
