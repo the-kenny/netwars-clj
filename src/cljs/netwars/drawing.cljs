@@ -1,4 +1,5 @@
-(ns netwars.drawing)
+(ns netwars.drawing
+  (:require [goog.events :as events]))
 
 ;;; Image loading and caching
 
@@ -33,15 +34,18 @@
 
 ;;; Netwars specific drawing functions
 
-(defn draw-terrain [graphics image-data]
-  (let [image (js/Image.)
-        canvas (:canvas graphics)]
-    (set! (. image src) image-data)
-    (when (and (pos? (.width image)) (pos? (.height image)))
+(defn draw-terrain-image [graphics image]
+  (let [canvas (:canvas graphics)]
+   (when (and (pos? (.width image)) (pos? (.height image)))
      (resize-graphics graphics (.width image) (.height image)))
-    (.drawImage (:context graphics) image
-                (/ (- (.width canvas) (.width image)) 2)
-                (/ (- (.height canvas) (.height image)) 2))))
+   (.drawImage (:context graphics) image
+               (/ (- (.width canvas) (.width image)) 2)
+               (/ (- (.height canvas) (.height image)) 2))))
+
+(defn draw-terrain [graphics image-data]
+  (let [image (js/Image.)]
+    (set! (. image src) image-data)
+    (events/listen image "load" #(draw-terrain-image graphics image))))
 
 
 (defn draw-unit-at [graphics x y data]
