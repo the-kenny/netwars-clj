@@ -10,6 +10,11 @@
   (dom/appendChild (dom/getElement "messageLog")
                    (dom/createDom "div" nil message)))
 
+(connection/on-open
+  #(set! (. (dom/getElement "connectionIndicator") textContent) "connected"))
+(connection/on-close
+ #(set! (. (dom/getElement "connectionIndicator") textContent) "closed..."))
+
 (def board-context (drawing/make-graphics (dom/getElement "gameBoard")))
 
 ;;; Network stuff
@@ -19,11 +24,14 @@
 
 (def socket (connection/open-socket "ws://localhost:8080"))
 
-(defn request-map-data [m]
-  (connection/send-data socket {"type" "request-map", "map" m}
-                        (fn [obj]
-                          (drawing/draw-terrain board-context
-                                                (get obj "map-data")))))
+;;; Implement drawing the requested map
+(let [request-name "request-map"]
+ (defmethod connection/handle-response request-name [message]
+   (drawing/draw-terrain board-context
+                         (get message "map-data")))
+
+ (defn request-map-data [m]
+   (connection/send-data socket {"type" request-name, "map" m})))
 
 (defn on-load-map-submit []
   (connection/log "Requesting new map from server")
@@ -33,4 +41,3 @@
                events/EventType.SUBMIT
                #(do (on-load-map-submit)
                     (. % (preventDefault))))
-;(request-map-data "7330.aws")

@@ -7,62 +7,65 @@
 (defn log [& args]
   (.log js/console (apply str args)))
 
-;;; Hacky implementation of multimethod-dispatch
-(let [dispatch-spec (atom {})]
-  (defn get-callback-fn [key]
-    (get @dispatch-spec key))
-  (defn register-callback! [key fn]
-    (swap! dispatch-spec assoc key fn))
-  (defn unregister-callback! [key]
-    (swap! dispatch-spec dissoc key)))
+(defn encode-data [data]
+  (pr-str (into {} (for [[k v] data] [(name k) v]))))
 
-(defn call-callback
-  "Calls callback for key with args"
-  [key data-object]
-  (if-let [f (get-callback-fn key)]
-    (f data-object)
-    (log "No callback specified for type " key)))
+(defn decode-data [s]
+  (into {} (for [[k v] (cljs.reader/read-string s)] [(keyword k) v])))
 
 (defn- generate-id [& [prefix]]
   (apply str prefix (repeatedly 10 #(rand-int 10))))
 
-(defn send-data
-  ([socket data callback]
-     (let [id (generate-id "send-data")]
-       (register-callback! id #(do (callback %)
-                                   (unregister-callback! id)))
-       (let [js (pr-str (assoc data "id" id))]
-         (.send socket js))))
-  ([socket data]
-     (let [p (atom)]
-       (send-data socket data #(reset! p %))
-       p)))
+
+
+(defmulti handle-response #(get % "type"))
+
+(defmethod handle-response :default [message]
+  (log "Got unknown message with type: " (get message "type")))
+
+(defn send-data [socket data]
+  (let [id (generate-id "send-data")]
+    (.send socket (encode-data data))))
 
 ;;; Connnection Stuff
-(defn handle-message [socket-event]
+(defn handle-socket-message [socket-event]
   (log "got data: " (.data socket-event))
-  (let [obj #_(json/parse (.data socket-event))
-        (reader/read-string (.data socket-event))
-        id (get obj "id")]
-   (call-callback id obj)))
+  (let [obj (reader/read-string (.data socket-event))]
+   (handle-response obj)))
 
-(defn handle-close [socket]
-  (log "socket closed"))
+(let [closefns (atom [])]
+  (defn on-close [f]
+    (swap! closefns conj f))
 
-(defn handle-open [socket]
-  (log "socket opened")
-  ;; Schedule periodic pings
-  (let [t (goog.Timer. 2000)]
+  (defn handle-close [socket]
+    (log "socket closed")
+    (doseq [f @closefns]
+      (when (fn? f) (f)))))
+
+(let [openfns (atom [])]
+  (defn on-open [f]
+    (swap! openfns conj f))
+
+  (defn handle-open [socket]
+    (log "socket opened")
+    (doseq [f @openfns]
+      (when (fn? f) (f socket)))))
+
+(defn start-ping-timer [interval ws]
+  (let [t (goog.Timer. interval)]
     (events/listen t goog.Timer/TICK
-                   (fn [data]
-                     (log "Ping...")
-                     (send-data socket {"type" "ping"}
-                                #(log "Pong"))))
+                   (fn []
+                     (send-data ws {"type" "ping"})))
     (. t (start))))
+
+(defmethod handle-response "pong" [_]
+  (log "pong"))
+
+(on-open (partial start-ping-timer 5000))
 
 (defn open-socket [uri]
   (let [ws (js/WebSocket. uri)]
     (events/listen ws "open" #(handle-open ws))
     (events/listen ws "close" #(handle-close ws))
-    (set! (. ws onmessage) handle-message)
+    (set! (. ws onmessage) handle-socket-message)
     ws))
