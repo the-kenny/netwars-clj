@@ -6,8 +6,14 @@
 
 (def base-map-path "maps/")
 
+(defn-memo safe-load-map [file]
+  (let [file (-> file
+                 (.replace java.io.File/separatorChar \?)
+                 (.replace ".." "??"))]
+    (map-loader/load-map (str base-map-path file))))
+
 (defn-memo map-to-base64 [file]
-  (let [loaded-map (map-loader/load-map (str base-map-path file))
+  (let [loaded-map (safe-load-map file)
         img (map-drawer/render-terrain-board (:terrain loaded-map))
         os (java.io.ByteArrayOutputStream.)
         output (java.io.StringWriter.)]
