@@ -25,8 +25,12 @@
                           (drawing/draw-terrain board-context
                                                 (get obj "map-data")))))
 
-(events/listen (dom/getElement "request-button") events/EventType.CLICK
-               #(do (connection/log "Clicked request-button")
-                    (request-map-data "7330.aws")))
+(defn on-load-map-submit []
+  (connection/log "Requesting new map from server")
+  (request-map-data (.value (dom/getElement "mapName"))))
 
+(events/listen (dom/getElement "mapForm")
+               events/EventType.SUBMIT
+               #(do (on-load-map-submit)
+                    (. % (preventDefault))))
 ;(request-map-data "7330.aws")
