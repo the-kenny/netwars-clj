@@ -29,7 +29,6 @@
 
 ;;; Connnection Stuff
 (defn handle-socket-message [socket-event]
-  (log "got message: " (.data socket-event))
   (let [obj (reader/read-string (.data socket-event))]
    (handle-response obj)))
 

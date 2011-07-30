@@ -67,4 +67,5 @@
 (defmethod connection/handle-response :unit-data [data]
   (connection/log "got " (count (:units data)) " units")
   (doseq [[c u] (:units data)]
-    (connection/log (str "got unit: " (name (:internal-name u))))))
+    ;; (connection/log (str "got unit: " (name (:internal-name u))))
+    ))
