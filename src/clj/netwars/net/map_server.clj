@@ -20,10 +20,10 @@
 
 (defn send-map-data [client map-file]
   (let [map-base64 (map-to-base64 map-file)]
-   (connection/send-data client {:type "request-map"
+   (connection/send-data client {:type :request-map
                                  :map-data map-base64})))
 
-(defmethod connection/handle-request "request-map" [client request]
+(defmethod connection/handle-request :request-map [client request]
   (println "Got map request:" (str request))
   (let [requested-map (:map request)]
     (send-map-data client requested-map)))

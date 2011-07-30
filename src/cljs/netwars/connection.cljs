@@ -18,10 +18,10 @@
 
 
 
-(defmulti handle-response #(get % "type"))
+(defmulti handle-response :type)
 
 (defmethod handle-response :default [message]
-  (log "Got unknown message with type: " (get message "type")))
+  (log "Got unknown message with type: " (:type message)))
 
 (defn send-data [socket data]
   (let [id (generate-id "send-data")]
@@ -55,10 +55,10 @@
   (let [t (goog.Timer. interval)]
     (events/listen t goog.Timer/TICK
                    (fn []
-                     (send-data ws {"type" "ping"})))
+                     (send-data ws {:type :ping})))
     (. t (start))))
 
-(defmethod handle-response "pong" [_]
+(defmethod handle-response :pong [_]
   ;; TODO: Implement a timeout for reconnecting here
 )
 

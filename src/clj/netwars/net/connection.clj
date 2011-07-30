@@ -11,7 +11,8 @@
 
 (defn encode-data [data]
   (binding [*print-meta* true]
-   (pr-str (into {} (for [[k v] data] [(name k) v])))))
+   ;; (pr-str (into {} (for [[k v] data] [(name k) v])))
+    (pr-str data)))
 
 (defn decode-data [s]
   (into {} (for [[k v] (read-string s)] [(keyword k) v])))
@@ -50,9 +51,9 @@
                        (handle-request c (decode-data %))))
     (siphon broadcast-channel ch)))
 
-(defmethod handle-request "ping" [client request]
+(defmethod handle-request :ping [client request]
   #_(println "Got ping from" (:client-id client))
-  (send-data client (assoc request :type "pong")))
+  (send-data client (assoc request :type :pong)))
 
 (defmethod handle-request :default [client request]
   (println "Got unknown message:" (str request))
