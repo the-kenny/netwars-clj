@@ -28,7 +28,7 @@
 
 (defn start-new-game [config first-client]
   (println "start-new-game:" config)
-  (let [aw-game (game/make-game {} (str base-map-path (:map-name config))
+  (let [aw-game (game/make-game {} (str map-base-path (:map-name config))
                                 [(player/make-player "foo" :red 1000)
                                  (player/make-player "bar" :blue 1000)])
         id (java.util.UUID/randomUUID)]
