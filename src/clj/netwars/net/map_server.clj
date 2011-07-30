@@ -5,15 +5,6 @@
   (:use [clojure.contrib.def :only [defn-memo]])
   (:import [org.apache.commons.codec.binary Base64]))
 
-;; (def base-map-path "maps/")
-
-;; (defn safe-load-map [file]
-;;   (println "safe-load-map:" file)
-;;   (let [file file #_(-> file
-;;                  (.replace java.io.File/separatorChar \?)
-;;                  (.replace ".." "??"))]
-;;     (map-loader/load-map file #_(str base-map-path file))))
-
 (defn-memo map-to-base64 [board]
   (let [;; loaded-map (safe-load-map file)
         img (map-drawer/render-terrain-board (:terrain board))]
