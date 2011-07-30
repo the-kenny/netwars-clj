@@ -11,7 +11,7 @@
                    (dom/createDom "div" nil message)))
 
 (connection/on-open
-  #(set! (. (dom/getElement "connectionIndicator") textContent) "connected"))
+ #(set! (. (dom/getElement "connectionIndicator") textContent) "connected"))
 (connection/on-close
  #(set! (. (dom/getElement "connectionIndicator") textContent) "closed..."))
 
