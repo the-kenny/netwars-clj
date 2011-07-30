@@ -57,7 +57,7 @@
   (get #{:water :reef :beach :bridge} t))
 
 (defn is-ground? [t]
-  (not (is-water? t)))
+  (and (not (nil? t)) (not (is-water? t))))
 
 (let [cost
       {:plain        {:infantry 1   :mech 1   :tread 1   :tires 2   :air 1   :sea nil :transport nil :oozium 1   :pipe nil :hover 1}
