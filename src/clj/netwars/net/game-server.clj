@@ -52,11 +52,3 @@
   (when-let [game (get @running-games (java.util.UUID/fromString (:game-id request)))]
     (map-server/send-map-data client (-> game :aw-game :board deref))
     (send-units client game)))
-
-(defmethod connection/handle-request :unit-tiles [client request]
-  (let [[tilespec tile] (tiling/load-tile "resources/pixmaps/units/")]
-    (connection/send-data client (assoc request
-                                   :tile-spec (into {}
-                                               (for [[k c] tilespec]
-                                                  [k (connection/encode-coordinate c)]))
-                                   :tiled-image (connection/image-to-base64 tile)))))

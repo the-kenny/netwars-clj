@@ -1,14 +1,24 @@
 (ns netwars.net.tiling
   (:use [netwars.aw-map :only [coord]]
-        [clojure.contrib.def :only [defn-memo]])
+        [netwars.net.connection :as connection]
+        [clojure.contrib.def :only [defn-memo]]
+        [clojure.string :as string])
   (:import java.awt.image.BufferedImage
            java.awt.Graphics2D
-           javax.imageio.ImageIO))
+           javax.imageio.ImageIO
+           ;; java.io.File
+           ))
 
 (defn- make-tiling-spec [directory]
   (let [files (filter #(.isFile %) (file-seq (java.io.File. directory)))]
     (for [file files]
-      [(-> file (.getPath) (.substring (count directory))) file])))
+      (let [key (-> file
+                    (.getPath)
+                    (.substring (count directory))
+                    (.split (java.util.regex.Pattern/quote java.io.File/separator))
+                    vec
+                    (update-in [1] #(.substring % 0 (- (count %) 4))))]
+       [(vec (map keyword key)) file]))))
 
 ;;; Returns [tile-spec tiled-image]
 ;;; tile-spec maps keys (path-strings) to coordinates on the tiles-image
@@ -35,3 +45,13 @@
   (-> directory
       make-tiling-spec
       make-tile))
+
+(defmethod connection/handle-request :unit-tiles [client request]
+  (let [[tilespec tile] (load-tile "resources/pixmaps/units/")]
+    (connection/send-data
+     client
+     (assoc request
+       :tile-spec (into {}
+                        (for [[k c] tilespec]
+                          [k (connection/encode-coordinate c)]))
+       :tiled-image (connection/image-to-base64 tile)))))
