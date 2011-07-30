@@ -1,5 +1,6 @@
 (ns netwars.net.game-server
   (:use [netwars.net.connection :as connection]
+        [netwars.net.map-server :as map-server]
         [netwars.aw-game :as game]
         [netwars.player :as player]))
 
@@ -35,4 +36,5 @@
 (defmethod connection/handle-request "game-data" [client request]
   (println "got game-data request: " request)
   (when-let [game (get @running-games (java.util.UUID/fromString (:game-id request)))]
-   (send-units client game)))
+   (send-units client game)
+   (map-server/send-map-data client "7330.aws")))

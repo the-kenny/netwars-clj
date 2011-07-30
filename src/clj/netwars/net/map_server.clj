@@ -21,8 +21,12 @@
     (str "data:image/png;base64,"
          (Base64/encodeBase64String (.toByteArray os)))))
 
+(defn send-map-data [client map-file]
+  (let [map-base64 (map-to-base64 map-file)]
+   (connection/send-data client {:type "request-map"
+                                 :map-data map-base64})))
+
 (defmethod connection/handle-request "request-map" [client request]
   (println "Got map request:" (str request))
-  (let [requested-map (:map request)
-        map-base64 (map-to-base64 requested-map)]
-   (connection/send-data client (assoc request :map-data map-base64))))
+  (let [requested-map (:map request)]
+    (send-map-data client requested-map)))
