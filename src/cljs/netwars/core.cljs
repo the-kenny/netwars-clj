@@ -46,3 +46,23 @@
                events/EventType.SUBMIT
                #(do (on-load-map-submit)
                     (. % (preventDefault))))
+
+(let [request-name "new-game"]
+  (defmethod connection/handle-response request-name [message]
+    (connection/log "New game created!"))
+
+  (defn start-new-game [map-name]
+    (connection/send-data socket {"type" request-name, "map" map-name})))
+
+(let [request-name "game-data"]
+  (defmethod connection/handle-response request-name [message]
+    (connection/log "got game data: " (str message)))
+
+  (defn request-game-data [game-id]
+    (connection/send-data socket {"type" request-name
+                                  "game-id" game-id})))
+
+(defmethod connection/handle-response "unit-data" [data]
+  (connection/log "got " (count (get data "units")) " units")
+  (doseq [u (get data "units")]
+    (connection/log (str "got unit: " (str u)))))
