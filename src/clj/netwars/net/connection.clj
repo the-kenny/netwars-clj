@@ -1,19 +1,30 @@
 (ns netwars.net.connection
   (:use lamina.core
         aleph.http
-        [aleph.formats :as formats]))
+        [aleph.formats :as formats])
+  (:import [org.apache.commons.codec.binary Base64]))
 
 (defrecord ClientConnection [client-id connection])
 
 (defn make-client-connection [id ch]
   (ClientConnection. id ch))
 
-
 (defn encode-data [data]
-  (pr-str (into {} (for [[k v] data] [(name k) v]))))
+  (binding [*print-meta* true]
+   (pr-str (into {} (for [[k v] data] [(name k) v])))))
 
 (defn decode-data [s]
   (into {} (for [[k v] (read-string s)] [(keyword k) v])))
+
+(defn encode-coordinate [c]
+  [(:x c) (:y c)])
+
+(defn image-to-base64 [image]
+  (let [os (java.io.ByteArrayOutputStream.)
+        output (java.io.StringWriter.)]
+    (javax.imageio.ImageIO/write image "png" os)
+    (str "data:image/png;base64,"
+         (Base64/encodeBase64String (.toByteArray os)))))
 
 (defn send-data [client data]
   (if-not (closed? (:connection client))
@@ -24,6 +35,7 @@
 (def connection-pool (atom {}))
 (def broadcast-channel (permanent-channel))
 
+(defmulti handle-request (fn [client data] (get data :type)))
 
 (defn handle-disconnect [client]
   (println "Got disconnect from client:" (:client-id client))
@@ -37,8 +49,6 @@
     (receive-all ch #(when (string? %)
                        (handle-request c (decode-data %))))
     (siphon broadcast-channel ch)))
-
-(defmulti handle-request (fn [client data] (get data :type)))
 
 (defmethod handle-request "ping" [client request]
   #_(println "Got ping from" (:client-id client))
