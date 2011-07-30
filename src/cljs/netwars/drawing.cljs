@@ -49,20 +49,42 @@
     (events/listen image "load" #(draw-terrain-image graphics image))))
 
 
-(defn draw-unit-at [graphics x y data]
-  (let [image (js/Image.)
-        canvas (:canvas graphics)]
-    (set! (. image src) data)
-    (.drawImage (:context graphics) image
-                (/ (- (.width canvas) (.width image)) 2)
-                (/ (- (.height canvas) (.height image)) 2))))
-
 ;;; Tile handling
 
 (defn request-unit-tiles [server]
   (connection/send-data server {:type :unit-tiles}))
 
 (def unit-tiles (atom nil))
+
 (defmethod connection/handle-response :unit-tiles [server response]
   (connection/log "got tiles!")
-  (reset! unit-tiles (select-keys response [:tile-spec :tiled-image])))
+  (let [image (js/Image.)]
+    (set! (. image src) (:tiled-image response))
+    (events/listen image "load"
+                   (fn []
+                      (reset! unit-tiles {:tile-spec (:tile-spec response)
+                                         :tiled-image image})
+                      (connection/log "Finished loading tiled image"))))
+  ;; (doseq [k (keys (:tile-spec @unit-tiles))]
+  ;;   (connection/log (name (first k)) " " (name (second k))))
+  )
+
+(let [color-mappings {:yellow :ys
+                      :red :os
+                      :green :ge
+                      :blue :bm
+                      :black :bh}]
+ (defn draw-unit-at [graphics x y unit]
+   (let [internal-name (:internal-name unit)
+         color (:color unit)
+         canvas (:canvas graphics)
+         tile (:tiled-image @unit-tiles)
+         context (:context graphics)
+         [tx ty] (get (:tile-spec @unit-tiles)
+                         [(color-mappings color) internal-name])]
+     (. context (drawImage tile
+                           tx ty
+                           16 16
+                           (* x 16)
+                           (* y 16)
+                           16 16)))))
