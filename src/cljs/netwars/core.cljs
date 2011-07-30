@@ -1,6 +1,7 @@
 (ns netwars.core
   (:require [goog.events :as events]
             [goog.dom :as dom]
+            [goog.dom.classes :as classes]
             [netwars.drawing :as drawing]
             [netwars.connection :as connection]))
 
@@ -10,17 +11,21 @@
   (dom/appendChild (dom/getElement "messageLog")
                    (dom/createDom "div" nil message)))
 
+(defn set-connection-status [status]
+  (dom/setTextContent (dom/getElement "connectionIndicator") status))
+
 (connection/on-open
- #(set! (. (dom/getElement "connectionIndicator") textContent) "connected"))
+  #(let [elem (dom/getElement "connectionIndicator")]
+     (classes/set elem "connected")
+     (dom/setTextContent elem "connected")))
 (connection/on-close
- #(set! (. (dom/getElement "connectionIndicator") textContent) "closed..."))
+  #(let [elem (dom/getElement "connectionIndicator")]
+     (classes/set elem "disconnected")
+     (dom/setTextContent elem "closed...")))
 
 (def board-context (drawing/make-graphics (dom/getElement "gameBoard")))
 
 ;;; Network stuff
-
-(defn set-connection-status [status]
-  (dom/setTextContent (dom/getElement "connectionIndicator") status))
 
 (def socket (connection/open-socket "ws://localhost:8080"))
 

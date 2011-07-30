@@ -6,49 +6,54 @@
     right: 0.3em;
     float: left;
     text-align: right;
-    background-color: gray;
+    /* background-color: gray; */
     border: 2pt solid black;
+}
+
+.disconnected {
+    background-color: red;
+}
+
+.connected {
+    background-color: #00ff00;
 }
 
 #normal {
     display: block;
+    min-width: 560pt;
 }
 
 
 #sidebar {
-    top: 8pt;
-    /* left: 610pt;*/
     right: 10pt;
     vertical-align: top;
-    position: absolute;
-    display: inline-block;
-    background-color: #ff0000;
-    height: 140pt;
-}
-
-#minimap {
-    position: absolute;
-    right: 10pt;
-    top: 150pt;
-    background-color: #353221;
     height: 200pt;
+    display: inline;
+    float: right;
+    background-color: #ff0000;
+    margin-bottom: 10pt;
+    border: 1pt solid black;
 }
 
 #mapBox {
-    width: 600pt; height: 400pt;
+    /* width: 600pt; height: 300pt; */
 }
 
 #gameBoard {
     background-color: #f00fff;
     border: 1pt solid black;
+    float: left;
+    margin-bottom: 10pt;
 }
 
 #messageLog {
     background-color: red;
     width: 100%;
-    height: 25%;
+    height: 100pt;
+    /* margin-top: 10pt; */
     min-height 80pt;
-    position: absolute;
+    /* position: absolute; */
     overflow: auto;
     border: 1pt solid black;
+    float: bottom;
 }
