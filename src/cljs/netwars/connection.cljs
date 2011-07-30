@@ -29,7 +29,6 @@
 
 ;;; Connnection Stuff
 (defn handle-socket-message [socket-event]
-  (log "got data: " (.data socket-event))
   (let [obj (reader/read-string (.data socket-event))]
    (handle-response obj)))
 
@@ -59,7 +58,8 @@
     (. t (start))))
 
 (defmethod handle-response "pong" [_]
-  (log "pong"))
+  ;; TODO: Implement a timeout for reconnecting here
+)
 
 (on-open (partial start-ping-timer 5000))
 
