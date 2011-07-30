@@ -58,3 +58,4 @@
 
 ;;; Request game list on open
 (connection/on-open game-list/request-game-list)
+(connection/on-open drawing/request-unit-tiles)

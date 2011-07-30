@@ -1,5 +1,6 @@
 (ns netwars.drawing
-  (:require [goog.events :as events]))
+  (:require [netwars.connection :as connection]
+            [goog.events :as events]))
 
 ;;; Image loading and caching
 
@@ -55,3 +56,13 @@
     (.drawImage (:context graphics) image
                 (/ (- (.width canvas) (.width image)) 2)
                 (/ (- (.height canvas) (.height image)) 2))))
+
+;;; Tile handling
+
+(defn request-unit-tiles [server]
+  (connection/send-data server {:type :unit-tiles}))
+
+(def unit-tiles (atom nil))
+(defmethod connection/handle-response :unit-tiles [server response]
+  (connection/log "got tiles!")
+  (reset! unit-tiles (select-keys response [:tile-spec :tiled-image])))
