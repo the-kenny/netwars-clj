@@ -35,6 +35,10 @@
     border: 1pt solid black;
 }
 
+ul .gameLink {
+    font-size: small;
+}
+
 #mapBox {
     /* width: 600pt; height: 300pt; */
 }

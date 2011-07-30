@@ -5,6 +5,8 @@
         [netwars.aw-game :as game]
         [netwars.player :as player]))
 
+(def map-base-path "maps/")
+
 (defrecord ServerGame [aw-game clients])
 
 (defn make-server-game [aw-game clients]
@@ -17,12 +19,26 @@
 
 (def running-games (atom {}))
 
+(defmethod connection/handle-request :game-list [client request]
+  ;; TODO: Filter out games where the client doesn't have access
+  (connection/send-data client
+                        (assoc request :games
+                               (for [[id game] @running-games]
+                                 [(str id) (-> game :aw-game :info)]))))
+
 (defn start-new-game [config first-client]
-  (let [aw-game (game/make-game {} "maps/7330.aws" [(player/make-player "foo" :red 1000)
-                                               (player/make-player "bar" :blue 1000)])
+  (println "start-new-game:" config)
+  (let [aw-game (game/make-game {} (str base-map-path (:map-name config))
+                                [(player/make-player "foo" :red 1000)
+                                 (player/make-player "bar" :blue 1000)])
         id (java.util.UUID/randomUUID)]
     (assign-client! aw-game 0 first-client)
-    (swap! running-games assoc id (make-server-game aw-game [first-client]))))
+    (swap! running-games assoc id (make-server-game aw-game [first-client]))
+    id))
+
+(defmethod connection/handle-request :new-game [client request]
+  (let [id (dosync (start-new-game request client))]
+    (connection/send-data client (assoc request :game-id (str id)))))
 
 (defn send-units [client game]
   (let [units (-> game :aw-game :board deref :units)
@@ -31,15 +47,11 @@
    (connection/send-data client {:type :unit-data
                                  :units encoded})))
 
-(defmethod connection/handle-request :new-game [client request]
-  (dosync
-   (start-new-game nil client)))
-
 (defmethod connection/handle-request :game-data [client request]
   (println "got game-data request: " request)
   (when-let [game (get @running-games (java.util.UUID/fromString (:game-id request)))]
-   (send-units client game)
-   (map-server/send-map-data client "7330.aws")))
+    (map-server/send-map-data client (-> game :aw-game :board deref))
+    (send-units client game)))
 
 (defmethod connection/handle-request :unit-tiles [client request]
   (let [[tilespec tile] (tiling/load-tile "resources/pixmaps/units/")]

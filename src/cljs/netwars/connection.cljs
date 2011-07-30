@@ -18,19 +18,19 @@
 
 
 
-(defmulti handle-response :type)
+(defmulti handle-response (fn [server message] (:type message)))
 
-(defmethod handle-response :default [message]
+(defmethod handle-response :default [server message]
   (log "Got unknown message with type: " (:type message)))
 
-(defn send-data [socket data]
+(defn send-data [server data]
   (let [id (generate-id "send-data")]
-    (.send socket (encode-data data))))
+    (.send server (encode-data data))))
 
 ;;; Connnection Stuff
-(defn handle-socket-message [socket-event]
+(defn handle-socket-message [server socket-event]
   (let [obj (reader/read-string (.data socket-event))]
-   (handle-response obj)))
+    (handle-response server obj)))
 
 (let [closefns (atom [])]
   (defn on-close [f]
@@ -57,7 +57,7 @@
                      (send-data ws {:type :ping})))
     (. t (start))))
 
-(defmethod handle-response :pong [_]
+(defmethod handle-response :pong [_ _]
   ;; TODO: Implement a timeout for reconnecting here
 )
 
@@ -67,5 +67,5 @@
   (let [ws (js/WebSocket. uri)]
     (events/listen ws "open" #(handle-open ws))
     (events/listen ws "close" #(handle-close ws))
-    (set! (. ws onmessage) handle-socket-message)
+    (set! (. ws onmessage) (partial handle-socket-message ws))
     ws))

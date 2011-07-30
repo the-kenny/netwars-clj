@@ -3,7 +3,9 @@
             [goog.dom :as dom]
             [goog.dom.classes :as classes]
             [netwars.drawing :as drawing]
-            [netwars.connection :as connection]))
+            [netwars.connection :as connection]
+            [netwars.game-list :as game-list]
+            [netwars.game :as game]))
 
 ;;; Logging Stuff
 
@@ -31,7 +33,7 @@
 
 ;;; Implement drawing the requested map
 (let [request-name :request-map]
- (defmethod connection/handle-response request-name [message]
+ (defmethod connection/handle-response request-name [_ message]
    (drawing/draw-terrain board-context
                          (get message :map-data)))
 
@@ -41,31 +43,18 @@
 
 (defn on-load-map-submit []
   (connection/log "Requesting new map from server")
-  (request-map-data (.value (dom/getElement "mapName"))))
+  (game/start-new-game socket (.value (dom/getElement "mapName"))))
 
 (events/listen (dom/getElement "mapForm")
                events/EventType.SUBMIT
                #(do (on-load-map-submit)
                     (. % (preventDefault))))
 
-(let [request-name :new-game]
-  (defmethod connection/handle-response request-name [message]
-    (connection/log "New game created!"))
-
-  (defn start-new-game [map-name]
-    (connection/send-data socket {:type request-name,
-                                  :map map-name})))
-
-(let [request-name :game-data]
-  (defmethod connection/handle-response request-name [message]
-    (connection/log "got game data: " (str message)))
-
-  (defn request-game-data [game-id]
-    (connection/send-data socket {:type request-name
-                                  :game-id game-id})))
-
-(defmethod connection/handle-response :unit-data [data]
+(defmethod connection/handle-response :unit-data [_ data]
   (connection/log "got " (count (:units data)) " units")
-  (doseq [[c u] (:units data)]
-    ;; (connection/log (str "got unit: " (name (:internal-name u))))
-    ))
+  ;; (doseq [[c u] (:units data)]
+  ;;   (connection/log (str "got unit: " (name (:internal-name u)))))
+  )
+
+;;; Request game list on open
+(connection/on-open game-list/request-game-list)
