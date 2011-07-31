@@ -53,7 +53,6 @@
 (defmethod connection/handle-response :unit-data [_ data]
   (connection/log "got " (count (:units data)) " units")
   (doseq [[c u] (:units data)]
-    (connection/log "drawing unit " (name (:internal-name u)) " " (name (:color u)))
     (drawing/draw-unit-at board-context
                           (first c) (second c)
                           u)))
