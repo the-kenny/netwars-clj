@@ -52,10 +52,11 @@
 
 (defmethod connection/handle-response :unit-data [_ data]
   (connection/log "got " (count (:units data)) " units")
-  (doseq [[c u] (:units data)]
-    (drawing/draw-unit-at board-context
-                          (first c) (second c)
-                          u)))
+  (. (:kinetic board-context) (setDrawStage
+                               #(doseq [[c u] (:units data)]
+                                 (drawing/draw-unit-at board-context
+                                                       (first c) (second c)
+                                                       u)))))
 
 ;;; Request game list on open
 (connection/on-open game-list/request-game-list)

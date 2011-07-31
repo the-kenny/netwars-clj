@@ -14,16 +14,14 @@
    (when-let [img (get cache key)]
      img)))
 
-;; (defn request-image [server key & [callback]]
-;;   (.send socket (js/JSON/stringify {:type :request-image
-;;                                     :image key
-;;                                     :request-id })))
 
 ;;; Canvas functions
 
 (defn make-graphics [element]
-  {:context (.getContext element "2d")
-   :canvas  element})
+  (let [kinetic (js/Kinetic. (.id element) "2d")]
+   {:kinetic kinetic
+    :context (. kinetic (getContext))
+    :canvas  (. kinetic (getCanvas))}))
 
 (defn resize-graphics [graphics w h]
   (let [canv (:canvas graphics)]
@@ -31,7 +29,7 @@
     (set! (. canv height) h)))
 
 (defn clear [graphics]
-  (.clear (:context graphics)))
+  (. (:kinetic graphics) clear))
 
 ;;; Netwars specific drawing functions
 
@@ -80,11 +78,20 @@
          canvas (:canvas graphics)
          tile (:tiled-image @unit-tiles)
          context (:context graphics)
+         kinetic (:kinetic graphics)
          [tx ty] (get (:tile-spec @unit-tiles)
-                         [(color-mappings color) internal-name])]
+                      [(color-mappings color) internal-name])]
+     ;; (. kinetic (clear))
+     (. kinetic (beginRegion))
      (. context (drawImage tile
                            tx ty
                            16 16
                            (* x 16)
                            (* y 16)
-                           16 16)))))
+                           16 16))
+     (. context (beginPath))
+     (. context (rect (* x 16) (* y 16) 16 16))
+     (. context (closePath))
+     (. kinetic (addRegionEventListener "onmousedown"
+                                        #(connection/log "foo")))
+     (. kinetic (closeRegion)))))
