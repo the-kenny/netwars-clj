@@ -50,5 +50,6 @@
 (defmethod connection/handle-request :game-data [client request]
   (println "got game-data request: " request)
   (when-let [game (get @running-games (java.util.UUID/fromString (:game-id request)))]
+    (connection/send-data client (assoc request :info (-> game :aw-game :info)))
     (map-server/send-map-data client (-> game :aw-game :board deref))
     (send-units client game)))
