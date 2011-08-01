@@ -28,8 +28,22 @@
     (set! (. canv width) w)
     (set! (. canv height) h)))
 
+(defn redraw [graphics]
+  (. (:kinetic graphics) (drawStage)))
+
 (defn clear [graphics]
-  (. (:kinetic graphics) clear))
+  (. (:kinetic graphics) (clear)))
+
+(defn set-drawing-function! [graphics f]
+  (. (:kinetic graphics) (setDrawStage #(f graphics))))
+
+(defn start-animation [graphics]
+  (. (:kinetic graphics) (startAnimation)))
+
+(defn image-from-base64 [base64 callback]
+  (let [image (js/Image.)]
+    (set! (. image src) base64)
+    (events/listen image "load" #(callback image))))
 
 ;;; Netwars specific drawing functions
 
@@ -42,9 +56,7 @@
                (/ (- (.height canvas) (.height image)) 2))))
 
 (defn draw-terrain [graphics image-data]
-  (let [image (js/Image.)]
-    (set! (. image src) image-data)
-    (events/listen image "load" #(draw-terrain-image graphics image))))
+  (image-from-base64 image-data (partial draw-terrain-image graphics)))
 
 
 ;;; Tile handling
@@ -56,23 +68,18 @@
 
 (defmethod connection/handle-response :unit-tiles [server response]
   (connection/log "got tiles!")
-  (let [image (js/Image.)]
-    (set! (. image src) (:tiled-image response))
-    (events/listen image "load"
-                   (fn []
-                      (reset! unit-tiles {:tile-spec (:tile-spec response)
-                                         :tiled-image image})
-                      (connection/log "Finished loading tiled image"))))
-  ;; (doseq [k (keys (:tile-spec @unit-tiles))]
-  ;;   (connection/log (name (first k)) " " (name (second k))))
-  )
+  (image-from-base64 (:tiled-image response)
+                     (fn [img]
+                       (reset! unit-tiles {:tile-spec (:tile-spec response)
+                                           :tiled-image img})
+                       (connection/log "Finished loading tiled image"))))
 
 (let [color-mappings {:yellow :ys
                       :red :os
                       :green :ge
                       :blue :bm
                       :black :bh}]
- (defn draw-unit-at [graphics x y unit]
+ (defn draw-unit-at [graphics unit x y]
    (let [internal-name (:internal-name unit)
          color (:color unit)
          canvas (:canvas graphics)

@@ -2,6 +2,7 @@
   (:require [goog.events :as events]
             [goog.dom :as dom]
             [goog.dom.classes :as classes]
+            [goog.Timer :as Timer]
             [netwars.drawing :as drawing]
             [netwars.connection :as connection]
             [netwars.game-list :as game-list]
@@ -32,14 +33,6 @@
 (def socket (connection/open-socket "ws://moritz-macbook.local:8080"))
 
 ;;; Implement drawing the requested map
-(let [request-name :request-map]
- (defmethod connection/handle-response request-name [_ message]
-   (drawing/draw-terrain board-context
-                         (get message :map-data)))
-
- (defn request-map-data [m]
-   (connection/send-data socket {:type request-name,
-                                 :map m})))
 
 (defn on-load-map-submit []
   (connection/log "Requesting new map from server")
@@ -50,14 +43,14 @@
                #(do (on-load-map-submit)
                     (. % (preventDefault))))
 
-(defmethod connection/handle-response :unit-data [_ data]
-  (connection/log "got " (count (:units data)) " units")
-  (. (:kinetic board-context) (setDrawStage
-                               #(doseq [[c u] (:units data)]
-                                 (drawing/draw-unit-at board-context
-                                                       (first c) (second c)
-                                                       u)))))
-
 ;;; Request game list on open
 (connection/on-open game-list/request-game-list)
 (connection/on-open drawing/request-unit-tiles)
+
+(drawing/set-drawing-function! board-context game/draw-game)
+;;(drawing/start-animation board-context)
+
+;;; TODO: Use animation when enormous cpu usage is fixed
+(let [t (goog.Timer. 1000)]
+  (events/listen t goog.Timer/TICK #(drawing/redraw board-context))
+  (. t (start)))
