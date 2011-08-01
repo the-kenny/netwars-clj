@@ -4,4 +4,5 @@
                  [aleph "0.2.0-alpha2"]
                  [commons-codec "1.5"]]
   :repositories {"stuartsierra-releases" "http://stuartsierra.com/maven2"}
-  :source-path "src/clj/")
+  :source-path "src/clj/"
+  :main netwars.core)
