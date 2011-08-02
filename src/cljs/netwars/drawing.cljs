@@ -67,7 +67,7 @@
 (def unit-tiles (atom nil))
 
 (defmethod connection/handle-response :unit-tiles [server response]
-  (connection/log "got tiles!")
+  (connection/log "got tiled unit-sprites")
   (image-from-base64 (:tiled-image response)
                      (fn [img]
                        (reset! unit-tiles {:tile-spec (:tile-spec response)
