@@ -79,7 +79,7 @@
                       :green :ge
                       :blue :bm
                       :black :bh}]
- (defn draw-unit-at [graphics unit x y]
+ (defn draw-unit-at [graphics unit x y & [callback]]
    (let [internal-name (:internal-name unit)
          color (:color unit)
          canvas (:canvas graphics)
@@ -99,6 +99,7 @@
      (. context (beginPath))
      (. context (rect (* x 16) (* y 16) 16 16))
      (. context (closePath))
-     (. kinetic (addRegionEventListener "onmousedown"
-                                        #(connection/log "foo")))
+     (when (fn? callback)
+      (. kinetic (addRegionEventListener "onmousedown"
+                                         #(callback x y unit))))
      (. kinetic (closeRegion)))))

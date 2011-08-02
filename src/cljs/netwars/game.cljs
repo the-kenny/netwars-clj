@@ -10,6 +10,9 @@
 (def game-units (atom nil))
 (def terrain-image (atom nil))
 
+(defn unit-clicked [x y unit]
+  (connection/log "Unit clicked: " (name (:internal-name unit))))
+
 (defmethod connection/handle-response :game-data [server message]
   (connection/log "got game data: " (apply str (map name (keys message))))
   (reset! running-game {:game-id (:game-id message)
@@ -53,5 +56,6 @@
     ;; Draw the units
     (doseq [[c u] @game-units]
       (drawing/draw-unit-at graphics u
-                            (first c) (second c)))))
+                            (first c) (second c)
+                            unit-clicked))))
 
