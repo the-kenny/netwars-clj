@@ -40,7 +40,5 @@
     (connection/send-data
      client
      (assoc request
-       :tile-spec (into {}
-                        (for [[k c] tilespec]
-                          [k (connection/encode-coordinate c)]))
+       :tile-spec tilespec
        :tiled-image (connection/image-to-base64 tile)))))

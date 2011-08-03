@@ -19,12 +19,13 @@
 
 (def running-games (atom {}))
 
+(defn game-list []
+  (for [[id game] @running-games]
+    [id (-> game :aw-game :info)]))
+
 (defmethod connection/handle-request :game-list [client request]
   ;; TODO: Filter out games where the client doesn't have access
-  (connection/send-data client
-                        (assoc request :games
-                               (for [[id game] @running-games]
-                                 [(str id) (-> game :aw-game :info)]))))
+  (connection/send-data client (assoc request :games (game-list))))
 
 (defn start-new-game [config first-client]
   (println "start-new-game:" config)
@@ -41,11 +42,9 @@
     (connection/send-data client (assoc request :game-id (str id)))))
 
 (defn send-units [client game]
-  (let [units (-> game :aw-game :board deref :units)
-        encoded (for [[c u] (seq units)]
-                  [(connection/encode-coordinate c) (into {} u)])]
+  (let [units (-> game :aw-game :board deref :units)]
    (connection/send-data client {:type :unit-data
-                                 :units encoded})))
+                                 :units units})))
 
 (defmethod connection/handle-request :game-data [client request]
   (println "got game-data request: " request)

@@ -1,24 +1,14 @@
 (ns netwars.net.connection
   (:use lamina.core
         aleph.http
-        [aleph.formats :as formats])
+        [aleph.formats :as formats]
+        netwars.net.otw)
   (:import [org.apache.commons.codec.binary Base64]))
 
 (defrecord ClientConnection [client-id connection])
 
 (defn make-client-connection [id ch]
   (ClientConnection. id ch))
-
-(defn encode-data [data]
-  (binding [*print-meta* true]
-   ;; (pr-str (into {} (for [[k v] data] [(name k) v])))
-    (pr-str data)))
-
-(defn decode-data [s]
-  (into {} (for [[k v] (read-string s)] [(keyword k) v])))
-
-(defn encode-coordinate [c]
-  [(:x c) (:y c)])
 
 (defn image-to-base64 [image]
   (let [os (java.io.ByteArrayOutputStream.)
