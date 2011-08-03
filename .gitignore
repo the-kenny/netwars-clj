@@ -4,3 +4,4 @@ web/
 !web/style.css
 !web/kinetic.js
 classes/
+db/
