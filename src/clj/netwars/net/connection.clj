@@ -10,12 +10,21 @@
 (defn- make-client-connection [id ch]
   (ClientConnection. id ch))
 
+(defn make-broadcast-channel []
+  (permanent-channel))
+
+;;; TODO: Move to netwars.net.otw
 (defn- image-to-base64 [image]
   (let [os (java.io.ByteArrayOutputStream.)
         output (java.io.StringWriter.)]
     (javax.imageio.ImageIO/write image "png" os)
     (str "data:image/png;base64,"
          (Base64/encodeBase64String (.toByteArray os)))))
+
+(defn send-broadcast [broadcast data]
+  (if-not (closed? broadcast)
+   (enqueue broadcast (encode-data data))
+   (println "Attempted to send to closed broadcast-channel")))
 
 (defn send-data [client data]
   (if-not (closed? (:connection client))

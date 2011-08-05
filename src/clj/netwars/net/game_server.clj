@@ -14,6 +14,10 @@
 ;;; The server will send all actions in a game to all clients which joined it
 ;;; client-game-map will map client-ids to game-ids
 
+;;; Broadcasting Game-Events to clients
+;;; Every game has a key :broadcast-channel to which messages can be sent using
+;;; connection/send-broadcast
+
 (def map-base-path "maps/")
 
 ;;; Game List handling
@@ -41,8 +45,9 @@
 (defn assign-client!
   "Assigns client to game. The client will receive all events from the game."
   [client game]
-  {:pre [client game (:game-id game)]}
-  (alter client-game-map assoc (:client-id client) (:game-id game)))
+  {:pre [client game (:game-id game) (:broadcast-channel game)]}
+  (alter client-game-map assoc (:client-id client) (:game-id game))
+  (connection/add-broadcast-receiver (:broadcast-channel game) client))
 
 (defn dissoc-client!
   "Removed client from the game he currently spectates"
@@ -58,7 +63,9 @@
 (defn start-new-game
   "Creates an AwGame with parameters from its argument"
   [config]
-  (game/make-game config (str map-base-path (:map-name config)) []))
+  (let [game (game/make-game config (str map-base-path (:map-name config)) [])
+        broadcast (connection/make-broadcast-channel)]
+    (assoc game :broadcast-channel broadcast)))
 
 ;;; Connection-Handling
 
