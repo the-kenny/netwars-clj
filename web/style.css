@@ -33,6 +33,7 @@
     background-color: #ff0000;
     margin-bottom: 10pt;
     border: 1pt solid black;
+    overflow: auto;
 }
 
 ul .gameLink {
