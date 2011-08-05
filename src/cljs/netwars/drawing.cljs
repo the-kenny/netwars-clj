@@ -45,7 +45,11 @@
     (set! (. image src) base64)
     (events/listen image "load" #(callback image))))
 
-;;; Netwars specific drawing functions
+(defn canvas->map-coordinates [graphics [x y]]
+  [(Math/floow (/ x 16)) (Math/floor (/ x 16))])
+
+
+;;; Terrain drawing
 
 (defn draw-terrain-image [graphics image]
   (let [canvas (:canvas graphics)]
@@ -73,6 +77,8 @@
                        (reset! unit-tiles {:tile-spec (:tile-spec response)
                                            :tiled-image img})
                        (connection/log "Finished loading tiled image"))))
+
+;;; Unit Drawing
 
 (let [color-mappings {:yellow :ys
                       :red :os

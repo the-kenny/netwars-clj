@@ -7,7 +7,7 @@
 (defn- append-game [server id game]
   (let [link (dom/createDom "a" nil (str id))]
     (events/listen link goog.events.EventType/CLICK
-                   #(game/request-game-data server id))
+                   #(game/join-game server id))
    (doto (dom/getElement "gameList")
      (.appendChild (dom/createDom "li" "gameLink" link)))))
 

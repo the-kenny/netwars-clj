@@ -24,22 +24,38 @@
 
 
 (def connection-pool (atom {}))
+
 (def broadcast-channel (permanent-channel))
+(def connect-channel (permanent-channel))
+(def disconnect-channel (permanent-channel))
 
 (defmulti handle-request (fn [client data] (get data :type)))
 
-(defn handle-disconnect [client]
-  (println "Got disconnect from client:" (:client-id client))
-  (swap! connection-pool dissoc (:client-id client)))
 
-(defn handle-connect [ch handshake]
+(defn- enqueue-disconnect [client]
+  (enqueue disconnect-channel client))
+
+(defn enqueue-connect [ch handshake]
   (let [c (make-client-connection (java.util.UUID/randomUUID) ch)]
-    (println "Got new connection with client-id:" (:client-id c))
-    (swap! connection-pool assoc (:client-id c) c)
-    (on-closed ch #(handle-disconnect c))
+    (enqueue connect-channel c)
+    (on-closed ch #(enqueue-disconnect c))
     (receive-all ch #(when (string? %)
                        (handle-request c (decode-data %))))
     (siphon broadcast-channel ch)))
+
+
+(defn on-disconnect [f]
+  (receive-all disconnect-channel f))
+
+(defn on-connect [f]
+  (receive-all connect-channel f))
+
+(on-connect #(println "Got new connection with client-id:" (:client-id %)))
+(on-connect #(swap! connection-pool assoc (:client-id %) %))
+
+(on-disconnect #(println "Got disconnect from client:" (:client-id %)))
+(on-disconnect #(swap! connection-pool dissoc (:client-id %)))
+
 
 (defmethod handle-request :ping [client request]
   #_(println "Got ping from" (:client-id client))
@@ -50,7 +66,7 @@
   (send-data client request))
 
 (defn start-server [port]
-  (start-http-server #'handle-connect {:port port :websocket true}))
+  (start-http-server #'enqueue-connect {:port port :websocket true}))
 
 (defn stop-server [server]
   (server))

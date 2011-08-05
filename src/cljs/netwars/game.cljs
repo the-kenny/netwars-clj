@@ -10,6 +10,9 @@
 (def game-units (atom nil))
 (def terrain-image (atom nil))
 
+(defn clicked-on [x y]
+  (connection/log "clicked on: " x "/" y))
+
 (defn unit-clicked [x y unit]
   (connection/log "Unit clicked: " (name (:internal-name unit))))
 
@@ -18,8 +21,8 @@
   (reset! running-game {:game-id (:game-id message)
                         :info (:info message)}))
 
-(defn request-game-data [server game-id]
-  (connection/send-data server {:type :game-data
+(defn join-game [server game-id]
+  (connection/send-data server {:type :join-game
                                 :game-id game-id}))
 
 
@@ -31,7 +34,8 @@
 
 (defmethod connection/handle-response :new-game [server message]
   (connection/log "New game created!")
-  (request-game-data server (:game-id message)))
+  ;; (request-game-data server (:game-id message))
+  )
 
 
 ;;; Functions for handling data sent after a :game-data request

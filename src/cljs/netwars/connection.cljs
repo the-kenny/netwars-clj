@@ -11,12 +11,11 @@
   (pr-str (into {} (for [[k v] data] [(name k) v]))))
 
 (defn decode-data [s]
-  (into {} (for [[k v] (cljs.reader/read-string s)] [(keyword k) v])))
+  (log s)
+  (reader/read-string s))
 
 (defn- generate-id [& [prefix]]
   (apply str prefix (repeatedly 10 #(rand-int 10))))
-
-
 
 (defmulti handle-response (fn [server message] (:type message)))
 
@@ -29,7 +28,7 @@
 
 ;;; Connnection Stuff
 (defn handle-socket-message [server socket-event]
-  (let [obj (reader/read-string (.data socket-event))]
+  (let [obj (decode-data (.data socket-event))]
     (handle-response server obj)))
 
 (let [closefns (atom [])]
