@@ -90,10 +90,15 @@
   (map-server/send-map-data client (-> game :board deref))
   (send-units client game))
 
+(defn send-game-list [client]
+  (connection/send-data client {:type :game-list
+                                :games (into {} (for [game (game-list)]
+                                                  [(:game-id game) (:info game)]))}))
+
+;;; TODO: Delta-Updates
 (defmethod connection/handle-request :game-list [client request]
   ;; TODO: Filter out games where the client doesn't have access
-  (let [info-map (into {} (for [game (game-list)] [(:game-id game) (:info game)]))]
-   (connection/send-data client (assoc request :games info-map))))
+  (send-game-list client))
 
 (defmethod connection/handle-request :new-game [client request]
   (let [id (java.util.UUID/randomUUID)
@@ -102,7 +107,8 @@
      (store-game! aw-game)
      (assign-client! client aw-game))
     (connection/send-data client (assoc request :game-id id))
-    (send-game-data aw-game client)))
+    (send-game-data aw-game client)
+    (send-game-list client)))
 
 (defmethod connection/handle-request :join-game [client request]
   (when-let [game (get-game (java.util.UUID/fromString (:game-id request)))]
