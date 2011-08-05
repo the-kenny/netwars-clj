@@ -11,7 +11,8 @@
 
 ;;; Joining a game
 ;;; The client can join a game using the join-game request
-;;; If he does, the server will send the client all data of the game
+;;; The server will send all actions in a game to all clients which joined it
+;;; client-game-map will map client-ids to game-ids
 
 (def map-base-path "maps/")
 
@@ -20,7 +21,10 @@
 (def running-games (ref {}))            ;Maps a game-id to a netwars.aw-game/AwGame
 (def client-game-map (ref {}))       ;Maps a client-id to a game-id
 
-(defn game-list []
+(defn game-list
+  "Returns a list of AwGames with :game-id attached to every game"
+  []
+  {:post [(every? :game-id %)]}
   (vals @running-games))
 
 (defn store-game! [game]
@@ -47,9 +51,10 @@
 ;;; Connection-Handling
 
 (defn disconnect-client [client]
-  (println "disconnecting client with id: " (:client-id client))
-  (dosync (dissoc-client! client)))
-(connection/on-disconnect disconnect-client)
+  (when-let [game (get-game (:client-id client))]
+   (println "Removing client" (:client-id client) "from game" (:game-id game))
+   (dosync (dissoc-client! client))))
+(connection/on-disconnect #'disconnect-client)
 
 ;;; Client requests
 
@@ -82,6 +87,7 @@
   (when-let [game (get-game (java.util.UUID/fromString (:game-id request)))]
     (dosync
      (assign-client! client game))
+    (println "Assigned client" (str (:client-id client)) "to game" (:game-id request))
     (send-game-data game client)))
 
 (defmethod connection/handle-request :game-data [client request]
