@@ -27,30 +27,44 @@
   {:post [(every? :game-id %)]}
   (vals @running-games))
 
-(defn store-game! [game]
+(defn store-game!
+  "Stores an AwGame in the running-games sore. The game needs a unique id in :game-id"
+  [game]
   {:pre [(:game-id game)]}
   (alter running-games assoc (:game-id game) game))
 
-(defn get-game [id]
+(defn get-game
+  "Returns the AwGame with the game-id id"
+  [id]
   (get @running-games id))
 
-(defn assign-client! [client game]
+(defn assign-client!
+  "Assigns client to game. The client will receive all events from the game."
+  [client game]
   {:pre [client game (:game-id game)]}
   (alter client-game-map assoc (:client-id client) (:game-id game)))
 
-(defn dissoc-client! [client]
+(defn dissoc-client!
+  "Removed client from the game he currently spectates"
+  [client]
   (alter client-game-map dissoc (:client-id client)))
 
-(defn get-game-for-client [client]
+(defn game-for-client
+  "Returns the game a client currently spectates"
+  [client]
   (let [client-id (:client-id client)]
     (get-game (get client-game-map client-id))))
 
-(defn start-new-game [config]
+(defn start-new-game
+  "Creates an AwGame with parameters from its argument"
+  [config]
   (game/make-game config (str map-base-path (:map-name config)) []))
 
 ;;; Connection-Handling
 
-(defn disconnect-client [client]
+(defn disconnect-client
+  "Calls dissoc-client! to remove client from the game he spectates"
+  [client]
   (when-let [game (get-game (:client-id client))]
    (println "Removing client" (:client-id client) "from game" (:game-id game))
    (dosync (dissoc-client! client))))
