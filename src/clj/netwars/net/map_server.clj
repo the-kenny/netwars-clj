@@ -1,14 +1,15 @@
 (ns netwars.net.map-server
   (:require [netwars.net.connection :as connection]
             [netwars.map-loader :as map-loader]
-            [netwars.map-drawer :as map-drawer])
+            [netwars.map-drawer :as map-drawer]
+            [netwars.net.otw :as otw])
   (:use [clojure.contrib.def :only [defn-memo]])
   (:import [org.apache.commons.codec.binary Base64]))
 
 (defn-memo map-to-base64 [board]
   (let [;; loaded-map (safe-load-map file)
         img (map-drawer/render-terrain-board (:terrain board))]
-    (connection/image-to-base64 img)))
+    (otw/image-to-base64 img)))
 
 (defn send-map-data [client board]
   (let [map-base64 (map-to-base64 board)]

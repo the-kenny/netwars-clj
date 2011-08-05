@@ -1,7 +1,8 @@
 (ns netwars.net.otw
   (:import [clojure.lang IPersistentMap IPersistentVector Keyword]
            [java.util List UUID]
-           [netwars.aw_map Coordinate]))
+           [netwars.aw_map Coordinate]
+           [org.apache.commons.codec.binary Base64]))
 
 (defprotocol Sendable
   (encode [o]))
@@ -25,3 +26,10 @@
 
 (defn decode-data [s]
   (into {} (for [[k v] (read-string s)] [(keyword k) v])))
+
+(defn image-to-base64 [image]
+  (let [os (java.io.ByteArrayOutputStream.)
+        output (java.io.StringWriter.)]
+    (javax.imageio.ImageIO/write image "png" os)
+    (str "data:image/png;base64,"
+         (Base64/encodeBase64String (.toByteArray os)))))

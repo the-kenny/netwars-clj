@@ -2,8 +2,7 @@
   (:use lamina.core
         aleph.http
         [aleph.formats :as formats]
-        netwars.net.otw)
-  (:import [org.apache.commons.codec.binary Base64]))
+        netwars.net.otw))
 
 (defrecord ClientConnection [client-id connection])
 
@@ -13,13 +12,9 @@
 (defn make-broadcast-channel []
   (permanent-channel))
 
-;;; TODO: Move to netwars.net.otw
-(defn- image-to-base64 [image]
-  (let [os (java.io.ByteArrayOutputStream.)
-        output (java.io.StringWriter.)]
-    (javax.imageio.ImageIO/write image "png" os)
-    (str "data:image/png;base64,"
-         (Base64/encodeBase64String (.toByteArray os)))))
+(defn add-broadcast-receiver [broadcast client]
+  (siphon broadcast (:connection client)))
+
 
 (defn send-broadcast [broadcast data]
   (if-not (closed? broadcast)

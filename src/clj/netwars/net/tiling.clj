@@ -1,7 +1,8 @@
 (ns netwars.net.tiling
   (:use [netwars.aw-map :only [coord]]
         [netwars.net.connection :as connection]
-        [clojure.contrib.def :only [defn-memo]])
+        [clojure.contrib.def :only [defn-memo]]
+        [netwars.net.otw :as otw])
   (:import java.awt.image.BufferedImage
            java.awt.Graphics2D
            javax.imageio.ImageIO))
@@ -41,4 +42,4 @@
      client
      (assoc request
        :tile-spec tilespec
-       :tiled-image (connection/image-to-base64 tile)))))
+       :tiled-image (otw/image-to-base64 tile)))))
