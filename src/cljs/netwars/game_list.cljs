@@ -11,7 +11,12 @@
    (doto (dom/getElement "gameList")
      (.appendChild (dom/createDom "li" "gameLink" link)))))
 
+(defmethod connection/handle-response :new-listed-game [server response]
+  (let [game (:game response)]
+    (append-game server (:game-id game) (:info game))))
+
 (defmethod connection/handle-response :game-list [server response]
+  (dom/removeChildren (dom/getElement "gameList"))
   (doseq [[id info] (:games response)]
     (append-game server id info)))
 

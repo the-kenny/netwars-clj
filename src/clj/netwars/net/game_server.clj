@@ -108,7 +108,9 @@
      (assign-client! client aw-game))
     (connection/send-data client (assoc request :game-id id))
     (send-game-data aw-game client)
-    (send-game-list client)))
+    ;; TODO: Broadcast this to all clients
+    (connection/send-data client {:type :new-listed-game
+                                  :game (select-keys aw-game [:game-id :info])})))
 
 (defmethod connection/handle-request :join-game [client request]
   (when-let [game (get-game (java.util.UUID/fromString (:game-id request)))]
