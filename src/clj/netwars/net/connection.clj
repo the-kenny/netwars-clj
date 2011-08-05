@@ -29,7 +29,7 @@
 
 (def connection-pool (atom {}))
 
-(def broadcast-channel (permanent-channel))
+(def broadcast-channel (make-broadcast-channel))
 (def connect-channel (permanent-channel))
 (def disconnect-channel (permanent-channel))
 
@@ -45,7 +45,7 @@
     (on-closed ch #(enqueue-disconnect c))
     (receive-all ch #(when (string? %)
                        (handle-request c (decode-data %))))
-    (siphon broadcast-channel ch)))
+    (add-broadcast-receiver broadcast-channel c)))
 
 
 (defn on-disconnect [f]
