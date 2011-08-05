@@ -7,10 +7,10 @@
 
 (defrecord ClientConnection [client-id connection])
 
-(defn make-client-connection [id ch]
+(defn- make-client-connection [id ch]
   (ClientConnection. id ch))
 
-(defn image-to-base64 [image]
+(defn- image-to-base64 [image]
   (let [os (java.io.ByteArrayOutputStream.)
         output (java.io.StringWriter.)]
     (javax.imageio.ImageIO/write image "png" os)
@@ -35,7 +35,7 @@
 (defn- enqueue-disconnect [client]
   (enqueue disconnect-channel client))
 
-(defn enqueue-connect [ch handshake]
+(defn- enqueue-connect [ch handshake]
   (let [c (make-client-connection (java.util.UUID/randomUUID) ch)]
     (enqueue connect-channel c)
     (on-closed ch #(enqueue-disconnect c))
