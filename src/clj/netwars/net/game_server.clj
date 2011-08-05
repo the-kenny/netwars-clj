@@ -95,7 +95,6 @@
                                 :games (into {} (for [game (game-list)]
                                                   [(:game-id game) (:info game)]))}))
 
-;;; TODO: Delta-Updates
 (defmethod connection/handle-request :game-list [client request]
   ;; TODO: Filter out games where the client doesn't have access
   (send-game-list client))
@@ -108,8 +107,8 @@
      (assign-client! client aw-game))
     (connection/send-data client (assoc request :game-id id))
     (send-game-data aw-game client)
-    ;; TODO: Broadcast this to all clients
-    (connection/send-data client {:type :new-listed-game
+    (connection/send-broadcast connection/broadcast-channel
+                                {:type :new-listed-game
                                   :game (select-keys aw-game [:game-id :info])})))
 
 (defmethod connection/handle-request :join-game [client request]
