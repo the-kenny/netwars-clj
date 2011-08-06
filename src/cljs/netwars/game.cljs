@@ -11,10 +11,10 @@
 (def game-units (atom nil))
 (def terrain-image (atom nil))
 
-(defn clicked-on [x y]
+(defn clicked-on [[x y]]
   (logging/log "clicked on: " x "/" y))
 
-(defn unit-clicked [x y unit]
+(defn unit-clicked [[x y] unit]
   (logging/message "Unit: " (name (:internal-name unit)) " (" (name (:color unit)) ") "
                     (:hp unit) "hp"))
 
@@ -60,7 +60,12 @@
     (drawing/draw-terrain-image graphics @terrain-image)
     ;; Draw the units
     (doseq [[c u] @game-units]
-      (drawing/draw-unit-at graphics u
-                            (first c) (second c)
-                            unit-clicked))))
+      (drawing/draw-unit-at graphics u c))
 
+    (let [canvas (:canvas graphics)]
+     ;; (drawing/add-event-listener graphics 0 0 (.width canvas) (.height canvas)
+     ;;                             "onmouseover"
+     ;;                             #(logging/log "moved: " %1 "," %2))
+     (drawing/add-click-listener graphics
+                                 [0 0] (.width canvas) (.height canvas)
+                                 #(-> % drawing/canvas->map clicked-on)))))

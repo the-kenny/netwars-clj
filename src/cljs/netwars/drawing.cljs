@@ -41,13 +41,40 @@
 (defn start-animation [graphics]
   (. (:kinetic graphics) (startAnimation)))
 
+;;; Event Stuff
+
+(defn add-event-listener [graphics [x y] w h event f]
+  (let [kinetic (:kinetic graphics)
+        context (:context graphics)
+        callback #(let [mousePos (. kinetic (getMousePos))
+                        x (.x mousePos)
+                        y (.y mousePos)]
+                    (f [x y]))]
+    ;; Add region event listener
+    (. kinetic (beginRegion))
+    (. context (beginPath))
+    (. context (rect x y w h))
+    (. context (closePath))
+    (. kinetic (addRegionEventListener event callback))
+    (. kinetic (closeRegion))))
+
+(defn add-click-listener
+  "Adds a click listener to graphics at [x,y] with width w and height h.
+   Calls (f mouse-x mouse-y) on click"
+  [graphics [x y] w h f]
+  (add-event-listener graphics [x y] w h "onmousedown" f))
+
+;;; Helper
+
 (defn image-from-base64 [base64 callback]
   (let [image (js/Image.)]
     (set! (. image src) base64)
     (events/listen image "load" #(callback image))))
 
-(defn canvas->map-coordinates [graphics [x y]]
-  [(Math/floow (/ x 16)) (Math/floor (/ x 16))])
+(defn canvas->map
+  "Converts canvas coordinates to netwars coordinates"
+  [[x y]]
+  [(Math/floor (/ x 16)) (Math/floor (/ y 16))])
 
 
 ;;; Terrain drawing
@@ -86,7 +113,7 @@
                       :green :ge
                       :blue :bm
                       :black :bh}]
- (defn draw-unit-at [graphics unit x y & [callback]]
+ (defn draw-unit-at [graphics unit [x y]]
    (let [internal-name (:internal-name unit)
          color (:color unit)
          canvas (:canvas graphics)
@@ -95,18 +122,9 @@
          kinetic (:kinetic graphics)
          [tx ty] (get (:tile-spec @unit-tiles)
                       [(color-mappings color) internal-name])]
-     ;; (. kinetic (clear))
-     (. kinetic (beginRegion))
      (. context (drawImage tile
                            tx ty
                            16 16
                            (* x 16)
                            (* y 16)
-                           16 16))
-     (. context (beginPath))
-     (. context (rect (* x 16) (* y 16) 16 16))
-     (. context (closePath))
-     (when (fn? callback)
-      (. kinetic (addRegionEventListener "onmousedown"
-                                         #(callback x y unit))))
-     (. kinetic (closeRegion)))))
+                           16 16)))))
