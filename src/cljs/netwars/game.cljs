@@ -15,7 +15,8 @@
   (logging/log "clicked on: " x "/" y))
 
 (defn unit-clicked [x y unit]
-  (logging/log "Unit clicked: " (name (:internal-name unit))))
+  (logging/message "Unit: " (name (:internal-name unit)) " (" (name (:color unit)) ") "
+                    (:hp unit) "hp"))
 
 (defmethod connection/handle-response :game-data [server message]
   (reset! running-game {:game-id (:game-id message)
