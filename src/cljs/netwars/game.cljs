@@ -11,7 +11,14 @@
 (def game-units (atom nil))
 (def terrain-image (atom nil))
 
+;;; General methods for games
+
+(defn unit-at [c]
+  (get @game-units c))
+
 (defn clicked-on [[x y]]
+  (when-let [u (unit-at [x y])]
+    (logging/message "Unit: " (name (:internal-name u))))
   (logging/log "clicked on: " x "/" y))
 
 (defn unit-clicked [[x y] unit]
