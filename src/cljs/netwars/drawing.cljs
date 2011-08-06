@@ -1,5 +1,6 @@
 (ns netwars.drawing
   (:require [netwars.connection :as connection]
+            [netwars.logging :as logging]
             [goog.events :as events]))
 
 ;;; Image loading and caching
@@ -71,12 +72,12 @@
 (def unit-tiles (atom nil))
 
 (defmethod connection/handle-response :unit-tiles [server response]
-  (connection/log "got tiled unit-sprites")
+  (logging/log "got tiled unit-sprites")
   (image-from-base64 (:tiled-image response)
                      (fn [img]
                        (reset! unit-tiles {:tile-spec (:tile-spec response)
                                            :tiled-image img})
-                       (connection/log "Finished loading tiled image"))))
+                       (logging/log "Finished loading tiled image"))))
 
 ;;; Unit Drawing
 

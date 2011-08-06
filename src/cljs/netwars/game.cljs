@@ -1,6 +1,7 @@
 (ns netwars.game
   (:require [netwars.connection :as connection]
-            [netwars.drawing :as drawing]))
+            [netwars.drawing :as drawing]
+            [netwars.logging :as logging]))
 
 ;;; TODO: Substitute with a record
 ;; {:game-id nil
@@ -11,13 +12,12 @@
 (def terrain-image (atom nil))
 
 (defn clicked-on [x y]
-  (connection/log "clicked on: " x "/" y))
+  (logging/log "clicked on: " x "/" y))
 
 (defn unit-clicked [x y unit]
-  (connection/log "Unit clicked: " (name (:internal-name unit))))
+  (logging/log "Unit clicked: " (name (:internal-name unit))))
 
 (defmethod connection/handle-response :game-data [server message]
-  (connection/log "got game data: " (apply str (map name (keys message))))
   (reset! running-game {:game-id (:game-id message)
                         :info (:info message)}))
 
@@ -33,7 +33,7 @@
                                 :map-name map-name}))
 
 (defmethod connection/handle-response :new-game [server message]
-  (connection/log "New game created!")
+  (logging//log "New game created!")
   ;; (request-game-data server (:game-id message))
   )
 
@@ -49,7 +49,7 @@
   (drawing/image-from-base64 (:map-data message) #(reset! terrain-image %)))
 
 (defmethod connection/handle-response :unit-data [_ data]
-  (connection/log "got " (count (:units data)) " units")
+  (logging/log "got " (count (:units data)) " units")
   (reset! game-units (:units data)))
 
 (defn draw-game [graphics]

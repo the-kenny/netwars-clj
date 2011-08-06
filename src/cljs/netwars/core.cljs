@@ -6,13 +6,10 @@
             [netwars.drawing :as drawing]
             [netwars.connection :as connection]
             [netwars.game-list :as game-list]
-            [netwars.game :as game]))
+            [netwars.game :as game]
+            [netwars.logging :as logging]))
 
 ;;; Logging Stuff
-
-(defn log-message [message]
-  (dom/appendChild (dom/getElement "messageLog")
-                   (dom/createDom "div" nil message)))
 
 (defn set-connection-status [status]
   (dom/setTextContent (dom/getElement "connectionIndicator") status))
@@ -35,7 +32,7 @@
 ;;; Implement drawing the requested map
 
 (defn on-load-map-submit []
-  (connection/log "Requesting new map from server")
+  (logging/log "Requesting new map from server")
   (game/start-new-game socket (.value (dom/getElement "mapName"))))
 
 (events/listen (dom/getElement "mapForm")

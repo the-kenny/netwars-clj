@@ -2,16 +2,14 @@
   (:require [goog.events :as events]
             [goog.json :as json]
             [goog.Timer :as timer]
-            [cljs.reader :as reader]))
-
-(defn log [& args]
-  (.log js/console (apply str args)))
+            [cljs.reader :as reader]
+            [netwars.logging :as logging]))
 
 (defn encode-data [data]
   (pr-str (into {} (for [[k v] data] [(name k) v]))))
 
 (defn decode-data [s]
-  (log s)
+  (logging/log s)
   (reader/read-string s))
 
 (defn- generate-id [& [prefix]]
@@ -20,7 +18,7 @@
 (defmulti handle-response (fn [server message] (:type message)))
 
 (defmethod handle-response :default [server message]
-  (log "Got unknown message with type: " (:type message)))
+  (logging/log "Got unknown message with type: " (:type message)))
 
 (defn send-data [server data]
   (let [id (generate-id "send-data")]
@@ -36,7 +34,7 @@
     (swap! closefns conj f))
 
   (defn handle-close [socket]
-    (log "socket closed")
+    (logging/log "socket closed")
     (doseq [f @closefns]
       (when (fn? f) (f)))))
 
@@ -45,7 +43,7 @@
     (swap! openfns conj f))
 
   (defn handle-open [socket]
-    (log "socket opened")
+    (logging/log "socket opened")
     (doseq [f @openfns]
       (when (fn? f) (f socket)))))
 
