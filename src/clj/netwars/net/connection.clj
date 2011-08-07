@@ -20,14 +20,14 @@
 (defn remove-broadcast-receiver! [broadcast client]
   (swap! (:clients broadcast) disj client))
 
-(defn send-broadcast [broadcast data]
-  (doseq [c @(:clients broadcast)]
-    (send-data c data)))
-
 (defn send-data [client data]
   (if-not (closed? (:connection client))
    (enqueue (:connection client) (encode-data data))
    (println "Attempted to send to closed channel")))
+
+(defn send-broadcast [broadcast data]
+  (doseq [c @(:clients broadcast)]
+    (send-data c data)))
 
 
 (def connection-pool (atom {}))

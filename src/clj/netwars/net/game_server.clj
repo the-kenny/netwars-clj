@@ -46,6 +46,12 @@
 (defn broadcast-for-game [game]
   (get @game-broadcast-channels (:game-id game)))
 
+(defn game-for-client
+  "Returns the game a client currently spectates"
+  [client]
+  (let [client-id (:client-id client)]
+    (get-game (get @client-game-map client-id))))
+
 (defn dissoc-client!
   "Removed client from the game he currently spectates.
    No-op when client spectates no game."
@@ -61,12 +67,6 @@
   (dissoc-client! client)                ;Dissoc from previous game
   (alter client-game-map assoc (:client-id client) (:game-id game))
   (connection/add-broadcast-receiver! (broadcast-for-game game) client))
-
-(defn game-for-client
-  "Returns the game a client currently spectates"
-  [client]
-  (let [client-id (:client-id client)]
-    (get-game (get @client-game-map client-id))))
 
 (defn start-new-game
   "Creates an AwGame with parameters from its argument"
