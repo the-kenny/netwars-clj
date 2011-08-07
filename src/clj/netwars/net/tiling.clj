@@ -36,6 +36,7 @@
       make-tiling-spec
       make-tile))
 
+;;; TODO: Serve via http
 (defmethod connection/handle-request :unit-tiles [client request]
   (let [[tilespec tile] (load-tile "resources/pixmaps/units/")]
     (connection/send-data

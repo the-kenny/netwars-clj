@@ -41,7 +41,7 @@
                                 :map-name map-name}))
 
 (defmethod connection/handle-response :new-game [server message]
-  (logging//log "New game created!")
+  (logging/log "New game created!")
   ;; (request-game-data server (:game-id message))
   )
 

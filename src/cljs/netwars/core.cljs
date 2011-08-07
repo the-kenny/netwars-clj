@@ -48,6 +48,6 @@
 ;;(drawing/start-animation board-context)
 
 ;;; TODO: Use animation when enormous cpu usage is fixed
-(let [t (goog.Timer. 100)]
+(let [t (goog.Timer. 1000)]
   (events/listen t goog.Timer/TICK #(drawing/redraw board-context))
   (. t (start)))

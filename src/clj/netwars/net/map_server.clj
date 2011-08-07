@@ -11,6 +11,7 @@
         img (map-drawer/render-terrain-board (:terrain board))]
     (otw/image-to-base64 img)))
 
+;;; TODO: Serve via http
 (defn send-map-data [client board]
   (let [map-base64 (map-to-base64 board)]
    (connection/send-data client {:type :request-map
