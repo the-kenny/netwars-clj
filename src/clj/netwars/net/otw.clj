@@ -1,4 +1,5 @@
 (ns netwars.net.otw
+  (:require netwars.aw-map)             ;import fails w.o. this
   (:import [clojure.lang IPersistentMap IPersistentVector Keyword]
            [java.util List UUID]
            [netwars.aw_map Coordinate]
