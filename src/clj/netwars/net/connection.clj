@@ -9,17 +9,20 @@
 (defn- make-client-connection [id ch]
   (ClientConnection. id ch))
 
+(defrecord BroadcastChannel [clients])
+
 (defn make-broadcast-channel []
-  (permanent-channel))
+  (BroadcastChannel. (atom #{})))
 
-(defn add-broadcast-receiver [broadcast client]
-  (siphon broadcast (:connection client)))
+(defn add-broadcast-receiver! [broadcast client]
+  (swap! (:clients broadcast) conj client))
 
+(defn remove-broadcast-receiver! [broadcast client]
+  (swap! (:clients broadcast) disj client))
 
 (defn send-broadcast [broadcast data]
-  (if-not (closed? broadcast)
-   (enqueue broadcast (encode-data data))
-   (println "Attempted to send to closed broadcast-channel")))
+  (doseq [c @(:clients broadcast)]
+    (send-data c data)))
 
 (defn send-data [client data]
   (if-not (closed? (:connection client))
@@ -45,7 +48,7 @@
     (on-closed ch #(enqueue-disconnect c))
     (receive-all ch #(when (string? %)
                        (handle-request c (decode-data %))))
-    (add-broadcast-receiver broadcast-channel c)))
+    (add-broadcast-receiver! broadcast-channel c)))
 
 
 (defn on-disconnect [f]

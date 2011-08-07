@@ -23,7 +23,8 @@
 ;;; Game List handling
 
 (def running-games (ref {}))            ;Maps a game-id to a netwars.aw-game/AwGame
-(def client-game-map (ref {}))       ;Maps a client-id to a game-id
+(def client-game-map (ref {}))          ;Maps a client-id to a game-id
+(def game-broadcast-channels (ref {}))  ;Maps game-id to a connection/broadcast
 
 (defn game-list
   "Returns a list of AwGames with :game-id attached to every game"
@@ -42,23 +43,30 @@
   [id]
   (get @running-games id))
 
+(defn broadcast-for-game [game]
+  (get @game-broadcast-channels (:game-id game)))
+
+(defn dissoc-client!
+  "Removed client from the game he currently spectates.
+   No-op when client spectates no game."
+  [client]
+  (when-let [game (game-for-client client)]
+    (connection/remove-broadcast-receiver! (broadcast-for-game game) client))
+  (alter client-game-map dissoc (:client-id client)))
+
 (defn assign-client!
   "Assigns client to game. The client will receive all events from the game."
   [client game]
-  {:pre [client game (:game-id game) (:broadcast-channel game)]}
+  {:pre [client game (:game-id game)]}
+  (dissoc-client! client)                ;Dissoc from previous game
   (alter client-game-map assoc (:client-id client) (:game-id game))
-  (connection/add-broadcast-receiver (:broadcast-channel game) client))
-
-(defn dissoc-client!
-  "Removed client from the game he currently spectates"
-  [client]
-  (alter client-game-map dissoc (:client-id client)))
+  (connection/add-broadcast-receiver! (broadcast-for-game game) client))
 
 (defn game-for-client
   "Returns the game a client currently spectates"
   [client]
   (let [client-id (:client-id client)]
-    (get-game (get client-game-map client-id))))
+    (get-game (get @client-game-map client-id))))
 
 (defn start-new-game
   "Creates an AwGame with parameters from its argument"
@@ -72,10 +80,10 @@
 (defn disconnect-client
   "Calls dissoc-client! to remove client from the game he spectates"
   [client]
-  (when-let [game (get-game (:client-id client))]
+  (when-let [game (game-for-client client)]
    (println "Removing client" (:client-id client) "from game" (:game-id game))
    (dosync (dissoc-client! client))))
-(connection/on-disconnect #'disconnect-client)
+(connection/on-disconnect disconnect-client)
 
 ;;; Client requests
 
@@ -104,12 +112,13 @@
         aw-game (assoc (start-new-game request) :game-id id)]
     (dosync
      (store-game! aw-game)
+     (alter game-broadcast-channels assoc id (connection/make-broadcast-channel))
      (assign-client! client aw-game))
     (connection/send-data client (assoc request :game-id id))
     (send-game-data aw-game client)
     (connection/send-broadcast connection/broadcast-channel
                                 {:type :new-listed-game
-                                  :game (select-keys aw-game [:game-id :info])})))
+                                 :game (select-keys aw-game [:game-id :info])})))
 
 (defmethod connection/handle-request :join-game [client request]
   (when-let [game (get-game (java.util.UUID/fromString (:game-id request)))]
