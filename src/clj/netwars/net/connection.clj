@@ -15,6 +15,9 @@
 (defn make-broadcast-channel []
   (BroadcastChannel. (atom #{})))
 
+(defn broadcast-clients [b]
+  @(:clients b))
+
 (defn add-broadcast-receiver! [broadcast client]
   (debug "adding client" (:client-id client) "to broadcast" broadcast)
   (swap! (:clients broadcast) conj client))
@@ -30,7 +33,7 @@
    (error "Attempted to send to closed channel of client:" (:client-id client))))
 
 (defn send-broadcast [broadcast data]
-  (debug "sending broadcast to" (-> broadcast :clients count) "clients")
+  (debug "sending broadcast to" (count (broadcast-clients broadcast)) "clients")
   (doseq [c @(:clients broadcast)]
     (send-data c data)))
 
