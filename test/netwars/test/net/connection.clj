@@ -1,8 +1,14 @@
 (ns netwars.test.net.connection
   (:use clojure.test
         [netwars.net.connection :as connection]
-        lamina.core)
+        lamina.core
+        clj-logging-config.log4j)
   (:import [netwars.net.connection ClientConnection]))
+
+(set-loggers!
+ "netwars.net.connection"
+ {:level :warn
+  :pattern "%d %p: %m%n"})
 
 (deftest test-broadcast-channel
   (let [broadcast (connection/make-broadcast-channel)
@@ -25,3 +31,4 @@
     (connection/remove-broadcast-receiver! broadcast c1) ;Remove receiver 1
     (send-broadcast broadcast {})
     (is (= 1 @verify-atom))))
+
