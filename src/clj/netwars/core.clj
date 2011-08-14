@@ -1,13 +1,28 @@
 (ns netwars.core
   (:use [netwars.net.connection :as connection]
         [netwars.net.game-server :as game-server]
+        [aleph.http :only [start-http-server
+                           wrap-aleph-handler
+                           wrap-ring-handler]]
+        compojure.core
+        [compojure.route :as route]
+        [compojure.handler :as handler]
+        [ring.util.response :only [redirect]]
         clojure.tools.logging
         clj-logging-config.log4j))
 
-(set-logger!
+(set-loggers!
  "netwars.net"
- :level :info
- :pattern "%d %p: %m%n")
+ {:level :info
+  :pattern "%d %p: %m%n"
+  :out #_(java.io.File. "netwars.log") :console})
+
+(defroutes main-routes
+  (GET "/" [] (redirect "/dnetwars.html"))
+  (route/resources "/")
+  (GET "/socket" [] (wrap-aleph-handler connection/websocket-handler))
+  (route/not-found "<p>aww... this doesn't exist</p>"))
 
 (defn -main []
-  (connection/start-server 8080))
+	(start-http-server (wrap-ring-handler #'main-routes) {:port 8080 :websocket true})
+	(println "server started"))

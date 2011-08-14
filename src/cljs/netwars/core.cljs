@@ -27,7 +27,7 @@
 
 ;;; Network stuff
 
-(def socket (connection/open-socket "ws://moritz-macbook.local:8080"))
+(def socket (connection/open-socket "ws://moritz-macbook.local:8080/socket"))
 
 ;;; Implement drawing the requested map
 

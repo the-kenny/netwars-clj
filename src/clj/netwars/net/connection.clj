@@ -87,8 +87,4 @@
   (error "Got unknown message:" (str request))
   (send-data client request))
 
-(defn start-server [port]
-  (start-http-server #'enqueue-connect {:port port :websocket true}))
-
-(defn stop-server [server]
-  (server))
+(def websocket-handler #'enqueue-connect)
