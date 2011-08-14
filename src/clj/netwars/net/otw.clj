@@ -19,7 +19,9 @@
   UUID
   (encode [u] (str u))
   Object
-  (encode [o] o))
+  (encode [o] o)
+  nil
+  (encode [_] nil))
 
 (defn encode-data [data]
   (binding [*print-meta* true]
