@@ -74,7 +74,9 @@
   (receive-all connect-channel f))
 
 (on-connect #(swap! connection-pool assoc (:client-id %) %))
-(on-disconnect #(swap! connection-pool dissoc (:client-id %)))
+(on-disconnect (fn [client]
+                 (remove-broadcast-receiver! broadcast-channel client)
+                 (swap! connection-pool dissoc (:client-id client))))
 
 
 (defmethod handle-request :ping [client request]
