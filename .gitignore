@@ -1,7 +1,7 @@
 lib/
-web/
-!web/netwars.html
-!web/style.css
-!web/kinetic.js
+resources/public
+!resources/public/netwars.html
+!resources/public/style.css
+!resources/public/kinetic.js
 classes/
 db/
