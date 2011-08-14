@@ -3,7 +3,8 @@
         [netwars.net.map-server :as map-server]
         [netwars.net.tiling :as tiling]
         [netwars.aw-game :as game]
-        [netwars.player :as player]))
+        [netwars.player :as player]
+        [clojure.tools.logging :only [debug info warn error fatal]]))
 
 ;;; Overview:
 ;;; A client connects and gets a client-id.
@@ -36,6 +37,7 @@
   "Stores an AwGame in the running-games sore. The game needs a unique id in :game-id"
   [game]
   {:pre [(:game-id game)]}
+  (info "Stored game:" (:info game))
   (alter running-games assoc (:game-id game) game))
 
 (defn get-game
@@ -56,7 +58,10 @@
   "Removed client from the game he currently spectates.
    No-op when client spectates no game."
   [client]
+  (info "Removing client" (:client-id client) "from all games")
   (when-let [game (game-for-client client)]
+    (info "Removing client" (:client-id client)
+          "from game-broadcast for game" (:game-id game) )
     (connection/remove-broadcast-receiver! (broadcast-for-game game) client))
   (alter client-game-map dissoc (:client-id client)))
 
@@ -65,6 +70,7 @@
   [client game]
   {:pre [client game (:game-id game)]}
   (dissoc-client! client)                ;Dissoc from previous game
+  (info "Assigning client" (:client-id client) "to game" (:game-id game))
   (alter client-game-map assoc (:client-id client) (:game-id game))
   (connection/add-broadcast-receiver! (broadcast-for-game game) client))
 
@@ -81,24 +87,26 @@
   "Calls dissoc-client! to remove client from the game he spectates"
   [client]
   (when-let [game (game-for-client client)]
-   (println "Removing client" (:client-id client) "from game" (:game-id game))
    (dosync (dissoc-client! client))))
-(connection/on-disconnect disconnect-client)
+(connection/on-disconnect #'disconnect-client)
 
 ;;; Client requests
 
 (defn send-units [client game]
   (let [units (-> game :board deref :units)]
-   (connection/send-data client {:type :unit-data
+    (info "Sending units from game" (:game-id game) "to client" (:client-id client))
+    (connection/send-data client {:type :unit-data
                                  :units units})))
 
 (defn send-game-data [game client]
+  (info "Sending game-data for game" (:game-id game) "to client" (:client-id client))
   (connection/send-data client {:type :game-data
                                 :info (:info game)})
   (map-server/send-map-data client (-> game :board deref))
   (send-units client game))
 
 (defn send-game-list [client]
+  (info "Sending game-list to client" (:client-id client))
   (connection/send-data client {:type :game-list
                                 :games (into {} (for [game (game-list)]
                                                   [(:game-id game) (:info game)]))}))
@@ -110,6 +118,7 @@
 (defmethod connection/handle-request :new-game [client request]
   (let [id (java.util.UUID/randomUUID)
         aw-game (assoc (start-new-game request) :game-id id)]
+    (info "Got new-game request:" request "from client:" (:client-id client))
     (dosync
      (store-game! aw-game)
      (alter game-broadcast-channels assoc id (connection/make-broadcast-channel))
@@ -122,12 +131,13 @@
 
 (defmethod connection/handle-request :join-game [client request]
   (when-let [game (get-game (java.util.UUID/fromString (:game-id request)))]
+    (info "Got join-game request from client" (:client-id client)
+          "for game" (:game-id game))
     (dosync
      (assign-client! client game))
-    (println "Assigned client" (str (:client-id client)) "to game" (:game-id request))
     (send-game-data game client)))
 
 (defmethod connection/handle-request :game-data [client request]
-  (println "got game-data request: " request)
+  (info "got game-data request:" request)
   (when-let [game (get-game (java.util.UUID/fromString (:game-id request)))]
     (send-game-data game client)))
