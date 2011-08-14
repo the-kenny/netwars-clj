@@ -46,7 +46,6 @@
 
 (defmulti handle-request (fn [client data] (get data :type)))
 
-
 (defn- enqueue-disconnect [client]
   (info "Got disconnect:" (:client-id client))
   (enqueue disconnect-channel client))
@@ -57,7 +56,9 @@
     (enqueue connect-channel c)
     (on-closed ch #(enqueue-disconnect c))
     (receive-all ch #(when (string? %)
-                       (handle-request c (decode-data %))))
+                       (let [data (decode-data %)]
+                        (debug "Got data:" data)
+                        (handle-request c data))))
     (add-broadcast-receiver! broadcast-channel c)))
 
 
