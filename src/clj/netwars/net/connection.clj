@@ -10,7 +10,12 @@
 (defn- make-client-connection [id ch]
   (ClientConnection. id ch))
 
-(defrecord BroadcastChannel [clients])
+(defrecord BroadcastChannel [clients]
+  Object
+  (toString [self] (str "#<Broadcast " @clients ">")))
+
+(defmethod print-method BroadcastChannel [b w]
+  (print-simple (str b) w))
 
 (defn make-broadcast-channel []
   (BroadcastChannel. (atom #{})))
@@ -19,11 +24,11 @@
   @(:clients b))
 
 (defn add-broadcast-receiver! [broadcast client]
-  (debug "adding client" (:client-id client) "to broadcast" broadcast)
+  (info "adding client" (:client-id client) "to broadcast" broadcast)
   (swap! (:clients broadcast) conj client))
 
 (defn remove-broadcast-receiver! [broadcast client]
-  (debug "removing client" (:client-id client) "from broadcast" broadcast)
+  (info "removing client" (:client-id client) "from broadcast" broadcast)
   (swap! (:clients broadcast) disj client))
 
 (defn send-data [client data]
@@ -57,7 +62,7 @@
     (on-closed ch #(enqueue-disconnect c))
     (receive-all ch #(when (string? %)
                        (let [data (decode-data %)]
-                        (debug "Got data:" data)
+                         (debug "Got data:" data)
                         (handle-request c data))))
     (add-broadcast-receiver! broadcast-channel c)))
 
