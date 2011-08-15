@@ -23,6 +23,16 @@
   (GET "/socket" [] (wrap-aleph-handler connection/websocket-handler))
   (route/not-found "<p>aww... this doesn't exist</p>"))
 
+(let [server (atom nil)]
+  (defn start []
+   (reset! server (start-http-server (wrap-ring-handler #'main-routes)
+                                     {:port 8080 :websocket true}))
+   (info "server started"))
+
+  (defn stop []
+    (@server)
+    (reset! server nil)
+    (info "Server stopped")))
+
 (defn -main []
-	(start-http-server (wrap-ring-handler #'main-routes) {:port 8080 :websocket true})
-	(println "server started"))
+  (start))
