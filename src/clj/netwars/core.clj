@@ -18,7 +18,7 @@
   :out #_(java.io.File. "netwars.log") :console})
 
 (defroutes main-routes
-  (GET "/" [] (redirect "/dnetwars.html"))
+  (GET "/" [] (redirect "/netwars.html"))
   (route/resources "/")
   (GET "/socket" [] (wrap-aleph-handler connection/websocket-handler))
   (route/not-found "<p>aww... this doesn't exist</p>"))
