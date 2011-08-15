@@ -1,6 +1,6 @@
 (ns netwars.net.otw
   (:require netwars.aw-map)             ;import fails w.o. this
-  (:import [clojure.lang IPersistentMap IPersistentVector Keyword]
+  (:import [clojure.lang IPersistentMap IPersistentSet Keyword]
            [java.util List UUID]
            [netwars.aw_map Coordinate]
            [org.apache.commons.codec.binary Base64]))
@@ -16,6 +16,8 @@
   (encode [v] (map encode v))
   IPersistentMap
   (encode [m] (into {} (for [[k v] m] [(encode k) (encode v)])))
+  IPersistentSet
+  (encode [s] (into #{} (map encode s)))
   UUID
   (encode [u] (str u))
   Object
