@@ -18,12 +18,21 @@
 
 (defn clicked-on [[x y]]
   (when-let [u (unit-at [x y])]
-    (logging/message "Unit: " (name (:internal-name u))))
+    (logging/message "Unit: " (name (:internal-name u)))
+    (connection/send-data {:type :movement-range
+                           :coordinate [x y]}))
   (logging/log "clicked on: " x "/" y))
 
 (defn unit-clicked [[x y] unit]
   (logging/message "Unit: " (name (:internal-name unit)) " (" (name (:color unit)) ") "
                     (:hp unit) "hp"))
+
+
+(def movement-range nil)
+(defmethod connection/handle-response :movement-range [server message]
+  (set! movement-range (:movement-range message)))
+
+;;; Handling of responses for new games
 
 (defmethod connection/handle-response :game-data [server message]
   (reset! running-game {:game-id (:game-id message)
@@ -45,7 +54,6 @@
   ;; (request-game-data server (:game-id message))
   )
 
-
 ;;; Functions for handling data sent after a :game-data request
 
 (defn request-map-data [server m]
@@ -60,6 +68,8 @@
   (logging/log "got " (count (:units data)) " units")
   (reset! game-units (:units data)))
 
+;;; Concrete drawing functions
+
 (defn draw-game [graphics]
   (when (and @running-game @game-units @terrain-image)
     (drawing/clear graphics)
@@ -68,11 +78,11 @@
     ;; Draw the units
     (doseq [[c u] @game-units]
       (drawing/draw-unit-at graphics u c))
+    ;; Draw the movement-range
+    (doseq [c movement-range]
+      (drawing/highlight-square graphics c))
 
     (let [canvas (:canvas graphics)]
-     ;; (drawing/add-event-listener graphics 0 0 (.width canvas) (.height canvas)
-     ;;                             "onmouseover"
-     ;;                             #(logging/log "moved: " %1 "," %2))
      (drawing/add-click-listener graphics
                                  [0 0] (.width canvas) (.height canvas)
                                  #(-> % drawing/canvas->map clicked-on)))))

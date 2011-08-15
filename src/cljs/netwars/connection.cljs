@@ -5,6 +5,9 @@
             [cljs.reader :as reader]
             [netwars.logging :as logging]))
 
+;;; TODO: Use only this socket
+(def *socket* nil)
+
 (defn encode-data [data]
   (pr-str (into {} (for [[k v] data] [(name k) v]))))
 
@@ -20,9 +23,13 @@
 (defmethod handle-response :default [server message]
   (logging/log "Got unknown message with type: " (:type message)))
 
-(defn send-data [server data]
-  (let [id (generate-id "send-data")]
-    (.send server (encode-data data))))
+(defn send-data
+  ([server data]
+     (let [id (generate-id "send-data")]
+       (.send server (encode-data data))))
+  ([data]
+     (let [id (generate-id "send-data")]
+       (.send *socket* (encode-data data)))))
 
 ;;; Connnection Stuff
 (defn handle-socket-message [server socket-event]

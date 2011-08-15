@@ -3,6 +3,8 @@
         [netwars.net.map-server :as map-server]
         [netwars.net.tiling :as tiling]
         [netwars.aw-game :as game]
+        [netwars.aw-map :as aw-map]
+        [netwars.game-board :as board]
         [netwars.player :as player]
         [clojure.tools.logging :only [debug info warn error fatal]]))
 
@@ -90,7 +92,7 @@
    (dosync (dissoc-client! client))))
 (connection/on-disconnect #'disconnect-client)
 
-;;; Client requests
+;;; Game-related Send Functions
 
 (defn send-units [client game]
   (let [units (-> game :board deref :units)]
@@ -110,6 +112,8 @@
   (connection/send-data client {:type :game-list
                                 :games (into {} (for [game (game-list)]
                                                   [(:game-id game) (:info game)]))}))
+
+;;; Creating/Joining of games
 
 (defmethod connection/handle-request :game-list [client request]
   ;; TODO: Filter out games where the client doesn't have access
@@ -141,3 +145,16 @@
   (info "got game-data request:" request)
   (when-let [game (get-game (java.util.UUID/fromString (:game-id request)))]
     (send-game-data game client)))
+
+;;; Unit Requests
+
+(defmethod connection/handle-request :movement-range [client request]
+  (if-let [game (game-for-client client)]
+    (let [c (apply aw-map/coord (:coordinate request))
+          board (-> game :board deref)
+          unit (get-unit board c)]
+      (info "Client" (:client-id client) "clicked on unit" unit "at" c)
+      (connection/send-data client
+                            (assoc request
+                              :movement-range (board/reachable-fields board c))))
+    (warn "Request for movement-range while client isn't in a game" (:client-id client) "isn't in a game")))

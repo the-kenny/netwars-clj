@@ -28,6 +28,7 @@
 ;;; Network stuff
 
 (def socket (connection/open-socket "ws://moritz-macbook.local:8080/socket"))
+(set! connection/*socket* socket)
 
 ;;; Implement drawing the requested map
 
@@ -48,6 +49,6 @@
 ;;(drawing/start-animation board-context)
 
 ;;; TODO: Use animation when enormous cpu usage is fixed
-(let [t (goog.Timer. 1000)]
+(let [t (goog.Timer. 100)]
   (events/listen t goog.Timer/TICK #(drawing/redraw board-context))
   (. t (start)))
