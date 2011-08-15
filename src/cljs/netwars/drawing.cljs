@@ -98,12 +98,12 @@
 
 ;;; Tile handling
 
-(defn request-unit-tiles [server]
-  (connection/send-data server {:type :unit-tiles}))
+(defn request-unit-tiles []
+  (connection/send-data {:type :unit-tiles}))
 
 (def unit-tiles (atom nil))
 
-(defmethod connection/handle-response :unit-tiles [server response]
+(defmethod connection/handle-response :unit-tiles [response]
   (logging/log "got tiled unit-sprites")
   (image-from-base64 (:tiled-image response)
                      (fn [img]

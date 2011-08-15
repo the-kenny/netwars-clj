@@ -27,14 +27,13 @@
 
 ;;; Network stuff
 
-(def socket (connection/open-socket "ws://moritz-macbook.local:8080/socket"))
-(set! connection/*socket* socket)
+(connection/open-socket "ws://moritz-macbook.local:8080/socket")
 
 ;;; Implement drawing the requested map
 
 (defn on-load-map-submit []
   (logging/log "Requesting new map from server")
-  (game/start-new-game socket (.value (dom/getElement "mapName"))))
+  (game/start-new-game (.value (dom/getElement "mapName"))))
 
 (events/listen (dom/getElement "mapForm")
                events/EventType.SUBMIT

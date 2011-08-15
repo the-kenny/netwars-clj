@@ -5,7 +5,6 @@
             [cljs.reader :as reader]
             [netwars.logging :as logging]))
 
-;;; TODO: Use only this socket
 (def *socket* nil)
 
 (defn encode-data [data]
@@ -18,29 +17,25 @@
 (defn- generate-id [& [prefix]]
   (apply str prefix (repeatedly 10 #(rand-int 10))))
 
-(defmulti handle-response (fn [server message] (:type message)))
+(defmulti handle-response :type)
 
-(defmethod handle-response :default [server message]
+(defmethod handle-response :default [message]
   (logging/log "Got unknown message with type: " (:type message)))
 
-(defn send-data
-  ([server data]
-     (let [id (generate-id "send-data")]
-       (.send server (encode-data data))))
-  ([data]
-     (let [id (generate-id "send-data")]
-       (.send *socket* (encode-data data)))))
+(defn send-data [data]
+  (let [id (generate-id "send-data")]
+    (.send *socket* (encode-data data))))
 
 ;;; Connnection Stuff
-(defn handle-socket-message [server socket-event]
+(defn handle-socket-message [socket-event]
   (let [obj (decode-data (.data socket-event))]
-    (handle-response server obj)))
+    (handle-response obj)))
 
 (let [closefns (atom [])]
   (defn on-close [f]
     (swap! closefns conj f))
 
-  (defn handle-close [socket]
+  (defn handle-close []
     (logging/log "socket closed")
     (doseq [f @closefns]
       (when (fn? f) (f)))))
@@ -49,27 +44,26 @@
   (defn on-open [f]
     (swap! openfns conj f))
 
-  (defn handle-open [socket]
+  (defn handle-open []
     (logging/log "socket opened")
     (doseq [f @openfns]
-      (when (fn? f) (f socket)))))
+      (when (fn? f) (f)))))
 
-(defn start-ping-timer [interval ws]
+(defn start-ping-timer [interval]
   (let [t (goog.Timer. interval)]
     (events/listen t goog.Timer/TICK
-                   (fn []
-                     (send-data ws {:type :ping})))
+                   #(send-data {:type :ping}))
     (. t (start))))
 
-(defmethod handle-response :pong [_ _]
+(defmethod handle-response :pong [_]
   ;; TODO: Implement a timeout for reconnecting here
 )
 
-(on-open (partial start-ping-timer 5000))
+(on-open #(start-ping-timer 5000))
 
 (defn open-socket [uri]
   (let [ws (js/WebSocket. uri)]
-    (events/listen ws "open" #(handle-open ws))
-    (events/listen ws "close" #(handle-close ws))
-    (set! (. ws onmessage) (partial handle-socket-message ws))
-    ws))
+    (events/listen ws "open" handle-open)
+    (events/listen ws "close" handle-close)
+    (set! (. ws onmessage) #(handle-socket-message %))
+    (set! *socket* ws)))

@@ -4,21 +4,21 @@
             [netwars.game :as game]
             [goog.events :as events]))
 
-(defn- append-game [server id game]
+(defn- append-game [id game]
   (let [link (dom/createDom "a" nil (str id))]
     (events/listen link goog.events.EventType/CLICK
-                   #(game/join-game server id))
+                   #(game/join-game id))
    (doto (dom/getElement "gameList")
      (.appendChild (dom/createDom "li" "gameLink" link)))))
 
-(defmethod connection/handle-response :new-listed-game [server response]
+(defmethod connection/handle-response :new-listed-game [response]
   (let [game (:game response)]
-    (append-game server (:game-id game) (:info game))))
+    (append-game (:game-id game) (:info game))))
 
-(defmethod connection/handle-response :game-list [server response]
+(defmethod connection/handle-response :game-list [response]
   (dom/removeChildren (dom/getElement "gameList"))
   (doseq [[id info] (:games response)]
-    (append-game server id info)))
+    (append-game id info)))
 
-(defn request-game-list [server]
-  (connection/send-data server {:type :game-list}))
+(defn request-game-list []
+  (connection/send-data {:type :game-list}))
