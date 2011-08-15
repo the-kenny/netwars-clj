@@ -78,7 +78,7 @@
       (drawing/draw-unit-at graphics u c))
     ;; Draw the movement-range
     (doseq [c movement-range]
-      (drawing/highlight-square graphics c))
+      (drawing/highlight-square graphics c :color "rgba(255, 0, 0, 0.4)"))
 
     (let [canvas (:canvas graphics)]
      (drawing/add-click-listener graphics

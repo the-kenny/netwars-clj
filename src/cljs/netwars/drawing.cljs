@@ -91,9 +91,10 @@
   (image-from-base64 image-data (partial draw-terrain-image graphics)))
 
 
-(defn highlight-square [graphics [x y]]
+(defn highlight-square [graphics [x y] & {:keys [color]}]
   (let [context (:context graphics)]
-    (set! (. context fillStyle) "rgba(255, 0, 0, 0.4)")
+    (when color
+     (set! (. context fillStyle) color))
     (.fillRect context (* x 16) (* y 16) 16 16)))
 
 ;;; Tile handling
