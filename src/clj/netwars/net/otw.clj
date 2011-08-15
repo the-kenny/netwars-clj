@@ -1,9 +1,17 @@
 (ns netwars.net.otw
   (:require netwars.aw-map)             ;import fails w.o. this
   (:import [clojure.lang IPersistentMap IPersistentSet Keyword]
+           [java.awt Image]
            [java.util List UUID]
            [netwars.aw_map Coordinate]
            [org.apache.commons.codec.binary Base64]))
+
+(defn image-to-base64 [image]
+  (let [os (java.io.ByteArrayOutputStream.)
+        output (java.io.StringWriter.)]
+    (javax.imageio.ImageIO/write image "png" os)
+    (str "data:image/png;base64,"
+         (Base64/encodeBase64String (.toByteArray os)))))
 
 (defprotocol Sendable
   (encode [o]))
@@ -22,6 +30,8 @@
   (encode [u] (str u))
   Object
   (encode [o] o)
+  java.awt.Image
+  (encode [i] (image-to-base64 i))
   nil
   (encode [_] nil))
 
@@ -32,9 +42,3 @@
 (defn decode-data [s]
   (into {} (for [[k v] (read-string s)] [(keyword k) v])))
 
-(defn image-to-base64 [image]
-  (let [os (java.io.ByteArrayOutputStream.)
-        output (java.io.StringWriter.)]
-    (javax.imageio.ImageIO/write image "png" os)
-    (str "data:image/png;base64,"
-         (Base64/encodeBase64String (.toByteArray os)))))

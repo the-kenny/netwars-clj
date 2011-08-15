@@ -6,16 +6,12 @@
   (:use [clojure.contrib.def :only [defn-memo]])
   (:import [org.apache.commons.codec.binary Base64]))
 
-(defn-memo map-to-base64 [board]
-  (let [;; loaded-map (safe-load-map file)
-        img (map-drawer/render-terrain-board (:terrain board))]
-    (otw/image-to-base64 img)))
 
 ;;; TODO: Serve via http
 (defn send-map-data [client board]
-  (let [map-base64 (map-to-base64 board)]
+  (let [map-image (map-drawer/render-terrain-board (:terrain board))]
    (connection/send-data client {:type :request-map
-                                 :map-data map-base64})))
+                                 :map-data map-image})))
 
 (defmethod connection/handle-request :request-map [client request]
   (println "Got map request:" (str request))

@@ -43,4 +43,4 @@
      client
      (assoc request
        :tile-spec tilespec
-       :tiled-image (otw/image-to-base64 tile)))))
+       :tiled-image tile))))
