@@ -1,5 +1,4 @@
 #/bin/bash
 
-echo "Eval: (use 'cljs.closure) (def opts {:output-to \"../resources/public/netwars.js\" :output-dir \"../resources/public/\"})"
-echo "Build with: (build \"../src/cljs/\" opts)"
+echo "(use 'cljs.closure) (build \"../src/cljs/\" {:output-to \"../resources/public/netwars.js\" :output-dir \"../resources/public/\"})"
 cd clojurescript; script/repl
