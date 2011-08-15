@@ -69,7 +69,7 @@
        :headquarter  {:foot 1   :mechanical 1   :tread 1   :tires 1   :air 1   :sea nil :transport nil :oozium 1   :pipe 1   :hover 1}
        :mountain     {:foot 2   :mechanical 1   :tread nil :tires nil :air 1   :sea nil :transport nil :oozium 1   :pipe nil :hover 0}
        :pipe         {:foot 2   :mechanical nil :tread nil :tires nil :air nil :sea nil :transport nil :oozium nil :pipe 1   :hover nil}
-       :reef         {:foot 2   :mechanical nil :tread nil :tires nil :air 1   :sea 1   :transport 1   :oozium nil :pipe nil :hover nil}
+       :reef         {:foot nil :mechanical nil :tread nil :tires nil :air 1   :sea 1   :transport 1   :oozium nil :pipe nil :hover nil}
        :street       {:foot 1   :mechanical 1   :tread 1   :tires 1   :air 1   :sea nil :transport nil :oozium 1   :pipe nil :hover nil}
        :water        {:foot nil :mechanical nil :trad nil  :tires nil :air 1   :sea 1   :transport 1   :oozium nil :pipe nil :hover nil}
        :silo         {:foot 1   :mechanical 1   :tread 1   :tires 1   :air 1   :sea nil :transport nil :oozium 1   :pipe 1   :hover nil}
