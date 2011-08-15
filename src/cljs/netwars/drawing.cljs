@@ -55,7 +55,10 @@
     (. context (beginPath))
     (. context (rect x y w h))
     (. context (closePath))
-    (. kinetic (addRegionEventListener event callback))
+    (. kinetic (addRegionEventListener event (fn [e]
+                                                (callback)
+                                                (. (.event js/window)
+                                                   (preventDefault)))))
     (. kinetic (closeRegion))))
 
 (defn add-click-listener
