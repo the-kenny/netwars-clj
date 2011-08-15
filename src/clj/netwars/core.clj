@@ -35,4 +35,9 @@
     (info "Server stopped")))
 
 (defn -main []
+  (set-loggers!
+   "netwars.net"
+   {:level :info
+    :pattern "%d %p: %m%n"
+    :out (java.io.File. "netwars.log")})
   (start))
