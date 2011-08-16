@@ -3,7 +3,6 @@
             [netwars.map-loader :as map-loader]
             [netwars.map-drawer :as map-drawer]
             [netwars.net.otw :as otw])
-  (:use [clojure.contrib.def :only [defn-memo]])
   (:import [org.apache.commons.codec.binary Base64]))
 
 

@@ -4,6 +4,7 @@
         netwars.aw-map
         [clojure.java.io :only [resource]]))
 
+;;; TODO: Test metadata
 (deftest map-loading
   (let [map-file "maps/7330.aws"]
     (is (instance? netwars.map_loader.LoadedMap (load-map map-file))

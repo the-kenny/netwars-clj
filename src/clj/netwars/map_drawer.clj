@@ -3,8 +3,7 @@
         netwars.map-utils
         netwars.map-loader
         [clojure.java.io :only [resource]])
-  (:require [clojure.contrib.str-utils2 :as str2]
-            [netwars.utilities :as util])
+  (:require [netwars.utilities :as util])
   (:import java.awt.Graphics2D
            java.awt.image.BufferedImage
            javax.imageio.ImageIO))
@@ -162,7 +161,7 @@ For example: [:pipe :uldr] or [:seaside :corner :dr]"
     (drawing-fn [:seaside (stringify-directions grounds)])))
 
 (defn split-intercardinal-direction [inter-dir]
-   (map #(keyword (apply str %)) (str2/split (name inter-dir) #"-")))
+   (map #(keyword (apply str %)) (.split (name inter-dir) "-")))
 
 (defn- seaside-corners [nbs drawing-fn]
   (doseq [inter-dir [:north-east :south-east :north-west :south-west]]

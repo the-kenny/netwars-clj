@@ -1,7 +1,6 @@
 (ns netwars.net.tiling
   (:use [netwars.aw-map :only [coord]]
         [netwars.net.connection :as connection]
-        [clojure.contrib.def :only [defn-memo]]
         [netwars.net.otw :as otw])
   (:import java.awt.image.BufferedImage
            java.awt.Graphics2D
@@ -31,10 +30,11 @@
     (.finalize graphics)
     [(into {} tile-coords) image]))
 
-(defn-memo load-tile [directory]
+(defn load-tile [directory]
   (-> directory
       make-tiling-spec
       make-tile))
+(alter-var-root #'load-tile memoize)
 
 ;;; TODO: Serve via http
 (defmethod connection/handle-request :unit-tiles [client request]

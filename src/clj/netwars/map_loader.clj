@@ -1,5 +1,4 @@
 (ns netwars.map-loader
-  (:require [clojure.contrib.str-utils2 :as str2])
   (:use netwars.aw-map
         netwars.impl.map-loader))
 
@@ -67,20 +66,20 @@
   (let [ ;; I hope Little-Endianess doesn't cause problems
         buf (.order (read-binary-resource source)
                     java.nio.ByteOrder/LITTLE_ENDIAN)
-        filetype (str2/tail source 4)
+        filetype (last (.split source "\\."))
 		editor-version (read-n-string buf 6)
 		format-version (read-n-string buf 3)
 		_ (read-byte buf)
-		width (if (= filetype ".aws")
+		width (if (= filetype "aws")
                 (read-byte buf)
                 30)
-		height (if (= filetype ".aws")
+		height (if (= filetype "aws")
                  (read-byte buf)
                  20)
 		tileset (parse-tileset
                  (condp = filetype
-                     ".awd"  (dec (int (read-byte buf)))
-                     ".aws"  (int (read-byte buf))
+                     "awd"  (dec (int (read-byte buf)))
+                     "aws"  (int (read-byte buf))
                      0))
 		terrain-data (vec (parse-terrain-data
                            (doall (for [_ (range (* width height))]
@@ -94,9 +93,9 @@
         author (read-when-possible buf
                                    (read-n-string buf (read-int32 buf)))
         desc (read-when-possible buf
-                                 (str2/replace (read-n-string buf (read-int32 buf))
-                                               #"\r\n"
-                                               "\n"))]
+                                 (.replace (read-n-string buf (read-int32 buf))
+                                           "\r\n"
+                                           "\n"))]
 
     (LoadedMap.
      (make-terrain-board [width height]

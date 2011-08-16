@@ -1,7 +1,8 @@
 (ns netwars.pathfinding
-  (:use [clojure.contrib.graph :as graph]
-        [netwars.map-loader :as map-loader]
-        [netwars.map-utils :as map]))
+  ;; (:use [clojure.contrib.graph :as graph]
+  ;;       [netwars.map-loader :as map-loader]
+  ;;       [netwars.map-utils :as map])
+  )
 
 ;; (defn- make-neighbor [awmap x y]
 ;;   (when (on-map awmap x y)
