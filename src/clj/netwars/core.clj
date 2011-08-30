@@ -11,7 +11,7 @@
         clojure.tools.logging
         clj-logging-config.log4j))
 
-(set-loggers!
+#_(set-loggers!
  "netwars.net"
  {:level :info
   :pattern "%d %p: %m%n"
@@ -36,7 +36,7 @@
 
 (defn -main []
   (set-loggers!
-   "netwars.net"
+   "netwars"
    {:level :info
     :pattern "%d %p: %m%n"
     :out (java.io.File. "netwars.log")})
