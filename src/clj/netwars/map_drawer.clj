@@ -3,7 +3,6 @@
         netwars.map-utils
         netwars.map-loader
         [clojure.java.io :only [resource]])
-  (:require [netwars.utilities :as util])
   (:import java.awt.Graphics2D
            java.awt.image.BufferedImage
            javax.imageio.ImageIO))
