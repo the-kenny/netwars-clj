@@ -5,3 +5,4 @@ resources/public
 !resources/public/kinetic.js
 classes/
 db/
+.lein-failures
