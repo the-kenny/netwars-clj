@@ -149,10 +149,12 @@
 (defmethod connection/handle-request :movement-range [client request]
   (if-let [game (game-for-client client)]
     (let [c (apply aw-map/coord (:coordinate request))
-          board (-> game :board deref)
-          unit (get-unit board c)]
-      (info "Client" (:client-id client) "clicked on unit" unit "at" c)
-      (connection/send-data client
-                            (assoc request
-                              :movement-range (board/reachable-fields board c))))
-    (warn "Request for movement-range while client isn't in a game" (:client-id client) "isn't in a game")))
+          board (-> game :board deref)]
+      (if-let [unit (get-unit board c)]
+        (let [fields (board/reachable-fields board c)]
+         (info "Client" (:client-id client) "clicked on unit" unit "at" c)
+         (connection/send-broadcast (broadcast-for-game game)
+                                    (assoc request :movement-range fields)))
+        (warn "Can't request movement-range for coordinate: No unit on" c)))
+    (warn "Request for movement-range while client"
+          (:client-id client) "isn't in a game")))
