@@ -16,3 +16,6 @@
   (is (= [:north :south] (rectangular-direction :east)))
   (is (= [:north :south] (rectangular-direction :west)))
   (is (nil? (rectangular-direction :foobar))))
+
+(deftest test-drop-neighbours-behind
+  (is nil "stub"))

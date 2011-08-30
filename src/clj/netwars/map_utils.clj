@@ -25,3 +25,18 @@
         :south [:east :west]
         :east [:north :south]
         :west [:north :south]} dir nil))
+
+(defn drop-neighbours-behind [direction nbs]
+  (select-keys nbs (case [direction]
+                     :north [:north
+                             :north-west :north-east
+                             :east :west]
+                     :east [:east
+                            :north-east :south-east
+                            :north :south]
+                     :west [:west
+                            :north-west :north-west
+                            :north :south]
+                     :south [:south
+                             :south-west :south-east
+                             :east :west])))
