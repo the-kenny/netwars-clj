@@ -27,7 +27,6 @@
 
 (def running-games (ref {}))            ;Maps a game-id to a netwars.aw-game/AwGame
 (def client-game-map (ref {}))          ;Maps a client-id to a game-id
-(def game-broadcast-channels (ref {}))  ;Maps game-id to a connection/broadcast
 
 (defn game-list
   "Returns a list of AwGames with :game-id attached to every game"
@@ -48,7 +47,7 @@
   (get @running-games id))
 
 (defn broadcast-for-game [game]
-  (get @game-broadcast-channels (:game-id game)))
+  (get game :broadcast-channel))
 
 (defn game-for-client
   "Returns the game a client currently spectates"
@@ -120,12 +119,11 @@
   (send-game-list client))
 
 (defmethod connection/handle-request :new-game [client request]
+  (info "Got new-game request:" request "from client:" (:client-id client))
   (let [id (java.util.UUID/randomUUID)
         aw-game (assoc (start-new-game request) :game-id id)]
-    (info "Got new-game request:" request "from client:" (:client-id client))
     (dosync
      (store-game! aw-game)
-     (alter game-broadcast-channels assoc id (connection/make-broadcast-channel))
      (assign-client! client aw-game))
     (connection/send-data client (assoc request :game-id id))
     (send-game-data aw-game client)
