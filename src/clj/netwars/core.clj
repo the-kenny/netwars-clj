@@ -11,7 +11,7 @@
         clojure.tools.logging
         clj-logging-config.log4j))
 
-#_(set-loggers!
+(set-loggers!
  "netwars.net"
  {:level :info
   :pattern "%d %p: %m%n"
