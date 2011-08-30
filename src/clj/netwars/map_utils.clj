@@ -18,35 +18,10 @@
     :north-west (msta (dec x) (dec y))
     :south-west (msta (dec x) (inc y)))))
 
-(defn rectangular-direction [dir]
+(defn rectangular-direction
+  "Returns the directions 90 degrees and -90 degrees to the given direction"
+  [dir]
   (get {:north [:east :west]
         :south [:east :west]
         :east [:north :south]
         :west [:north :south]} dir nil))
-
-(defn drop-neighbours-behind [direction nbs]
-  (select-keys nbs
-               (condp = direction
-                 :north [:north
-                         :north-west :north-east
-                         :east :west]
-                 :east [:east
-                        :north-east :south-east
-                        :north :south]
-                 :west [:west
-                        :north-west :north-west
-                        :north :south]
-                 :south [:south
-                         :south-west :south-east
-                         :east :west])))
-
-(comment
- (defn inspect-terrain [loaded-map]
-   (clojure.inspector/inspect
-    (apply merge (for [x (range 30) y (range 20)]
-                   {[x y] (at terrain (coord x y))})))))
-
-
-
-
-
