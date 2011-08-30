@@ -158,3 +158,16 @@
         (warn "Can't request movement-range for coordinate: No unit on" c)))
     (warn "Request for movement-range while client"
           (:client-id client) "isn't in a game")))
+
+(defmethod connection/handle-request :move-unit [client request]
+  (info "Got request to move unit from" (:from request) "to" (:to request))
+  (if-let [game (game-for-client client)]
+    (let [board (-> game :board deref)
+          from (apply aw-map/coord (:from request))
+          to   (apply aw-map/coord (:to   request))]
+
+      (dosync
+       ;; TODO: Error Handling
+       (alter (:board game) board/move-unit from to))
+      (connection/send-broadcast (broadcast-for-game game)
+                                 (assoc request :valid true)))))

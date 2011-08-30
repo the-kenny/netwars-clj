@@ -11,26 +11,51 @@
 (def game-units (atom nil))
 (def terrain-image (atom nil))
 
+
+;;; Game state
+(def current-unit nil)         ;Stores the coord of the highlighted unit
+(def movement-range nil)
+
 ;;; General methods for games
 
 (defn unit-at [c]
   (get @game-units c))
 
+;;; TODO: pre/post
+(defn move-unit [from to]
+  (let [u (unit-at from)]
+    (swap! game-units dissoc from)
+    (swap! game-units assoc to u)))
+
 (defn clicked-on [[x y]]
+  (logging/log "clicked on: " x "/" y)
   (when-let [u (unit-at [x y])]
     (logging/message "Unit: " (name (:internal-name u)))
     (connection/send-data {:type :movement-range
                            :coordinate [x y]}))
-  (logging/log "clicked on: " x "/" y))
+  (when (get movement-range [x y])
+    (connection/send-data {:type :move-unit
+                           :from current-unit
+                           :to [x y]})))
 
 (defn unit-clicked [[x y] unit]
   (logging/message "Unit: " (name (:internal-name unit)) " (" (name (:color unit)) ") "
                     (:hp unit) "hp"))
 
 
-(def movement-range nil)
+;;; Movement Range
+
 (defmethod connection/handle-response :movement-range [message]
-  (set! movement-range (:movement-range message)))
+  (set! movement-range (:movement-range message))
+  (set! current-unit (:coordinate message)))
+
+;;; Moving Units
+
+(defmethod connection/handle-response :move-unit [message]
+  (move-unit (:from message) (:to message))
+  ;; Reset movement-range
+  (set! movement-range nil)
+  (set! current-unit nil))
 
 ;;; Handling of responses for new games
 
