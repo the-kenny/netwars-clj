@@ -72,7 +72,8 @@
 
 (defmethod connection/handle-response :game-data [message]
   (set! running-game {:game-id (:game-id message)
-                      :info (:info message)}))
+                      :info (:info message)})
+  (logging/clear-messages))
 
 (defn join-game [game-id]
   (connection/send-data {:type :join-game
