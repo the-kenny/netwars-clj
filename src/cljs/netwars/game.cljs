@@ -28,20 +28,31 @@
                          (dissoc from)
                          (assoc to u)))))
 
-(defn clicked-on [[x y]]
-  (logging/log "clicked on: " x "/" y)
-  (when-let [u (unit-at [x y])]
-    (logging/message "Unit: " (name (:internal-name u)))
-    (connection/send-data {:type :movement-range
-                           :coordinate [x y]}))
-  (when (get movement-range [x y])
-    (connection/send-data {:type :move-unit
-                           :from current-unit
-                           :to [x y]})))
 
 (defn unit-clicked [[x y] unit]
   (logging/message "Unit: " (name (:internal-name unit)) " (" (name (:color unit)) ") "
-                    (:hp unit) "hp"))
+                    (:hp unit) "hp")
+  (when (nil? movement-range)
+    (connection/send-data {:type :movement-range
+                           :coordinate [x y]})))
+
+(defn terrain-clicked [[x y]]
+  (when current-unit
+    (if (get movement-range [x y])
+     (connection/send-data {:type :move-unit
+                            :from current-unit
+                            :to [x y]})
+     (connection/send-data {:type :deselect-unit
+                            :coordiante current-unit}))))
+
+(defn clicked-on [[x y]]
+  (logging/log "clicked on: " x "/" y)
+  (let [unit (unit-at [x y])]
+    (cond
+     unit
+     (unit-clicked [x y] unit)
+     true
+     (terrain-clicked [x y]))))
 
 
 ;;; Movement Range
