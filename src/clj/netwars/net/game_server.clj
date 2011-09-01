@@ -142,65 +142,28 @@
 
 ;;; Unit Requests
 
-(defmethod connection/handle-request :unit-clicked [client request]
+(defmethod connection/handle-request :movement-range [client request]
   (if-let [game (game-for-client client)]
-   (let [c (apply aw-map/coord (:coordinate request))
-         board (-> game :board deref)]
-     (if-let [unit (get-unit board c)]
-       (do
-        (info "Client" (:client-id client) "clicked on unit at" c)
-        (dosync
-         (game/select-unit! game c))
-        (connection/send-broadcast (broadcast-for-game game)
-                                   {:type :movement-range
-                                    :coordinate c
-                                    :movement-range (game/movement-range game)}))
-       (error ":unit-clicked from client" (:client-id client) "without unit on" c)))
-   (warn "Request for movement-range while client"
-         (:client-id client) "isn't in a game")))
-
-(defmethod connection/handle-request :terrain-clicked [client request]
-  (if-let [game (game-for-client client)]
-    (let [c (apply aw-map/coord (:coordinate request))]
-     (cond
-      ;; (and (game/selected-unit game) (contains? (game/movement-range game) c))
-      ;; (let [from (game/selected-coordinate game), to c]
-      ;;   (game/move-unit! game to)
-      ;;   (connection/send-broadcast (broadcast-for-game game)
-      ;;                              {:type :move-unit
-      ;;                               :from from
-      ;;                               :to to}))
-
-      (and (game/selected-unit game) (not (contains? (game/movement-range game) c)))
-      (do (dosync (game/deselect-unit! game))
-          (connection/send-broadcast (broadcast-for-game game)
-                                     {:type :deselect-unit
-                                      :coordinate c}))))
+    (let [c (apply aw-map/coord (:coordinate request))
+          board (-> game :board deref)]
+      (if-let [unit (get-unit board c)]
+        (let [fields (board/reachable-fields board c)]
+         (info "Client" (:client-id client) "clicked on unit" unit "at" c)
+         (connection/send-broadcast (broadcast-for-game game)
+                                    (assoc request :movement-range fields)))
+        (warn "Can't request movement-range for coordinate: No unit on" c)))
     (warn "Request for movement-range while client"
           (:client-id client) "isn't in a game")))
 
-(comment (defmethod connection/handle-request :movement-range [client request]
-   (if-let [game (game-for-client client)]
-     (let [c (apply aw-map/coord (:coordinate request))
-           board (-> game :board deref)]
-       (if-let [unit (get-unit board c)]
-         (let [fields (board/reachable-fields board c)]
-           (info "Client" (:client-id client) "clicked on unit" unit "at" c)
-           (connection/send-broadcast (broadcast-for-game game)
-                                      (assoc request :movement-range fields)))
-         (warn "Can't request movement-range for coordinate: No unit on" c)))
-     (warn "Request for movement-range while client"
-           (:client-id client) "isn't in a game"))))
+(defmethod connection/handle-request :move-unit [client request]
+  (info "Got request to move unit from" (:from request) "to" (:to request))
+  (if-let [game (game-for-client client)]
+    (let [board (-> game :board deref)
+          from (apply aw-map/coord (:from request))
+          to   (apply aw-map/coord (:to   request))]
 
-(comment (defmethod connection/handle-request :move-unit [client request]
-   (info "Got request to move unit from" (:from request) "to" (:to request))
-   (if-let [game (game-for-client client)]
-     (let [board (-> game :board deref)
-           from (apply aw-map/coord (:from request))
-           to   (apply aw-map/coord (:to   request))]
-
-       (dosync
-        ;; TODO: Error Handling
-        (alter (:board game) board/move-unit from to))
-       (connection/send-broadcast (broadcast-for-game game)
-                                  (assoc request :valid true))))))
+      (dosync
+       ;; TODO: Error Handling
+       (alter (:board game) board/move-unit from to))
+      (connection/send-broadcast (broadcast-for-game game)
+                                 (assoc request :valid true)))))

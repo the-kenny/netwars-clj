@@ -32,12 +32,18 @@
 (defn unit-clicked [[x y] unit]
   (logging/message "Unit: " (name (:internal-name unit)) " (" (name (:color unit)) ") "
                     (:hp unit) "hp")
-  (connection/send-data {:type :unit-clicked
-                         :coordinate [x y]}))
+  (when (nil? movement-range)
+    (connection/send-data {:type :movement-range
+                           :coordinate [x y]})))
 
 (defn terrain-clicked [[x y]]
-  (connection/send-data {:type :terrain-clicked
-                         :coordinate [x y]}))
+  (when current-unit
+    (if (get movement-range [x y])
+     (connection/send-data {:type :move-unit
+                            :from current-unit
+                            :to [x y]})
+     (connection/send-data {:type :deselect-unit
+                            :coordiante current-unit}))))
 
 (defn clicked-on [[x y]]
   (let [unit (unit-at [x y])]
@@ -61,10 +67,6 @@
   ;; Reset movement-range
   (set! movement-range nil)
   (set! current-unit nil))
-
-(defmethod connection/handle-response :deselect-unit [message]
-  (set! current-unit nil)
-  (set! movement-range nil))
 
 ;;; Handling of responses for new games
 
