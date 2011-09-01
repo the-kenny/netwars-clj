@@ -46,7 +46,6 @@
                             :coordiante current-unit}))))
 
 (defn clicked-on [[x y]]
-  (logging/log "clicked on: " x "/" y)
   (let [unit (unit-at [x y])]
     (cond
      unit
