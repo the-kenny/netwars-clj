@@ -102,7 +102,3 @@
     false
     (< (:ammo weapon) (/ (:ammo (meta weapon)) 2))))
 
-
-(comment
-  (def +spec+ (loader/load-units
-               "/Users/moritz/Development/netwars-clj/resources/units.xml")))
