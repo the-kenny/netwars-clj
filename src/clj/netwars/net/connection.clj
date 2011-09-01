@@ -80,7 +80,7 @@
 
 
 (defmacro defresponse [type [request-sym client-sym] & body]
-  `(defmethod handle-request ~type [request# client#]
+  `(defmethod handle-request ~type [client# request#]
      (let [~request-sym request#
            ~client-sym client#]
       (send-data client# (merge request# (do ~@body))))))

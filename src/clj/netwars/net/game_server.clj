@@ -97,7 +97,7 @@
   (let [units (-> game :board deref :units)]
     (info "Sending units from game" (:game-id game) "to client" (:client-id client))
     (connection/send-data client {:type :unit-data
-                                 :units units})))
+                                  :units units})))
 
 (defn send-game-data [game client]
   (info "Sending game-data for game" (:game-id game) "to client" (:client-id client))
