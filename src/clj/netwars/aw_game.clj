@@ -12,6 +12,7 @@
                    unit-spec
                    damagetable
                    board
+                   current-unit         ;Stores the selected unit
                    moves                ;Every move in the game gets saved here
                    ])
 
@@ -33,6 +34,7 @@
              unit-spec
              damagetable
              (ref board)
+             (ref nil)
              (ref [initial-event]))))
 
 ;;; Game events
@@ -84,3 +86,35 @@
                  (not counterattack))
         (perform-attack! game vic-coord att-coord :counterattack true))
       game)))
+
+;;; Movement Range and selected unit
+
+(defn selected-coordinate
+  "Returns the selected coordinate"
+  [game]
+  @(:current-unit game))
+
+(defn selected-unit
+  "Returns the selected unit"
+  [game]
+  (board/get-unit @(:board game) @(:current-unit game)))
+
+;;; TODO: Make sure that only the current player can select units
+(defn select-unit!
+  "Sets the selected unit to unit at coordinate c. Must be called in a transaction."
+  [game unit-coordinate]
+  {:pre [(-> game :board deref (board/get-unit unit-coordinate))]
+   :post [(= unit-coordinate @(:current-unit game))]}
+  (ref-set (:current-unit game) unit-coordinate))
+
+(defn deselect-unit!
+  "Sets the currently selected unit of game to nil. Returns the last value."
+  [game]
+  (let [c @(:current-unit game)]
+    (ref-set (:current-unit game) nil)
+    c))
+
+(defn movement-range
+  "Returns a set of all reachable fields for the currently selected unit."
+  [game]
+  (board/reachable-fields @(:board game) (selected-coordinate game)))

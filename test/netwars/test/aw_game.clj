@@ -12,7 +12,6 @@
                                                   [:player1 :player2 :player3])]
                         (f))))
 
-
 (deftest test-aw-game
   (is (instance? netwars.aw_game.AwGame *game*))
   (is (= :game-started (-> *game* :moves deref first :type))))
@@ -88,3 +87,44 @@
                                         (game-events *game*)))
                          infantry2 infantry
                          :infantry :infantry))))
+
+(deftest test-select-unit!
+  (testing "without a transaction"
+    (is (thrown? java.lang.IllegalStateException
+                 (select-unit! *game* (coord 1 13)))))
+  (let [c (coord 1 13)]
+    (dosync (select-unit! *game* c))
+    (is (= c @(:current-unit *game*)))))
+
+(deftest test-selected-coordinate
+  (is (nil? (selected-coordinate *game*)))
+  (let [c (coord 1 13)]
+   (dosync (select-unit! *game* c))
+   (is (= c (selected-coordinate *game*)))))
+
+(deftest test-selected-unit
+  (testing "on a clean game"
+    (is (nil? (selected-unit *game*)) ":current-unit should be nil for a clean game"))
+  (testing "after select-unit!"
+    (dosync (select-unit! *game* (coord 1 11)))
+    (is (not (nil? (selected-unit *game*)))
+        ":current-unit should be non-nil after select-unit!")))
+
+(deftest test-deselect-unit!
+  (testing "without a transaction"
+    (is (thrown? java.lang.IllegalStateException
+                 (deselect-unit! *game*))))
+  (let [c (coord 1 13)]
+   (dosync
+    (select-unit! *game* c)
+    (is (= c (deselect-unit! *game*)))
+    (is (= nil (selected-unit *game*))))))
+
+(deftest test-movement-range
+  (let [c (coord 1 13)]
+    (dosync (select-unit! *game* c))
+    (let [r (movement-range *game*)]
+      (is (set? r))
+      (is (every? #(instance? netwars.aw_map.Coordinate %) r))
+      (is (= r (board/reachable-fields (-> *game* :board deref)
+                                       (selected-coordinate *game*)))))))
