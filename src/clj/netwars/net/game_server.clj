@@ -106,17 +106,13 @@
   (map-server/send-map-data client (-> game :board deref))
   (send-units client game))
 
-(defn send-game-list [client]
-  (info "Sending game-list to client" (:client-id client))
-  (connection/send-data client {:type :game-list
-                                :games (into {} (for [game (game-list)]
-                                                  [(:game-id game) (:info game)]))}))
-
 ;;; Creating/Joining of games
 
-(defmethod connection/handle-request :game-list [client request]
+(connection/defresponse :game-list [client _]
   ;; TODO: Filter out games where the client doesn't have access
-  (send-game-list client))
+  (info "Sending game-list to client" (:client-id client))
+  {:games (into {} (for [game (game-list)]
+                     [(:game-id game) (:info game)]))})
 
 (defmethod connection/handle-request :new-game [client request]
   (info "Got new-game request:" request "from client:" (:client-id client))

@@ -79,12 +79,17 @@
                  (swap! connection-pool dissoc (:client-id client))))
 
 
-(defmethod handle-request :ping [client request]
-  (debug "Got ping from" (:client-id client))
-  (send-data client (assoc request :type :pong)))
+(defmacro defresponse [type [request-sym client-sym] & body]
+  `(defmethod handle-request ~type [request# client#]
+     (let [~request-sym request#
+           ~client-sym client#]
+      (send-data client# (merge request# (do ~@body))))))
 
-(defmethod handle-request :default [client request]
-  (error "Got unknown message:" (str request))
-  (send-data client request))
+(defresponse :ping [client request]
+  (info "Got ping from:" (:client-id client))
+  {:type :pong})
+
+(defresponse :default [client request]
+  (error "Got unknown message:" (str request)))
 
 (def websocket-handler #'enqueue-connect)
