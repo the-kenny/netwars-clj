@@ -79,7 +79,7 @@
                  (swap! connection-pool dissoc (:client-id client))))
 
 
-(defmacro defresponse [type [request-sym client-sym] & body]
+(defmacro defresponse [type [client-sym request-sym] & body]
   `(defmethod handle-request ~type [client# request#]
      (let [~request-sym request#
            ~client-sym client#]
@@ -89,7 +89,7 @@
   (info "Got ping from:" (:client-id client))
   {:type :pong})
 
-(defresponse :default [client request]
-  (error "Got unknown message:" (str request)))
+(defmethod handle-request :default [client request]
+  (error "Got unknown request:" request))
 
 (def websocket-handler #'enqueue-connect)
