@@ -59,7 +59,7 @@
   ;; TODO: Implement a timeout for reconnecting here
 )
 
-(on-open #(start-ping-timer 5000))
+#_(on-open #(start-ping-timer 5000))
 
 (defn open-socket [uri]
   (let [ws (js/WebSocket. uri)]
