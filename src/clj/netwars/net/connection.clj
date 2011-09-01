@@ -80,13 +80,13 @@
 
 
 (defmacro defresponse [type [client-sym request-sym] & body]
-  `(defmethod handle-request ~type [client# request#]
+  `(defmethod netwars.net.connection/handle-request ~type [client# request#]
      (let [~request-sym request#
            ~client-sym client#]
       (send-data client# (merge request# (do ~@body))))))
 
 (defresponse :ping [client request]
-  (info "Got ping from:" (:client-id client))
+  (debug "Got ping from:" (:client-id client))
   {:type :pong})
 
 (defmethod handle-request :default [client request]
