@@ -7,14 +7,9 @@
   (:import [org.apache.commons.codec.binary Base64]))
 
 
-;;; TODO: Serve via http
+;;; TODO: Remove
 (defn send-map-data [client board]
   (info "Sending map-data to client" client)
   (let [map-image (map-drawer/render-terrain-board (:terrain board))]
    (connection/send-data client {:type :request-map
                                  :map-data map-image})))
-
-(defmethod connection/handle-request :request-map [client request]
-  (info "Got map request:" (str request))
-  (let [requested-map (:map request)]
-    (send-map-data client requested-map)))
