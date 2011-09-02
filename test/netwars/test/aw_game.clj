@@ -128,3 +128,26 @@
       (is (every? #(instance? netwars.aw_map.Coordinate %) r))
       (is (= r (board/reachable-fields (-> *game* :board deref)
                                        (selected-coordinate *game*)))))))
+
+(deftest test-move-unit!
+  (let [from (coord 1 13)
+        to   (coord 1 14)
+        unit (board/get-unit @(:board *game*) from)]
+    (testing "without transaction"
+      (is (thrown? java.lang.IllegalStateException
+                   (move-unit! *game* to))))
+    (dosync
+     (testing "without :current-unit"
+       (is (thrown? java.lang.IllegalStateException
+                    (move-unit! *game* to))))
+     (select-unit! *game* from)
+     (testing "with `to` outside movement-range"
+       (is (thrown? java.lang.IllegalStateException
+                    (move-unit! *game* (coord 0 0)))))
+
+     (is (= to (move-unit! *game* to))))
+    (is (= unit (board/get-unit @(:board *game*) to)) "unit really moved to `to`")
+    (is (nil? (board/get-unit @(:board *game*) from)) "unit really moved from `from`")
+    (let [new-unit (board/get-unit @(:board *game*) to)]
+      (is (< (:fuel new-unit) (:fuel unit)) "the move used fuel"))
+    (is (= :unit-moved (:type (last (game-events *game*)))) "the move was logged")))

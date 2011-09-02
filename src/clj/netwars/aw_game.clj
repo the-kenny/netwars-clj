@@ -118,3 +118,20 @@
   "Returns a set of all reachable fields for the currently selected unit."
   [game]
   (board/reachable-fields @(:board game) (selected-coordinate game)))
+
+(defn move-unit!
+  "Moves the currently selected unit to `to`.
+`to` must be in the current movement-range. Returns to."
+  [game to]
+  (when-not (selected-unit game)
+    (throw (java.lang.IllegalStateException.
+            "Tried to move unit without selected-unit")))
+  (when-not (contains? (movement-range game) to)
+    (throw (java.lang.IllegalStateException.
+            "Tried to move unit to non-reachable field")))
+  (let [from (selected-coordinate game)]
+   (alter (:board game) board/move-unit from to)
+   (log-event! game {:type :unit-moved
+                     :from from
+                     :to to}))
+  to)
