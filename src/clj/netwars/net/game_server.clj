@@ -91,6 +91,26 @@
    (dosync (dissoc-client! client))))
 (connection/on-disconnect #'disconnect-client)
 
+;;; Helper macros
+
+(def ^{:dynamic true} *unit* nil)
+(def ^{:dynamic true} *game* nil)
+(def ^{:dynamic true} *coordinate* nil)
+(defmacro def-game-request [type [client-sym request-sym] & body]
+  `(defmethod connection/handle-request ~type [client# request#]
+     (if-let [game# (game-for-client client#)]
+       (let [~client-sym client#,
+             ~request-sym request#
+             coord# (try (aw-map/coord (:coordinate request#))
+                         (catch Exception _# nil))
+             unit# (and coord#(board/get-unit @(:board game#) coord#))]
+         (binding [*game* game#
+                   *coordinate* coord#
+                   *unit* unit#]
+           ~@body))
+       (error "Got" ~type "request while client" (:client-id client#)
+              "isn't in a game"))))
+
 ;;; Game-related Send Functions
 
 (defn send-units [client game]
