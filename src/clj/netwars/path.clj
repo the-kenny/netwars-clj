@@ -1,5 +1,6 @@
 (ns netwars.path
-  (:use [netwars.aw-map :only [distance]]))
+  (:use [netwars.aw-map :only [distance]])
+  (:import netwars.aw_map.Coordinate))
 
 (deftype AwPath [coordinates]
   Object
@@ -22,11 +23,17 @@
   (.write p (.toString o)))
 
 
+(defn valid-path? [path]
+  (and (every? (partial instance? Coordinate) path)
+       (every? #(= (apply distance %) 1) (partition 2 1 path))))
+
 (defn make-path [coords]
   ;; Validate integrity of `coords`
-  (when-not (every? #(= (apply distance %) 1) (partition 2 1 coords))
-    (throw (java.lang.IllegalArgumentException. "Path isn't connected")))
-  (AwPath. coords))
+  (let [path (AwPath. coords)]
+   (when-not (valid-path? path)
+     (throw (java.lang.IllegalArgumentException.
+             "`coords` doesn'wouldn't create a valid path object")))
+   path))
 
 (defn get-coordinates [path]
   (:coordinates path))
