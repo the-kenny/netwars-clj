@@ -1,4 +1,5 @@
-(ns netwars.path)
+(ns netwars.path
+  (:use [netwars.aw-map :only [distance]]))
 
 (deftype AwPath [coordinates]
   Object
@@ -22,8 +23,10 @@
 
 
 (defn make-path [coords]
+  ;; Validate integrity of `coords`
+  (when-not (every? #(= (apply distance %) 1) (partition 2 1 coords))
+    (throw (java.lang.IllegalArgumentException. "Path isn't connected")))
   (AwPath. coords))
 
 (defn get-coordinates [path]
   (:coordinates path))
-
