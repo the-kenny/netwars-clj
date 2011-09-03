@@ -1,7 +1,8 @@
 (ns netwars.test.path
   (:use clojure.test
         [netwars.aw-map :only [coord]]
-        netwars.path)
+        netwars.path
+        [netwars.test.game-board :only [make-testboard]])
   (:import netwars.path.AwPath))
 
 (deftest test-make-path
@@ -19,7 +20,17 @@
       (is (valid-path? (AwPath. []))))
     (testing "unconnected paths"
       (is (not (valid-path? invalid)))
-      (is (not (valid-path? (AwPath. [1 2])))))))
+      (is (not (valid-path? (AwPath. [1 2])))))
+    (testing "with optional second argument"
+      (let [board (make-testboard)]
+        (is (not (valid-path? (make-path (map coord [[1 12] [1 13]])) board))
+            "should return false when start coordinate is empty")
+        (is (not (valid-path? (make-path (map coord [[1 11] [1 12] [1 13]])) board))
+            "should return false when last coordinate is not empty")
+        (is (not (valid-path? (make-path (map coord (for [y (range 13 999)]
+                                                      [1 y])))
+                              board))
+            "should return false when the path is longer than remaining fuel or movement-range")))))
 
 (deftest test-get-coordinates
   (let [coords (map coord [[1 1] [1 2] [1 3]])]

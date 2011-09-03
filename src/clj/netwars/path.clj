@@ -1,5 +1,6 @@
 (ns netwars.path
-  (:use [netwars.aw-map :only [distance]])
+  (:use [netwars.aw-map :only [distance]]
+        [netwars.game-board :as board])
   (:import netwars.aw_map.Coordinate))
 
 (deftype AwPath [coordinates]
@@ -23,9 +24,19 @@
   (.write p (.toString o)))
 
 
-(defn valid-path? [path]
-  (and (every? (partial instance? Coordinate) path)
-       (every? #(= (apply distance %) 1) (partition 2 1 path))))
+(defn valid-path?
+  "Checks if a path is valid.
+With the optional second argument, it checks for validity in the context of the given board."
+  ([path]
+     (and (every? (partial instance? Coordinate) path)
+          (every? #(= (apply distance %) 1) (partition 2 1 path))))
+  ([path board]
+     (and (valid-path? path)
+          (get-unit board (first path))
+          (not (get-unit board (last path)))
+          ;; TODO: Test for real fuel-costs
+          (< (count path) (let [u (get-unit board (first path))]
+                            (min (:movement-range (meta u)) (:fuel u)))))))
 
 (defn make-path [coords]
   ;; Validate integrity of `coords`
