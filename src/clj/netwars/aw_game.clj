@@ -2,7 +2,9 @@
   (:use [netwars.game-board :as board]
         [netwars.aw-unit :as unit]
         [netwars.damagecalculator :as damage]
-        [netwars.damagetable :as damagetable])
+        [netwars.damagetable :as damagetable]
+        [netwars.aw-map :as aw-map]
+        [netwars.path :as path])
   (:require netwars.map-loader
             netwars.unit-loader))
 
@@ -86,6 +88,18 @@
                  (not counterattack))
         (perform-attack! game vic-coord att-coord :counterattack true))
       game)))
+
+;;; Fuel Costs
+
+(defn fuel-costs
+  "Returns the fuel costs for `path`"
+  [game path]
+  (let [board @(:board game)
+        unit (board/get-unit board (first path))]
+    (when (path/valid-path? path)
+      (reduce + (map #(aw-map/movement-costs (board/get-terrain board %)
+                                             (:movement-type (meta unit)))
+                     (path/get-coordinates path))))))
 
 ;;; Movement Range and selected unit
 

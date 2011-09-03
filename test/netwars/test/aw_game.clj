@@ -1,6 +1,7 @@
 (ns netwars.test.aw-game
   (:use clojure.test
         netwars.aw-game
+        [netwars.path :only [make-path]]
         [netwars.game-board :as board]
         [netwars.aw-map :only [coord]]))
 
@@ -87,6 +88,12 @@
                                         (game-events *game*)))
                          infantry2 infantry
                          :infantry :infantry))))
+
+(deftest test-fuel-costs
+  (let [path (make-path (map coord [[1 13] [1 12] [1 11] [1 10]]))]
+    (is (integer? (fuel-costs *game* path)))
+    (is (< 0 (fuel-costs *game* path)))
+    (is (= 5 (fuel-costs *game* path)) "This path costs 5")))
 
 (deftest test-select-unit!
   (testing "without a transaction"
