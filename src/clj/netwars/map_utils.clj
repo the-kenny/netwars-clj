@@ -19,14 +19,16 @@
     :south-west (msta (dec x) (inc y)))))
 
 (defn rectangular-direction
-  "Returns the directions 90 degrees and -90 degrees to the given direction"
+  "Returns the cardinal directions 90 degrees and -90 degrees to the given direction"
   [dir]
   (get {:north [:east :west]
         :south [:east :west]
         :east [:north :south]
         :west [:north :south]} dir nil))
 
-(defn drop-neighbours-behind [direction nbs]
+(defn drop-neighbours-behind
+  "Returns the cardinal and intercardinal directions 90 degress and -90 degrees to the given direction"
+  [direction nbs]
   (select-keys nbs (case direction
                      :north [:north
                              :north-west :north-east
