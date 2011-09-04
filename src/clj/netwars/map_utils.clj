@@ -27,7 +27,7 @@
         :west [:north :south]} dir nil))
 
 (defn drop-neighbours-behind
-  "Returns the cardinal and intercardinal directions 90 degress and -90 degrees to the given direction"
+  "Drops the cardinal and intercardinal directions from `nbs` opposite to `direction`"
   [direction nbs]
   (select-keys nbs (case direction
                      :north [:north
