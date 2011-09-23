@@ -24,6 +24,7 @@
 
 (defn send-data [data]
   (let [id (generate-id "send-data")]
+    (logging/log "Sending data: " (encode-data data))
     (.send *socket* (encode-data data))))
 
 ;;; Connnection Stuff
