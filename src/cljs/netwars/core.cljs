@@ -41,8 +41,7 @@
                     (. % (preventDefault))))
 
 ;;; Request game list on open
-(connection/on-open game-list/request-game-list)
-(connection/on-open drawing/request-unit-tiles)
+(connection/on-open #(connection/send-data {:type :helo}))
 
 (drawing/set-drawing-function! board-context game/draw-game)
 ;;(drawing/start-animation board-context)

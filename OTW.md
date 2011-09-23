@@ -25,8 +25,7 @@ Images get encoded as base64 and are prefixed to be ready to get used in the src
 
 ## Protocol Description
 ### Connecting
-
-When the client connects, the server sends the following messages to set up the client:
+When the client connects, it sends the server a message with type :helo and optional metadata. As a response, the server sends the following messages to set up the client:
 
 - A message of type ```:game-list```
 - A message of type ```:unit-tiles```
@@ -41,4 +40,16 @@ When the client connects, the server sends the following messages to set up the 
 ## Message Types
 
 ### :game-list
+Contains a map with all running games. game-id as the key, general game-info as the value:
+
+    {:type :game-list,
+     :games {"cd8e8f28-522d-48db-87a8-bde63b9372f1" 
+               {:map-name "7330.aws", ...}}}
+
 ### :unit-tiles
+Contains a tile for the unit images. The spec is generated from a folder structure and maps a list of directory-names (for example: ```[:os :lander]``` to a coordinate in the tile-image. The spec is is accessible via the key :tile-spec, the tiled image is accessible via :tiled-image.
+
+    {:type :unit-spec
+     :tile-spec {[:os :lander] [100, 0],
+                 [:bh :infantry] [120, 0]}
+     :tiled-image "data:image/png…"}

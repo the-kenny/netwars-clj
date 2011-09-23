@@ -91,6 +91,7 @@
    (dosync (dissoc-client! client))))
 (connection/on-disconnect #'disconnect-client)
 
+
 ;;; Helper macros
 
 (def ^{:dynamic true} *unit* nil)
@@ -130,13 +131,30 @@
   (map-server/send-map-data client (-> game :board deref))
   (send-units client game))
 
+(defn make-game-list-response []
+  {:type :game-list
+   :games (into {} (for [game (game-list)]
+                     [(:game-id game) (:info game)]))})
+
+
+;;; :helo Handler
+
+(defmethod connection/handle-request :helo [client request]
+  (info "We got a new client:" (:cliend-it client))
+  ;; Send unit tiles
+  (let [[spec tiles] (tiling/load-tile "resources/pixmaps/units/")]
+    (send-data client {:type :unit-tiles
+                       :tile-spec spec
+                       :tiled-image tiles}))
+  ;; Send game-list
+  (send-data client (make-game-list-response)))
+
 ;;; Creating/Joining of games
 
 (connection/defresponse :game-list [client _]
   ;; TODO: Filter out games where the client doesn't have access
   (info "Sending game-list to client" (:client-id client))
-  {:games (into {} (for [game (game-list)]
-                     [(:game-id game) (:info game)]))})
+  (make-game-list-response))
 
 (defmethod connection/handle-request :new-game [client request]
   (info "Got new-game request:" request "from client:" (:client-id client))
