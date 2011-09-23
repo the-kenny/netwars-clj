@@ -140,7 +140,7 @@
 ;;; :helo Handler
 
 (defmethod connection/handle-request :helo [client request]
-  (info "We got a new client:" (:cliend-it client))
+  (info "We got a new client:" (:client-id client))
   ;; Send unit tiles
   (let [[spec tiles] (tiling/load-tile "resources/pixmaps/units/")]
     (send-data client {:type :unit-tiles
