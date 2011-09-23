@@ -145,6 +145,7 @@
             "Tried to move unit to non-reachable field")))
   (let [from (selected-coordinate game)]
    (alter (:board game) board/move-unit from to)
+   #_(alter (:board game) board/update-unit update-in [:fuel] - (fuel-costs game path))
    (log-event! game {:type :unit-moved
                      :from from
                      :to to}))
