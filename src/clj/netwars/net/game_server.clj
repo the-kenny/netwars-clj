@@ -103,7 +103,7 @@
              ~request-sym request#
              coord# (try (aw-map/coord (:coordinate request#))
                          (catch Exception _# nil))
-             unit# (and coord#(board/get-unit @(:board game#) coord#))]
+             unit# (and coord# (board/get-unit @(:board game#) coord#))]
          (binding [*game* game#
                    *coordinate* coord#
                    *unit* unit#]
@@ -162,28 +162,29 @@
 
 ;;; Unit Requests
 
-(defmethod connection/handle-request :movement-range [client request]
-  (if-let [game (game-for-client client)]
-    (let [c (apply aw-map/coord (:coordinate request))
-          board (-> game :board deref)]
-      (if-let [unit (get-unit board c)]
-        (let [fields (board/reachable-fields board c)]
-         (info "Client" (:client-id client) "clicked on unit" unit "at" c)
-         (connection/send-broadcast (broadcast-for-game game)
-                                    (assoc request :movement-range fields)))
-        (warn "Can't request movement-range for coordinate: No unit on" c)))
-    (warn "Request for movement-range while client"
-          (:client-id client) "isn't in a game")))
+(def-game-request :movement-range [client request]
+  (let [board (-> *game* :board deref)]
+    (if *unit*
+      (let [fields (board/reachable-fields board *coordinate*)]
+        (info "Client" (:client-id client) "clicked on unit" *unit* "at" *coordinate*)
+        (connection/send-broadcast (broadcast-for-game *game*)
+                                   (assoc request :movement-range fields)))
+      (error "Can't request movement-range for coordinate: No unit on" *coordinate*))))
 
-(defmethod connection/handle-request :move-unit [client request]
-  (info "Got request to move unit from" (:from request) "to" (:to request))
-  (if-let [game (game-for-client client)]
-    (let [board (-> game :board deref)
-          from (apply aw-map/coord (:from request))
-          to   (apply aw-map/coord (:to   request))]
 
-      (dosync
-       ;; TODO: Error Handling
-       (alter (:board game) board/move-unit from to))
-      (connection/send-broadcast (broadcast-for-game game)
-                                 (assoc request :valid true)))))
+(def-game-request :move-unit [client request]
+  (let [from  (aw-map/coord (:from request))
+        to    (aw-map/coord (:to   request))
+        board @(:board *game*)]
+    (assert (board/get-unit board from))
+    (assert (nil? (board/get-unit board to)))
+    #_(game/move-unit *game* to)        ;TODO: Implement
+    (dosync (alter (:board *game*) board/move-unit from to))
+    (connection/send-broadcast (broadcast-for-game *game*)
+                               (assoc request
+                                 :valid true
+                                 :from from
+                                 :to to))
+    ))
+
+
