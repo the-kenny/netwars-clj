@@ -107,7 +107,11 @@
          (binding [*game* game#
                    *coordinate* coord#
                    *unit* unit#]
-           ~@body))
+           (try ~@body
+                (catch java.lang.Exception e#
+                  (error e#))
+                (catch java.lang.Error e#
+                  (error e#)))))
        (error "Got" ~type "request while client" (:client-id client#)
               "isn't in a game"))))
 

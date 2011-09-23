@@ -83,7 +83,12 @@
   `(defmethod netwars.net.connection/handle-request ~type [client# request#]
      (let [~request-sym request#
            ~client-sym client#]
-      (send-data client# (merge request# (do ~@body))))))
+       (try
+         (send-data client# (merge request# (do ~@body)))
+         (catch java.lang.Exception e#
+           (error e#))
+         (catch java.lang.Error e#
+           (error e#))))))
 
 (defresponse :ping [client request]
   (debug "Got ping from:" (:client-id client))
