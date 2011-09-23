@@ -159,7 +159,9 @@
 (defmethod connection/handle-request :new-game [client request]
   (info "Got new-game request:" request "from client:" (:client-id client))
   (let [id (java.util.UUID/randomUUID)
-        aw-game (assoc (start-new-game request) :game-id id)]
+        aw-game (-> (start-new-game request)
+                    (assoc :game-id id)
+                    (dissoc :type))]
     (dosync
      (store-game! aw-game)
      (assign-client! client aw-game))
