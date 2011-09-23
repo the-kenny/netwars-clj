@@ -74,6 +74,29 @@ The server will create a new game, set everything up and will send a response to
 
 `:game-id` is used to identity the game on the server.
 
+### :game-data
+This message contains generic information about a game. Players, spectators, game-settings (funds, weather, etc.), …
+Currently, this message doesn't contain much useful data.
+
+    {:type :game-data, 
+     :info {:map-name "7330.aws"}}
+
+### :map-data
+This message contains the rendered map-background:
+
+    {:type :map-data
+     :map-data "data:image/png;base64,…"}
+
+### :unit-data
+This message contains a map with coordinates as keys and unit-maps as values:
+
+    {:type :unit-data, 
+     :units {[15 14] {:internal-name :infantry, 
+                      :color :black, 
+                      …}}}
+
+This message describes a black infantry-unit at position x=15 and y=14. Note: There are much more tuples in a normal unit-map.
+
 ### :new-listed-game
 A broadcast notifying connected clients of a new game. 
 
