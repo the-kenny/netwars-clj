@@ -8,7 +8,7 @@
 (def *socket* nil)
 
 (defn encode-data [data]
-  (pr-str (into {} (for [[k v] data] [(name k) v]))))
+  (pr-str (into {} (for [[k v] data] [k v]))))
 
 (defn decode-data [s]
   (logging/log s)
