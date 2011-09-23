@@ -11,5 +11,5 @@
 (defn send-map-data [client board]
   (info "Sending map-data to client" client)
   (let [map-image (map-drawer/render-terrain-board (:terrain board))]
-   (connection/send-data client {:type :request-map
+   (connection/send-data client {:type :map-data
                                  :map-data map-image})))

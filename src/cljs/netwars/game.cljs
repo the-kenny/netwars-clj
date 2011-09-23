@@ -97,10 +97,10 @@
 ;;; Functions for handling data sent after a :game-data request
 
 (defn request-map-data [m]
-  (connection/send-data {:type :request-map
+  (connection/send-data {:type :map-data
                          :map m}))
 
-(defmethod connection/handle-response :request-map [message]
+(defmethod connection/handle-response :map-data [message]
    ;; (drawing/draw-terrain board-context (get message :map-data))
   (drawing/image-from-base64 (:map-data message) #(set! terrain-image %)))
 
