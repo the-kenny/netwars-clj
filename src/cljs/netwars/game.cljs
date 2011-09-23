@@ -32,16 +32,15 @@
 (defn unit-clicked [[x y] unit]
   (logging/message "Unit: " (name (:internal-name unit)) " (" (name (:color unit)) ") "
                     (:hp unit) "hp")
-  (when (nil? movement-range)
-    (connection/send-data {:type :movement-range
+  (when (nil? current-unit)
+    (connection/send-data {:type :select-unit
                            :coordinate [x y]})))
 
 (defn terrain-clicked [[x y]]
   (when current-unit
     (if (get movement-range [x y])
      (connection/send-data {:type :move-unit
-                            :from current-unit
-                            :to [x y]})
+                            :coordinate [x y]})
      (connection/send-data {:type :deselect-unit
                             :coordiante current-unit}))))
 
@@ -56,9 +55,11 @@
 
 ;;; Movement Range
 
-(defmethod connection/handle-response :movement-range [message]
-  (set! movement-range (:movement-range message))
+(defmethod connection/handle-response :select-unit [message]
   (set! current-unit (:coordinate message)))
+
+(defmethod connection/handle-response :movement-range [message]
+  (set! movement-range (:movement-range message)))
 
 ;;; Moving Units
 
@@ -73,6 +74,10 @@
 (defmethod connection/handle-response :game-data [message]
   (set! running-game {:game-id (:game-id message)
                       :info (:info message)})
+  (set! game-units nil)
+  (set! terrain-image nil)
+  (set! movement-range nil)
+  (set! current-unit nil)
   (logging/clear-messages))
 
 (defn join-game [game-id]

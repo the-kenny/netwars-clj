@@ -162,6 +162,15 @@
 
 ;;; Unit Requests
 
+(def-game-request :select-unit [client request]
+  (when *unit*
+    (info ":select-unit " (:game-id *game*) " " *coordinate*)
+    (dosync (game/select-unit! *game* *coordinate*))
+    (connection/send-data client (assoc request :coordinate *coordinate*))
+    (connection/send-broadcast (broadcast-for-game *game*)
+                               {:type :movement-range
+                                :movement-range (game/movement-range *game*)})))
+
 (def-game-request :movement-range [client request]
   (let [board (-> *game* :board deref)]
     (if *unit*
@@ -173,18 +182,15 @@
 
 
 (def-game-request :move-unit [client request]
-  (let [from  (aw-map/coord (:from request))
-        to    (aw-map/coord (:to   request))
+  (let [from (game/selected-coordinate *game*)
+        to *coordinate*
         board @(:board *game*)]
     (assert (board/get-unit board from))
     (assert (nil? (board/get-unit board to)))
-    #_(game/move-unit *game* to)        ;TODO: Implement
-    (dosync (alter (:board *game*) board/move-unit from to))
+    (info "Moving unit from" from "to" to)
+    (dosync (game/move-unit! *game* to))
     (connection/send-broadcast (broadcast-for-game *game*)
                                (assoc request
                                  :valid true
                                  :from from
-                                 :to to))
-    ))
-
-
+                                 :to to))))
