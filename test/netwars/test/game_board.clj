@@ -6,7 +6,7 @@
   (:require netwars.map-loader
             netwars.unit-loader))
 
-(defn- make-testboard []
+(defn make-testboard []
   (let [loaded-map (netwars.map-loader/load-map "maps/7330.aws")
         unit-spec (netwars.unit-loader/load-units "resources/units.xml")
         terrain (:terrain loaded-map)
