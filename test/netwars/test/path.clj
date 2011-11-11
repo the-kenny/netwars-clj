@@ -21,7 +21,7 @@
     (testing "unconnected paths"
       (is (not (valid-path? invalid)))
       (is (not (valid-path? (AwPath. [1 2])))))
-    (testing "with optional second argument"
+    (testing "with optional board-argument"
       (let [board (make-testboard)]
         (is (not (valid-path? (make-path (map coord [[1 12] [1 13]])) board))
             "should return false when start coordinate is empty")
