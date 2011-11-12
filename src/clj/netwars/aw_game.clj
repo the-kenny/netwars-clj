@@ -96,7 +96,7 @@
   [game path]
   (let [board @(:board game)
         unit (board/get-unit board (first path))]
-    (when (path/valid-path? path)
+    (when (path/valid-path? path board)
       (reduce + (map #(aw-map/movement-costs (board/get-terrain board %)
                                              (:movement-type (meta unit)))
                      (path/get-coordinates path))))))
