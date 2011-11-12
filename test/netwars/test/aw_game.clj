@@ -90,10 +90,10 @@
                          :infantry :infantry))))
 
 (deftest test-fuel-costs
-  (let [path (make-path (map coord [[1 13] [1 12] [1 11] [1 10]]))]
+  (let [path (make-path (map coord [[1 13] [2 13] [2 12] [3 12]]))]
     (is (integer? (fuel-costs *game* path)))
     (is (< 0 (fuel-costs *game* path)))
-    (is (= 5 (fuel-costs *game* path)) "This path costs 5")))
+    (is (= 3 (fuel-costs *game* path)) "This path costs 3")))
 
 (deftest test-select-unit!
   (testing "without a transaction"

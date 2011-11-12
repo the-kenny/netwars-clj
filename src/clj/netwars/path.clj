@@ -30,22 +30,21 @@
 With the optional second argument, it checks for validity in the context of the given board."
   ([path]
      (and (>= (count path) 2)
-          (every? (partial instance? Coordinate) path)
+          (every? #(instance? Coordinate %) path)
           ;; Check if euclidean-distance doesn't exceed 1
           (every? #(= (apply distance %) 1) (partition 2 1 path))
           (= (count path) (count (set path))) ;naive check for duplicates
           ))
   ([path board]
-     (and (valid-path? path)
-          (get-unit board (first path))
-          (not (get-unit board (last path)))
-          ;; TODO: Test for real fuel-costs
-          (< (count path) (let [u (get-unit board (first path))]
-                            (min (:movement-range (meta u)) (:fuel u))))
-          (every? #(aw-map/can-pass? (get-terrain board %1)
-                                     (:movement-type (meta (get-unit board
-                                                                     (first path)))))
-                  path))))
+     (let [unit (get-unit board (first path))]
+       (and (valid-path? path)
+            (get-unit board (first path))
+            (not (get-unit board (last path)))
+            (<= (count (rest path))
+                (min (:movement-range (meta unit)) (:fuel unit)))
+            (every? #(aw-map/can-pass? (get-terrain board %1)
+                                 (:movement-type (meta unit)))
+              path)))))
 
 (defn make-path [coords]
   (AwPath. coords))

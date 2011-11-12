@@ -96,10 +96,11 @@
   [game path]
   (let [board @(:board game)
         unit (board/get-unit board (first path))]
-    (when (path/valid-path? path board)
+    (if (path/valid-path? path board)
       (reduce + (map #(aw-map/movement-costs (board/get-terrain board %)
                                              (:movement-type (meta unit)))
-                     (path/get-coordinates path))))))
+                     (rest path)))
+      (throw (java.lang.IllegalArgumentException. "path isn't valid")))))
 
 ;;; Movement Range and selected unit
 
