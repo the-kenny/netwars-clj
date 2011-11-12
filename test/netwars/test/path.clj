@@ -32,7 +32,17 @@
         (is (not (valid-path? (make-path (map coord (for [y (range 13 999)]
                                                       [1 y])))
                               board))
-            "should return false when the path is longer than remaining fuel or movement-range")))))
+            "should return false when the path is longer than remaining fuel or movement-range")
+        (testing "if fields in path are traversable"
+         (is (not (valid-path? (AwPath. (map coord [[1 11] [1 12] [1 13]]))
+                               board))
+             "BM Artillery can't traverse field with OS infantry on it")
+         (is (not (valid-path? (AwPath. (map coord [[1 11] [1 10]]))
+                               board))
+             "BM Artillery can't traverse mountain terrain")
+         (is (valid-path? (AwPath. (map coord [[1 11] [1 12] [2 12] [3 12]]))
+                          board))
+         "BM Artillery can traverse plain and street")))))
 
 (deftest test-get-coordinates
   (let [coords (map coord [[1 1] [1 2] [1 3]])]

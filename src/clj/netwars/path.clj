@@ -1,6 +1,7 @@
 (ns netwars.path
   (:use [netwars.aw-map :only [distance]]
-        [netwars.game-board :as board])
+        [netwars.game-board :as board]
+        [netwars.aw-map :as aw-map])
   (:import netwars.aw_map.Coordinate))
 
 (deftype AwPath [coordinates]
@@ -37,7 +38,11 @@ With the optional second argument, it checks for validity in the context of the 
           (not (get-unit board (last path)))
           ;; TODO: Test for real fuel-costs
           (< (count path) (let [u (get-unit board (first path))]
-                            (min (:movement-range (meta u)) (:fuel u)))))))
+                            (min (:movement-range (meta u)) (:fuel u))))
+          (every? #(aw-map/can-pass? (get-terrain board %1)
+                                     (:movement-type (meta (get-unit board
+                                                                     (first path)))))
+                  path))))
 
 (defn make-path [coords]
   ;; Validate integrity of `coords`
