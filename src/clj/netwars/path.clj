@@ -43,7 +43,7 @@ With the optional second argument, it checks for validity in the context of the 
   (let [path (AwPath. coords)]
    (when-not (valid-path? path)
      (throw (java.lang.IllegalArgumentException.
-             "`coords` doesn'wouldn't create a valid path object")))
+             "`coords` wouldn't create a valid path object")))
    path))
 
 (defn get-coordinates [path]
