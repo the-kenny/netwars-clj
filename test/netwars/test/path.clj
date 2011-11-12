@@ -13,15 +13,17 @@
                 (make-path (conj coords (coord 0 0)))))))
 
 (deftest test-valid-path
-  (let [path    (AwPath. (map coord [[1 1] [1 2] [1 3]]))
-        invalid (AwPath. (map coord [[1 1] [1 2] [1 4]]))]
+  (let [path (AwPath. (map coord [[1 1] [1 2] [1 3]]))]
     (is (not (valid-path? (AwPath. []))))
     (is (not (valid-path? (AwPath. (map coord [[1 1]])))))
     (testing "valid paths"
       (is (valid-path? path)))
-    (testing "unconnected paths"
-      (is (not (valid-path? invalid)))
-      (is (not (valid-path? (AwPath. [1 2])))))
+    (testing "general validity"
+      (testing "too short paths"
+        (is (not (valid-path? (AwPath. (map coord [[1 1] [1 2] [1 4]])))))
+        (is (not (valid-path? (AwPath. [1 2])))))
+      (is (not (valid-path? (AwPath. (map coord [[1 1] [1 2] [1 1]]))))
+          "Fields are unique in path"))
     (testing "with optional board-argument"
       (let [board (make-testboard)
             valid (AwPath. (map coord [[1 11] [1 12] [1 13]]))]

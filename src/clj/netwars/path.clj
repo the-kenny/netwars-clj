@@ -31,7 +31,10 @@ With the optional second argument, it checks for validity in the context of the 
   ([path]
      (and (>= (count path) 2)
           (every? (partial instance? Coordinate) path)
-          (every? #(= (apply distance %) 1) (partition 2 1 path))))
+          ;; Check if euclidean-distance doesn't exceed 1
+          (every? #(= (apply distance %) 1) (partition 2 1 path))
+          (= (count path) (count (set path))) ;naive check for duplicates
+          ))
   ([path board]
      (and (valid-path? path)
           (get-unit board (first path))
