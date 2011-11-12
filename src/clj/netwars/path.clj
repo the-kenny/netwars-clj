@@ -48,12 +48,7 @@ With the optional second argument, it checks for validity in the context of the 
                   path))))
 
 (defn make-path [coords]
-  ;; Validate integrity of `coords`
-  (let [path (AwPath. coords)]
-   (when-not (valid-path? path)
-     (throw (java.lang.IllegalArgumentException.
-             "`coords` wouldn't create a valid path object")))
-   path))
+  (AwPath. coords))
 
 (defn get-coordinates [path]
   (:coordinates path))
