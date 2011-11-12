@@ -15,17 +15,19 @@
 (deftest test-valid-path
   (let [path    (AwPath. (map coord [[1 1] [1 2] [1 3]]))
         invalid (AwPath. (map coord [[1 1] [1 2] [1 4]]))]
+    (is (not (valid-path? (AwPath. []))))
+    (is (not (valid-path? (AwPath. (map coord [[1 1]])))))
     (testing "valid paths"
-      (is (valid-path? path))
-      (is (valid-path? (AwPath. []))))
+      (is (valid-path? path)))
     (testing "unconnected paths"
       (is (not (valid-path? invalid)))
       (is (not (valid-path? (AwPath. [1 2])))))
     (testing "with optional board-argument"
-      (let [board (make-testboard)]
-        (is (not (valid-path? (make-path (map coord [[1 12] [1 13]])) board))
+      (let [board (make-testboard)
+            valid (AwPath. (map coord [[1 11] [1 12] [1 13]]))]
+        (is (not (valid-path? (rest valid) board))
             "should return false when start coordinate is empty")
-        (is (not (valid-path? (make-path (map coord [[1 11] [1 12] [1 13]])) board))
+        (is (not (valid-path? valid board))
             "should return false when last coordinate is not empty")
         (is (not (valid-path? (make-path (map coord (for [y (range 13 999)]
                                                       [1 y])))

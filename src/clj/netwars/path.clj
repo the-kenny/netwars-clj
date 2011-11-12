@@ -28,7 +28,8 @@
   "Checks if a path is valid.
 With the optional second argument, it checks for validity in the context of the given board."
   ([path]
-     (and (every? (partial instance? Coordinate) path)
+     (and (>= (count path) 2)
+          (every? (partial instance? Coordinate) path)
           (every? #(= (apply distance %) 1) (partition 2 1 path))))
   ([path board]
      (and (valid-path? path)
