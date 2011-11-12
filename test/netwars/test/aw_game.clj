@@ -139,20 +139,22 @@
 (deftest test-move-unit!
   (let [from (coord 1 13)
         to   (coord 1 14)
+        path (make-path [from to])
         unit (board/get-unit @(:board *game*) from)]
+
     (testing "without transaction"
       (is (thrown? java.lang.IllegalStateException
-                   (move-unit! *game* to))))
+                   (move-unit! *game* path))))
     (dosync
      (testing "without :current-unit"
        (is (thrown? java.lang.IllegalStateException
-                    (move-unit! *game* to))))
+                    (move-unit! *game* path))))
      (select-unit! *game* from)
      (testing "with `to` outside movement-range"
        (is (thrown? java.lang.IllegalStateException
-                    (move-unit! *game* (coord 0 0)))))
+                    (move-unit! *game* (make-path [from to (coord 0 0)])))))
 
-     (is (= to (move-unit! *game* to))))
+     (is (= path (move-unit! *game* path))))
     (is (= unit (board/get-unit @(:board *game*) to)) "unit really moved to `to`")
     (is (nil? (board/get-unit @(:board *game*) from)) "unit really moved from `from`")
     (let [new-unit (board/get-unit @(:board *game*) to)]
