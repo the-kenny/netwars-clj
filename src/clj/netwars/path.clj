@@ -42,7 +42,7 @@ With the optional second argument, it checks for validity in the context of the 
             (not (get-unit board (last path)))
             (<= (count (rest path))
                 (min (:movement-range (meta unit)) (:fuel unit)))
-            (every? #(aw-map/can-pass? (get-terrain board %1)
+            (every? #(aw-map/can-pass? (get-terrain board %)
                                  (:movement-type (meta unit)))
               path)))))
 
