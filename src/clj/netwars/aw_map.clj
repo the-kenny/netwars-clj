@@ -6,6 +6,9 @@
   ([x y] (Coordinate. x y))
   ([[x y]] (Coordinate. x y)))
 
+(defmethod clojure.core/print-method ::Coordinate [c writer]
+  (.write writer (str "[" (:x c) "," (:y c) "]")))
+
 (defn distance
   "Manhattan metric distance"
   [c1 c2]
