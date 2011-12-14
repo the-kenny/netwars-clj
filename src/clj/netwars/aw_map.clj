@@ -24,7 +24,7 @@
   (at [board ^Coordinate c])
   (update-board [board c v]))
 
-(defn in-bounds? [^Board b ^Coordinate c]
+(defn in-bounds? [b ^Coordinate c]
   (and (< -1 (:x c) (width b))
        (< -1 (:y c) (height b))))
 
