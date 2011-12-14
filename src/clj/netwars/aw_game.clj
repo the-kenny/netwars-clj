@@ -150,8 +150,9 @@
             "Given path isn't valid")))
   (let [from (selected-coordinate game)
         to   (last path)]
-   (alter (:board game) board/move-unit from to)
-   (alter (:board game) board/update-unit to update-in [:fuel] - (fuel-costs game path))
+   (alter (:board game) board/update-unit from
+          update-in [:fuel] - (fuel-costs game path))
+   (alter (:board game) board/move-unit from to) ;Important: First use fuel, then move
    (log-event! game {:type :unit-moved
                      :from from
                      :to to}))

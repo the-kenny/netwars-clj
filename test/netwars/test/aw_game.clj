@@ -145,7 +145,8 @@
         to   (coord 1 14)
         path (make-path [from to])
         unit (board/get-unit @(:board *game*) from)]
-
+    (is (netwars.path/valid-path? path @(:board *game*))
+        "Make sure path used in tests is valid on board")
     (testing "without transaction"
       (is (thrown? java.lang.IllegalStateException
                    (move-unit! *game* path))))
@@ -156,10 +157,14 @@
      (select-unit! *game* from)
      (testing "with `to` outside movement-range"
        (is (thrown? java.lang.IllegalStateException
-                    (move-unit! *game* (make-path [from to (coord 0 0)])))))
-
+                    (move-unit! *game* (make-path [from to (coord 0 0)]))))))
+    (dosync
+     (select-unit! *game* from)
      (is (= path (move-unit! *game* path))))
-    (is (= unit (board/get-unit @(:board *game*) to)) "unit really moved to `to`")
+    (is (= (select-keys unit [:internal-name :color])
+           (select-keys (board/get-unit @(:board *game*) to)
+                        ;; Test for name and color as fuel changes...
+                        [:internal-name :color])) "unit really moved to `to`")
     (is (nil? (board/get-unit @(:board *game*) from)) "unit really moved from `from`")
     (let [new-unit (board/get-unit @(:board *game*) to)]
       (is (< (:fuel new-unit) (:fuel unit)) "the move used fuel"))
