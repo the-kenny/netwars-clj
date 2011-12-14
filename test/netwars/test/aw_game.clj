@@ -5,7 +5,7 @@
         [netwars.game-board :as board]
         [netwars.aw-map :only [coord]]))
 
-(def *game* nil)
+(def ^:dynamic *game* nil)
 
 (use-fixtures :each (fn [f]
                       (binding [*game* (make-game nil
