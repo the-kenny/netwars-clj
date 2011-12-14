@@ -90,10 +90,14 @@
                          :infantry :infantry))))
 
 (deftest test-fuel-costs
-  (let [path (make-path (map coord [[1 13] [2 13] [2 12] [3 12]]))]
+  (let [coords (map coord [[1 13] [2 13] [2 12] [3 12]])
+        path (make-path coords)]
     (is (integer? (fuel-costs *game* path)))
     (is (< 0 (fuel-costs *game* path)))
-    (is (= 3 (fuel-costs *game* path)) "This path costs 3")))
+    (is (= 3 (fuel-costs *game* path)) "This path costs 3")
+    (is (thrown? java.lang.IllegalArgumentException
+                 (fuel-costs *game* (make-path (rest coords))))
+        "Throws when there is no unit on the first coordinate")))
 
 (deftest test-select-unit!
   (testing "without a transaction"
