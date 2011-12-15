@@ -1,4 +1,0 @@
-#/bin/bash
-
-echo "(use 'cljs.closure) (build \"../src/cljs/\" {:output-to \"../resources/public/netwars.js\" :output-dir \"../resources/public/\"})"
-cd clojurescript; script/repl
