@@ -36,9 +36,10 @@
   (encode [_] nil))
 
 (defn encode-data [data]
+  {:pre [(map? data)]}
   (binding [*print-meta* true]
     (pr-str (encode data))))
 
 (defn decode-data [s]
+  {:pre [(string? s)]}
   (into {} (for [[k v] (read-string s)] [(keyword k) v])))
-
