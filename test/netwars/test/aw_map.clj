@@ -7,6 +7,10 @@
     (is (= (:x c) 2) "has an x component of 2")
     (is (= (:y c) 3) "has an y component of 3")))
 
+(deftest test-coordinate?
+  (is (coord? (coord 1 2)) "returns true for a Coordinate")
+  (is (not (coord? 42)) "returns false for everything else"))
+
 (deftest test-distance
   (is (= 3 (distance (coord 0 0) (coord 2 1)))))
 

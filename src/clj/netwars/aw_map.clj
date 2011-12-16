@@ -6,6 +6,9 @@
   ([x y] (Coordinate. x y))
   ([[x y]] (Coordinate. x y)))
 
+(defn coord? [c]
+  (instance? Coordinate c))
+
 (defmethod clojure.core/print-method ::Coordinate [c writer]
   (.write writer (str "[" (:x c) "," (:y c) "]")))
 
