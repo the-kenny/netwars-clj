@@ -1,4 +1,4 @@
-(ns netwars.test.net.connection
+(ns netwars.net.test.connection
   (:use clojure.test
         [netwars.net.connection :as connection]
         lamina.core
@@ -31,4 +31,3 @@
     (connection/remove-broadcast-receiver! broadcast c1) ;Remove receiver 1
     (send-broadcast broadcast {})
     (is (= 1 @verify-atom))))
-

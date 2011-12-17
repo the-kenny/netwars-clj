@@ -1,4 +1,4 @@
-(ns netwars.test.net.tiling
+(ns netwars.net.test.tiling
   (:use clojure.test
         [netwars.net.tiling :as tiling]
         [netwars.aw-map :only [coord?]]))

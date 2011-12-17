@@ -1,4 +1,4 @@
-(ns netwars.test.net.otw
+(ns netwars.net.test.otw
   (:use clojure.test
         [netwars.net.otw :as otw]
         [clojure.java.io :only [resource]])
