@@ -24,6 +24,8 @@
 (defmethod clojure.core/print-method AwPath [o p]
   (.write p (.toString o)))
 
+(defn path? [p]
+  (instance? AwPath p))
 
 (defn valid-path?
   "Checks if a path is valid.
