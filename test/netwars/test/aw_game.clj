@@ -156,7 +156,7 @@
                     (move-unit! *game* path))))
      (select-unit! *game* from)
      (testing "with `to` outside movement-range"
-       (is (thrown? java.lang.IllegalStateException
+       (is (thrown? java.lang.IllegalArgumentException
                     (move-unit! *game* (make-path [from to (coord 0 0)]))))))
     (dosync
      (select-unit! *game* from)

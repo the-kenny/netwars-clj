@@ -136,17 +136,19 @@
   (board/reachable-fields @(:board game) (selected-coordinate game)))
 
 (defn move-unit!
-  "Moves the currently selected unit to `to`.
-`to` must be in the current movement-range. Returns to."
+  "Moves the currently selected unit along `path`.
+`(last path)` must be in the current movement-range. Must be called in a transaction.
+Returns path."
   [game path]
+  {:pre [(path/path? path)]}
   (when-not (selected-unit game)
     (throw (java.lang.IllegalStateException.
             "Tried to move unit without selected-unit")))
-  (when-not (every? (partial contains? (movement-range game)) path)
-    (throw (java.lang.IllegalStateException.
+  (when-not (every? #(contains? (movement-range game) %) path)
+    (throw (java.lang.IllegalArgumentException.
             "Tried to move unit to non-reachable field")))
-  (when-not (valid-path? path @(:board game))
-    (throw (java.lang.IllegalStateException.
+  (when-not (path/valid-path? path @(:board game))
+    (throw (java.lang.IllegalArgumentException.
             "Given path isn't valid")))
   (let [from (selected-coordinate game)
         to   (last path)]
