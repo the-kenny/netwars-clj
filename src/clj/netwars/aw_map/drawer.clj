@@ -1,7 +1,7 @@
-(ns netwars.map-drawer
+(ns netwars.aw-map.drawer
   (:use netwars.aw-map
         netwars.map-utils
-        netwars.map-loader
+        netwars.aw-map.loader
         [clojure.java.io :only [resource]])
   (:import java.awt.Graphics2D
            java.awt.image.BufferedImage
@@ -263,4 +263,3 @@ For example: [:pipe :uldr] or [:seaside :corner :dr]"
 ;;       (println x y)
 ;;       (draw-img graphics c img)))
 ;;   map-img)
-

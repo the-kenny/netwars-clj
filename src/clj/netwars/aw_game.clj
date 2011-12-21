@@ -5,7 +5,7 @@
         [netwars.damagetable :as damagetable]
         [netwars.aw-map :as aw-map]
         [netwars.path :as path]
-        [netwars.map-loader :only [load-map]]
+        [netwars.aw-map.loader :only [load-map]]
         [netwars.aw-unit.loader :only [load-units]]))
 
 (defrecord AwGame [info

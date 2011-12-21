@@ -1,8 +1,8 @@
 (ns netwars.net.map-server
   (:use [clojure.tools.logging :only [debug info warn error fatal]])
   (:require [netwars.net.connection :as connection]
-            [netwars.map-loader :as map-loader]
-            [netwars.map-drawer :as map-drawer]
+            [netwars.aw-map.loader :as map-loader]
+            [netwars.aw-map.drawer :as map-drawer]
             [netwars.net.otw :as otw])
   (:import [org.apache.commons.codec.binary Base64]))
 

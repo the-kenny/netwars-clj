@@ -1,6 +1,6 @@
 (ns netwars.pathfinding
   ;; (:use [clojure.contrib.graph :as graph]
-  ;;       [netwars.map-loader :as map-loader]
+  ;;       [netwars.aw-map.loader :as map-loader]
   ;;       [netwars.map-utils :as map])
   )
 
@@ -93,5 +93,3 @@
 ;;   (def goal-node (make-neighbor +lmap+ 4 0))
 
 ;;   (def +path+   (a-star-path +g+ start-node goal-node)))
-
-

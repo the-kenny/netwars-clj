@@ -103,10 +103,10 @@
       (helper c (min movement-range fuel) :initial? true))))
 
 (comment
-  (require 'netwars.map-loader)
+  (require 'netwars.aw-map.loader)
   (require 'netwars.aw-unit.loader)
 
-  (let [loaded-map (netwars.map-loader/load-map "maps/7330.aws")
+  (let [loaded-map (netwars.aw-map.loader/load-map "maps/7330.aws")
         unit-spec (netwars.aw-unit.loader/load-units "resources/units.xml")
         terrain (:terrain loaded-map)
         units (zipmap (keys (:units loaded-map))

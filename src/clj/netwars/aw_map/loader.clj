@@ -1,4 +1,4 @@
-(ns netwars.map-loader
+(ns netwars.aw-map.loader
   (:use netwars.aw-map
         netwars.impl.map-loader))
 

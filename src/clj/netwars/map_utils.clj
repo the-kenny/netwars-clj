@@ -1,5 +1,5 @@
 (ns netwars.map-utils
-  (:use netwars.map-loader
+  (:use netwars.aw-map.loader
         [netwars.aw-map :only [at coord]])
   (:require clojure.inspector))
 
