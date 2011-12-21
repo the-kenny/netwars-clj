@@ -4,6 +4,19 @@
         [netwars.aw-unit.loader :as loader]
         clojure.test))
 
+(deftest prototype-finding
+  (let [spec (loader/load-units (resource "units.xml"))]
+    (is (= (:internal-name (find-prototype spec :id 0)) :infantry)
+        "finds prototypes based on :id")
+    (is (= (:id (find-prototype spec :internal-name :md-tank)) 1)
+        "finds prototypes based on :internal-name")
+    (is (nil? (find-prototype spec :id 999))
+        "returns nil if it can't find a prototype")
+    (is (nil? (find-prototype spec
+                            :carries-towel ;; Today is towel-day
+                            true))
+        "returns nil if the key is unknown")))
+
 (deftest test-unit-creation
   (let [spec (loader/load-units (resource "units.xml"))
         weapon-unit (make-unit spec 0 :red)  ;Infantry
