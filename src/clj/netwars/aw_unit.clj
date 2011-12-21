@@ -29,7 +29,7 @@
     unit))
 (swap! fabrication-process conj #'prepare-loading)
 
-(defn- find-prototype [spec key value]
+(defn find-prototype [spec key value]
   (first (filter #(= (get % key) value) spec)))
 
 ;;; TODO: Make it possible to create units by internal-name

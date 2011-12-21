@@ -2,13 +2,13 @@
   (:use netwars.game-board
         [netwars.aw-map :only [coord]]
         clojure.test
-        [clojure.set :as set])
-  (:require netwars.map-loader
-            netwars.unit-loader))
+        [clojure.set :as set]
+        [netwars.map-loader :only [load-map]]
+        [netwars.aw-unit.loader :only [load-units]]))
 
 (defn make-testboard []
-  (let [loaded-map (netwars.map-loader/load-map "maps/7330.aws")
-        unit-spec (netwars.unit-loader/load-units "resources/units.xml")
+  (let [loaded-map (load-map "maps/7330.aws")
+        unit-spec (load-units "resources/units.xml")
         terrain (:terrain loaded-map)
         units (zipmap (keys (:units loaded-map))
                       (map #(netwars.aw-unit/make-unit unit-spec (:id %) (:color %))

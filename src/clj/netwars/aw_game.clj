@@ -4,9 +4,9 @@
         [netwars.damagecalculator :as damage]
         [netwars.damagetable :as damagetable]
         [netwars.aw-map :as aw-map]
-        [netwars.path :as path])
-  (:require netwars.map-loader
-            netwars.unit-loader))
+        [netwars.path :as path]
+        [netwars.map-loader :only [load-map]]
+        [netwars.aw-unit.loader :only [load-units]]))
 
 (defrecord AwGame [info
                    current-player-index
@@ -19,8 +19,8 @@
                    ])
 
 (defn make-game [info mapsource players]
-  (let [loaded-map (netwars.map-loader/load-map mapsource)
-        unit-spec (netwars.unit-loader/load-units "resources/units.xml")
+  (let [loaded-map (load-map mapsource)
+        unit-spec (load-units "resources/units.xml")
         damagetable (damagetable/load-damagetable "resources/damagetable.xml")
         board (board/generate-game-board loaded-map unit-spec)
         newplayers (clojure.core/map ref players)

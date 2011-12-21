@@ -1,6 +1,6 @@
 (ns netwars.test.unit-loader
   (:use clojure.test
-        netwars.unit-loader
+        netwars.aw-unit.loader
         [clojure.java.io :only [resource]]
         [clojure.set :only [subset?]]))
 

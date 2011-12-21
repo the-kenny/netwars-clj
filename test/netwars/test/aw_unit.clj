@@ -1,7 +1,7 @@
 (ns netwars.test.aw-unit
   (:use netwars.aw-unit
         [clojure.java.io :only [resource]]
-        [netwars.unit-loader :as loader]
+        [netwars.aw-unit.loader :as loader]
         clojure.test))
 
 (deftest test-unit-creation
@@ -15,7 +15,7 @@
     (is (= (:fuel weapon-unit 99)))
 
     (is (= (meta weapon-unit)
-           (loader/find-prototype spec :internal-name (:internal-name weapon-unit)))
+           (find-prototype spec :internal-name (:internal-name weapon-unit)))
         "Instance contains prototype as meta")
 
     (testing "weapon properties"
@@ -65,6 +65,3 @@
     (doseq [weapon (available-weapons infantry)]
      (is (= false (low-ammo? (val weapon)))))
     (is (= 2 (count (available-weapons megatank))))))
-
-
-
