@@ -151,6 +151,3 @@
  stream is a stream pointing to the xml-file.."
   [source]
   (parse-units (xml/parse (input-stream source))))
-
-(defn find-prototype [spec key value]
-  (first (filter #(= (get % key) value) spec)))

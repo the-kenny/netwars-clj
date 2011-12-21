@@ -1,5 +1,4 @@
-(ns netwars.aw-unit
-  (:use [netwars.aw-unit.loader :as loader]))
+(ns netwars.aw-unit)
 
 (defrecord AwUnit [internal-name color hp fuel])
 
@@ -30,10 +29,12 @@
     unit))
 (swap! fabrication-process conj #'prepare-loading)
 
+(defn- find-prototype [spec key value]
+  (first (filter #(= (get % key) value) spec)))
 
 ;;; TODO: Make it possible to create units by internal-name
 (defn make-unit [spec id color]
-  (when-let [prototype (loader/find-prototype spec :id id)]
+  (when-let [prototype (find-prototype spec :id id)]
     (with-meta (-> (AwUnit. (:internal-name prototype)
                              color
                              (:hp prototype)
