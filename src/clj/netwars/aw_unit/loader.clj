@@ -1,4 +1,4 @@
-(ns netwars.unit-loader
+(ns netwars.aw-unit.loader
   (:require [clojure.xml :as xml]
             [clojure.zip :as zip])
   (:use [clojure.set :only [rename-keys]]
@@ -154,6 +154,3 @@
 
 (defn find-prototype [spec key value]
   (first (filter #(= (get % key) value) spec)))
-
-
-

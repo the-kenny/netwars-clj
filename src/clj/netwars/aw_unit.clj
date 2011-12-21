@@ -1,5 +1,5 @@
 (ns netwars.aw-unit
-  (:use [netwars.unit-loader :as loader]))
+  (:use [netwars.aw-unit.loader :as loader]))
 
 (defrecord AwUnit [internal-name color hp fuel])
 
@@ -101,4 +101,3 @@
   (if (= (:ammo weapon) :infinity)
     false
     (< (:ammo weapon) (/ (:ammo (meta weapon)) 2))))
-
