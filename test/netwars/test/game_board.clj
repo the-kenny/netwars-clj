@@ -3,7 +3,7 @@
         [netwars.aw-map :only [coord]]
         clojure.test
         [clojure.set :as set]
-        [netwars.map-loader :only [load-map]]
+        [netwars.aw-map.loader :only [load-map]]
         [netwars.aw-unit.loader :only [load-units]]))
 
 (defn make-testboard []
