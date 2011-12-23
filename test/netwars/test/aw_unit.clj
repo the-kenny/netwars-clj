@@ -69,12 +69,29 @@
         (is (thrown? java.lang.Exception (unload-unit loaded 1)))
         (is (thrown? java.lang.Exception (unload-unit transporter 0)))))))
 
-(deftest test-weapons
-  (let [spec (loader/load-units (resource "units.xml"))
-        infantry (make-unit spec 0 :red)
-        megatank (make-unit spec 10 :red)]
-    (is (has-weapons? infantry))
-    (is (= 1 (count (available-weapons infantry))))
-    (doseq [weapon (available-weapons infantry)]
-     (is (= false (low-ammo? (val weapon)))))
-    (is (= 2 (count (available-weapons megatank))))))
+
+(def ^:dynamic *spec* nil)
+
+(use-fixtures :each #(binding [*spec* (loader/load-units (resource "units.xml"))]
+                       (%)))
+
+(deftest test-weapon-functions
+  (let [infantry (make-unit *spec* 0 :red)
+        megatank (make-unit *spec* 10 :red)
+        apc (make-unit *spec* 22 :red)]
+    ;; Infantry
+    (is (has-weapons? infantry) "Infantry has a weapon")
+    (is (= 1 (count (available-weapons infantry))) "One available weapon")
+    (is (every? #{:main-weapon} (keys (weapons infantry))) "Only the main weapon")
+    ;; Metagank
+    (is (has-weapons? infantry) "Megatank has weapons")
+    (is (= 2 (count (available-weapons megatank))) "Megatank has two weapons")
+    (is (every? #{:main-weapon :alt-weapon} (keys (weapons megatank))) "main and alt")
+    ;; APC
+    (is (not (has-weapons? apc)) "An APC doesn't have weapons")
+    (is (empty? (weapons apc)) "weapons returns an empty seq")))
+
+(deftest test-available-weapons
+  (is false "No tests written")
+  #_(doseq [weapon (available-weapons infantry)]
+      (is (= false (low-ammo? (val weapon))))))
