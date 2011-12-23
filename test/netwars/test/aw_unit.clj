@@ -4,23 +4,27 @@
         [netwars.aw-unit.loader :as loader]
         clojure.test))
 
+(def ^:dynamic *spec* nil)
+
+(use-fixtures :each #(binding [*spec* (loader/load-units (resource "units.xml"))]
+                       (%)))
+
+
 (deftest prototype-finding
-  (let [spec (loader/load-units (resource "units.xml"))]
-    (is (= (:internal-name (find-prototype spec :id 0)) :infantry)
-        "finds prototypes based on :id")
-    (is (= (:id (find-prototype spec :internal-name :md-tank)) 1)
-        "finds prototypes based on :internal-name")
-    (is (nil? (find-prototype spec :id 999))
-        "returns nil if it can't find a prototype")
-    (is (nil? (find-prototype spec
+  (is (= (:internal-name (find-prototype *spec* :id 0)) :infantry)
+      "finds prototypes based on :id")
+  (is (= (:id (find-prototype *spec* :internal-name :md-tank)) 1)
+      "finds prototypes based on :internal-name")
+  (is (nil? (find-prototype *spec* :id 999))
+      "returns nil if it can't find a prototype")
+  (is (nil? (find-prototype *spec*
                             :carries-towel ;; Today is towel-day
                             true))
-        "returns nil if the key is unknown")))
+      "returns nil if the key is unknown"))
 
 (deftest test-unit-creation
-  (let [spec (loader/load-units (resource "units.xml"))
-        weapon-unit (make-unit spec 0 :red)  ;Infantry
-        transport-unit (make-unit spec 22 :green)]
+  (let [weapon-unit (make-unit *spec* 0 :red)  ;Infantry
+        transport-unit (make-unit *spec* 22 :green)]
     (is (instance? netwars.aw_unit.AwUnit weapon-unit))
     (is (= (:internal-name weapon-unit) :infantry))
     (is (= (:color weapon-unit :red)))
@@ -28,7 +32,7 @@
     (is (= (:fuel weapon-unit 99)))
 
     (is (= (meta weapon-unit)
-           (find-prototype spec :internal-name (:internal-name weapon-unit)))
+           (find-prototype *spec* :internal-name (:internal-name weapon-unit)))
         "Instance contains prototype as meta")
 
     (testing "weapon properties"
@@ -39,7 +43,7 @@
         (is (instance? String (:name w)))
         (is (or (integer? (:ammo w)) (= :infinity (:ammo w))))
         (is (set? (:range w)))
-        (is (meta w) "Has the weapon metadata (the spec) attached?")))
+        (is (meta w) "Has the weapon metadata (the *spec*) attached?")))
 
     (testing "freight"
       (is (contains? transport-unit :transport))
@@ -49,9 +53,8 @@
         (is (= [] (:freight transport)))))))
 
 (deftest test-transporting
-  (let [spec (loader/load-units (resource "units.xml"))
-        transporter (make-unit spec 22 :green)
-        infantry (make-unit spec 0 :red)  ;Infantry
+  (let [transporter (make-unit *spec* 22 :green)
+        infantry (make-unit *spec* 0 :red)  ;Infantry
         ]
     (is (can-transport? transporter))
     (is (= #{:infantry :mech} (transport-types transporter)))
@@ -68,12 +71,6 @@
         (is (thrown? java.lang.Exception (unload-unit loaded -1)))
         (is (thrown? java.lang.Exception (unload-unit loaded 1)))
         (is (thrown? java.lang.Exception (unload-unit transporter 0)))))))
-
-
-(def ^:dynamic *spec* nil)
-
-(use-fixtures :each #(binding [*spec* (loader/load-units (resource "units.xml"))]
-                       (%)))
 
 (deftest test-weapon-functions
   (let [infantry (make-unit *spec* 0 :red)
