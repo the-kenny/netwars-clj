@@ -29,6 +29,22 @@
     unit))
 (swap! fabrication-process conj #'prepare-loading)
 
+
+;;; Public functions
+
+(def +movement-types+
+  "All existing movement types."
+  #{:foot
+    :mechanical
+    :tread
+    :tires
+    :air
+    :sea
+    :transport
+    :oozium
+    :pipe
+    :hover})
+
 (defn find-prototype [spec key value]
   (first (filter #(= (get % key) value) spec)))
 
