@@ -4,30 +4,32 @@
 
 ;;; Private methods for generating units
 
-(def ^{:private true} fabrication-process (atom []))
-(defn- prepare-unit [unit prototype]
-  (let [partials (map #(partial % prototype) @fabrication-process)]
-    ((apply comp partials) unit)))
+(defn- prepare-meta [prototype unit]
+  (with-meta unit prototype))
 
 (defn- prepare-main-weapon [prototype unit]
   (if-let [main (:main-weapon prototype)]
     (update-in unit [:weapons] conj (with-meta main main))
     unit))
-(swap! fabrication-process conj #'prepare-main-weapon)
 
 (defn- prepare-alt-weapon [prototype unit]
   (if-let [alt (:alt-weapon prototype)]
     (update-in unit [:weapons] conj (with-meta alt alt))
     unit))
-(swap! fabrication-process conj #'prepare-alt-weapon)
-
 
 (defn- prepare-loading [prototype unit]
   (if-let [limit (:transport-limit prototype)]
     (assoc unit :transport {:limit limit
                             :freight []})
     unit))
-(swap! fabrication-process conj #'prepare-loading)
+
+(def ^{:private true} fabrication-process [prepare-meta
+                                           prepare-main-weapon
+                                           prepare-alt-weapon
+                                           prepare-loading])
+(defn- prepare-unit [unit prototype]
+  (let [partials (map #(partial % prototype) fabrication-process)]
+    ((apply comp partials) unit)))
 
 
 ;;; Public functions
@@ -51,12 +53,11 @@
 ;;; TODO: Make it possible to create units by internal-name
 (defn make-unit [spec id color]
   (when-let [prototype (find-prototype spec :id id)]
-    (with-meta (-> (AwUnit. (:internal-name prototype)
-                             color
-                             (:hp prototype)
-                             (:max-fuel-level prototype))
-                   (prepare-unit prototype))
-      prototype)))
+    (prepare-unit (AwUnit. (:internal-name prototype)
+                           color
+                           (:hp prototype)
+                           (:max-fuel-level prototype))
+                  prototype)))
 
 ;;; Misc Functions
 
