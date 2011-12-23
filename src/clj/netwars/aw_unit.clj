@@ -100,10 +100,11 @@
   (second (:weapons u)))
 
 (defn weapons [u]
-  (when-let [m {:main-weapon (main-weapon u)}]
+  (when-let [main (main-weapon u)]
     (if-let [alt (alt-weapon u)]
-      (assoc m :alt-weapon alt)
-      m)))
+      {:main-weapon main
+       :alt-weapon alt}
+      {:main-weapon main})))
 
 (defn has-weapons? [u]
   (contains? u :weapons))
