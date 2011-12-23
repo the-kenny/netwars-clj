@@ -3,17 +3,20 @@
 (defrecord Coordinate [^int x ^int y])
 
 (defn coord
+  "Creates a coordinate from a x and a y value. x and y are coerced to int"
   ([x y] (Coordinate. x y))
   ([[x y]] (Coordinate. x y)))
 
-(defn coord? [c]
+(defn coord?
+  "Predicate to check if an object is an coordinate"
+  [c]
   (instance? Coordinate c))
 
 (defmethod clojure.core/print-method ::Coordinate [c writer]
   (.write writer (str "[" (:x c) "," (:y c) "]")))
 
 (defn distance
-  "Manhattan metric distance"
+  "Manhattan metric distance between coordinates"
   [c1 c2]
   (+ (Math/abs (- (:x c2) (:x c1)))
      (Math/abs (- (:y c2) (:y c1)))))
@@ -30,7 +33,9 @@
   (at [board ^Coordinate c])
   (update-board [board c v]))
 
-(defn in-bounds? [b ^Coordinate c]
+(defn in-bounds?
+  "Checks if a coordinate are in the bounds of b. b must implement the Board protocol."
+  [b ^Coordinate c]
   (and (< -1 (:x c) (width b))
        (< -1 (:y c) (height b))))
 
@@ -42,23 +47,40 @@
   (at [t c] (get-in (:data t) [(:x c) (:y c)]))
   (update-board [t c v] (assoc-in t [:data (:x c) (:y c)] v)))
 
-(defn make-terrain-board [[width height] data]
+;;; TODO: Specify `data`
+(defn make-terrain-board
+  "Creates a TerrainBoard with width, height and data.
+data must be in a specific format."
+  [[width height] data]
   (TerrainBoard. width height data))
 
 ;;; Functions to check for different types of terrain
 
-(defn is-building? [t]
+(defn is-building?
+  "Predicate to check if a terrain-value is a building.
+Building-values have the structure [building color] whereas normal terrains are only keywords."
+  [t]
   (and (vector? t)
        (get #{:headquarter :city :base :airport :port :tower :lab} (first t))))
 
-(defn is-terrain? [t]
+(defn is-terrain?
+  "Predicate to check if a terrain-value is normal terrain and not a building.
+terrain values are ordinary keywords.
+More or less the counterpart to `is-building?`"
+  [t]
   (get #{:plain :street :bridge :segment-pipe :river :beach :wreckage :pipe
          :mountain :forest :water :reef} t))
 
-(defn is-water? [t]
+(defn is-water?
+  "Predicate to check if a terrain value is some kind of water.
+Mostly useful for drawing of maps."
+  [t]
   (get #{:water :reef :beach :bridge} t))
 
-(defn is-ground? [t]
+(defn is-ground?
+    "Predicate to check if a terrain value is some kind of ground. Counterpart to `is-water?`
+Mostly useful for drawing of maps."
+  [t]
   (and (not (nil? t)) (not (is-water? t))))
 
 (let [cost
@@ -78,8 +100,12 @@
        :river        {:foot 2   :mechanical 1   :tread nil :tires nil :air 1   :sea nil :transport nil :oozium 1   :pipe nil :hover nil}
        :beach        {:foot 1   :mechanical 1   :tread 1   :tires 1   :air 1   :sea nil :transport 1   :oozium 1   :pipe nil :hover nil}
        :port         {:foot 1   :mechanical 1   :tread 1   :tires 1   :air 1   :sea nil :transport 1   :oozium 1   :pipe nil :hover nil}}]
-  (defn movement-costs [terrain type]
+  (defn movement-costs
+    "Returns the movement cost for a movement-type `type` on `terrain`"
+    [terrain type]
     (get-in cost [(if (vector? terrain) (first terrain) terrain) type])))
 
-(defn can-pass? [terrain movement-type]
+(defn can-pass?
+  "Predicate to check if `movement-type` can pass `terrain`, e.g. movement-costs are non-nil."
+  [terrain movement-type]
   (boolean (movement-costs terrain movement-type)))

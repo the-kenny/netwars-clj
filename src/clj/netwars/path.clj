@@ -24,7 +24,9 @@
 (defmethod clojure.core/print-method AwPath [o p]
   (.write p (.toString o)))
 
-(defn path? [p]
+(defn path?
+  "Predicate to test if an object is a path."
+  [p]
   (instance? AwPath p))
 
 (defn valid-path?
@@ -48,8 +50,12 @@ With the optional second argument, it checks for validity in the context of the 
                                  (:movement-type (meta unit)))
               path)))))
 
-(defn make-path [coords]
+(defn make-path
+  "Creates a path from a list of coordinates"
+  [coords]
   (AwPath. coords))
 
-(defn get-coordinates [path]
+(defn get-coordinates
+  "Returns the seq of coordinates of the path"
+  [path]
   (:coordinates path))
