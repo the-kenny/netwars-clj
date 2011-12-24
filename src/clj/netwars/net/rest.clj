@@ -8,7 +8,16 @@
 (extend-type java.util.UUID
   json/Write-JSON
   (write-json [object out escape-unicode?]
-              (json/write-json (str object) out escape-unicode?)))
+    (json/write-json (str object) out escape-unicode?)))
+
+(extend-type netwars.aw_game.AwGame
+  json/Write-JSON
+  (write-json [game out escape-unicode?]
+    (let [object (select-keys game [:info :players])]
+     (json/write-json (merge object
+                             {:current-player-index @(:current-player-index game)
+                              :moves (rest @(:moves game))})
+                      out escape-unicode?))))
 
 ;;; Methods
 
