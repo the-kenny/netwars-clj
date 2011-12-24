@@ -143,3 +143,26 @@
                            (* x 16)
                            (* y 16)
                            16 16)))))
+
+;;; Path drawing
+
+(defn draw-path [graphics path]
+  (let [context (:context graphics)
+        newpath (map #(map->canvas % true) path)]
+   (. context (beginPath))
+   (set! (. context strokeStyle) "rgba(0,0,0,0.5)")
+   (set! (. context lineWidth) 4)
+   (set! (. context lineCap) "round")
+   (set! (. context lineJoin) "round")
+   (.moveTo context (ffirst newpath) (second (first newpath)))
+   (doseq [[x y] (rest newpath)]
+     (.lineTo context x y))
+   (. context (stroke))
+   (. context (beginPath))
+   (let [end (map->canvas (last path) true)]
+    (.arc context
+          (first end) (second end)
+          2.0
+          0
+          (* 2 Math/PI)))
+   (. context (stroke))))
