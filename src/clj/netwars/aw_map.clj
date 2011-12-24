@@ -1,5 +1,13 @@
 (ns netwars.aw-map)
 
+;; This namespace contains various definitions used through the game.
+;;
+;; - Coordinate is a simple record containing x/y coordinates.
+;; - Board is a protocol specifying simple functions for operating on an board with limited width/height
+;;
+;; The rest of this namespace contains various functions for storing terrain data.
+
+
 (defrecord Coordinate [^int x ^int y])
 
 (defn coord

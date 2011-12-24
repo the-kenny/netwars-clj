@@ -8,6 +8,12 @@
         [netwars.aw-map.loader :only [load-map]]
         [netwars.aw-unit.loader :only [load-units]]))
 
+;; AwGame is a running game.
+;; It stores info about the current players, whose turn it is, the unit spec used, etc.
+;;
+;; It works on a high level. Every move is logged, the game is stateful (using refs).
+;; To move an unit, a path is needed. The functions in this namespace will automatically cause the necessary side effects (for example: consuming fuel).
+
 (defrecord AwGame [info
                    current-player-index
                    players

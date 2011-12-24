@@ -2,6 +2,12 @@
   (:use netwars.aw-map
         netwars.aw-unit))
 
+;; This namespace contains definitions and functions for GameBoard.
+;; GameBoard combines AwMap with information about the units on it.
+;;
+;; It offers an unified interface for moving units in respect to the terrain.
+
+
 ;;; Game Board
 (defrecord GameBoard [terrain units])
 
