@@ -42,7 +42,7 @@
      (connection/send-data {:type :move-unit
                             :coordinate [x y]})
      (connection/send-data {:type :deselect-unit
-                            :coordiante current-unit}))))
+                            :coordinate current-unit}))))
 
 (defn clicked-on [[x y]]
   (let [unit (unit-at [x y])]
