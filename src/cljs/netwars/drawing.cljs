@@ -67,6 +67,22 @@
   [graphics [x y] w h f]
   (add-event-listener graphics [x y] w h "onmousedown" f))
 
+(defn add-move-listener
+  "Adds a move listener to the canvas contained in the graphics object.
+   Calls (f [x y])"
+  [graphics f]
+  (let [kinetic (:kinetic graphics)
+        canvas (:canvas graphics)
+        last-coordinate (atom nil)
+        last-atom (atom nil)]
+    (.addEventListener canvas "mousemove"
+                       (fn [event]
+                         (let [mouse-pos (. kinetic (getMousePos))
+                               c (canvas->map [(.x mouse-pos) (.y mouse-pos)])]
+                           (when (not= c @last-atom)
+                             (f c)
+                             (reset! last-atom c)))))))
+
 ;;; Helper
 
 (defn image-from-base64 [base64 callback]
