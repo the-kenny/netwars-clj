@@ -13,7 +13,7 @@
 
 
 ;;; Game state
-(def current-unit nil)         ;Stores the coord of the highlighted unit
+(def current-unit-coord nil)         ;Stores the coord of the highlighted unit
 (def movement-range nil)
 
 ;;; General methods for games
@@ -28,21 +28,27 @@
                          (dissoc from)
                          (assoc to u)))))
 
+(defn request-select-unit [c]
+  (connection/send-data {:type :select-unit
+                         :coordinate c}))
+
+(defn request-deselect-unit [c]
+  (connection/send-data {:type :deselect-unit
+                         :coordinate c}))
 
 (defn unit-clicked [[x y] unit]
   (logging/message "Unit: " (name (:internal-name unit)) " (" (name (:color unit)) ") "
                     (:hp unit) "hp")
-  (when (nil? current-unit)
-    (connection/send-data {:type :select-unit
-                           :coordinate [x y]})))
+  (cond
+   (nil? current-unit-coord) (request-select-unit [x y])
+   (= current-unit-coord [x y]) (request-deselect-unit [x y])))
 
 (defn terrain-clicked [[x y]]
-  (when current-unit
+  (when current-unit-coord
     (if (get movement-range [x y])
      (connection/send-data {:type :move-unit
                             :coordinate [x y]})
-     (connection/send-data {:type :deselect-unit
-                            :coordinate current-unit}))))
+     (request-deselect-unit current-unit-coord))))
 
 (defn clicked-on [[x y]]
   (let [unit (unit-at [x y])]
@@ -56,7 +62,11 @@
 ;;; Movement Range
 
 (defmethod connection/handle-response :select-unit [message]
-  (set! current-unit (:coordinate message)))
+  (set! current-unit-coord (:coordinate message)))
+
+(defmethod connection/handle-response :deselect-unit [message]
+  (set! current-unit-coord nil)
+  (set! movement-range nil))
 
 (defmethod connection/handle-response :movement-range [message]
   (set! movement-range (:movement-range message)))
@@ -67,7 +77,7 @@
   (move-unit (:from message) (:to message))
   ;; Reset movement-range
   (set! movement-range nil)
-  (set! current-unit nil))
+  (set! current-unit-coord nil))
 
 ;;; Handling of responses for new games
 
@@ -77,7 +87,7 @@
   (set! game-units nil)
   (set! terrain-image nil)
   (set! movement-range nil)
-  (set! current-unit nil)
+  (set! current-unit-coord nil)
   (logging/clear-messages))
 
 (defn join-game [game-id]

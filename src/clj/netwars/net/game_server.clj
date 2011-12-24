@@ -195,6 +195,14 @@
                                {:type :movement-range
                                 :movement-range (game/movement-range *game*)})))
 
+(def-game-request :deselect-unit [client request]
+  (if (game/selected-unit *game*)
+    (do
+     (info ":deselect-unit " (:game-id *game*))
+     (dosync (game/deselect-unit! *game*))
+     (connection/send-broadcast (broadcast-for-game *game*) request))
+    (error "Got :deselect-unit without a selected unit on coordinate " *coordinate* "in game" (:game-id *game*))))
+
 (def-game-request :movement-range [client request]
   (let [board (-> *game* :board deref)]
     (if *unit*
