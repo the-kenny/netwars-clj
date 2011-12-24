@@ -6,10 +6,11 @@
                  [log4j/log4j "1.2.16"]
                  [clj-logging-config "1.9.6"
                   :exclusions [swank-clojure/swank-clojure]]
-                 [compojure "0.6.5"
+                 [compojure "1.0.0-RC2"
                   :exclusions
-                  [org.clojure/clojure
-                   org.clojure/clojure-contrib]]]
+                  [org.clojure/clojure]]
+                 [ring/ring-devel "1.0.1"]
+                 [org.clojure/data.json "0.1.1"]]
   :repositories {"stuartsierra-releases" "http://stuartsierra.com/maven2"}
   :source-path "src/clj/"
   :main netwars.core)
