@@ -1,7 +1,8 @@
 (ns netwars.game
   (:require [netwars.connection :as connection]
             [netwars.drawing :as drawing]
-            [netwars.logging :as logging]))
+            [netwars.logging :as logging]
+            [netwars.pathfinding :as pathfinding]))
 
 ;;; TODO: Substitute with a record
 ;; {:game-id nil
@@ -15,6 +16,7 @@
 ;;; Game state
 (def current-unit-coord nil)         ;Stores the coord of the highlighted unit
 (def movement-range nil)
+(def current-path nil)
 
 ;;; General methods for games
 
@@ -57,6 +59,9 @@
      (unit-clicked [x y] unit)
      true
      (terrain-clicked [x y]))))
+
+(defn mouse-moved [[x y]]
+  (logging/log "Mouse moved: [" x " " y "]"))
 
 
 ;;; Movement Range
@@ -120,6 +125,9 @@
 
 ;;; Concrete drawing functions
 
+(defn setup-event-listeners [graphics]
+  (drawing/add-move-listener graphics mouse-moved))
+
 (defn draw-game [graphics]
   (when (and running-game game-units terrain-image)
     (drawing/clear graphics)
@@ -131,8 +139,12 @@
     ;; Draw the movement-range
     (doseq [c movement-range]
       (drawing/highlight-square graphics c :color "rgba(255, 0, 0, 0.4)"))
+    ;; Draw the current path
+    (when current-path
+     (drawing/draw-path graphics path))
 
+    ;; This needs to be re-added after every clear. Dumb kinetic...
     (let [canvas (:canvas graphics)]
-     (drawing/add-click-listener graphics
-                                 [0 0] (.width canvas) (.height canvas)
-                                 #(-> % drawing/canvas->map clicked-on)))))
+      (drawing/add-click-listener graphics
+                                  [0 0] (.width canvas) (.height canvas)
+                                  #(-> % drawing/canvas->map clicked-on)))))

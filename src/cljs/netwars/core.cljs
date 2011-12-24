@@ -43,6 +43,7 @@
 ;;; Request game list on open
 (connection/on-open #(connection/send-data {:type :helo}))
 
+(game/setup-event-listeners board-context)
 (drawing/set-drawing-function! board-context game/draw-game)
 ;;(drawing/start-animation board-context)
 
