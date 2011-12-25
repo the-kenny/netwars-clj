@@ -6,6 +6,7 @@
         [netwars.aw-map :as aw-map]
         [netwars.game-board :as board]
         [netwars.player :as player]
+        [netwars.path :as path]
         [clojure.tools.logging :only [debug info warn error fatal]]))
 
 ;;; Overview:
@@ -215,14 +216,16 @@
 
 (def-game-request :move-unit [client request]
   (let [from (game/selected-coordinate *game*)
-        to *coordinate*
+        path (path/make-path (map coord (:path request)))
         board @(:board *game*)]
+    (assert (= from (first path)))
     (assert (board/get-unit board from))
-    (assert (nil? (board/get-unit board to)))
-    (info "Moving unit from" from "to" to)
-    (dosync (game/move-unit! *game* to))
+    (assert (nil? (board/get-unit board (last path))))
+    (info "Moving unit along" path)
+    (dosync (game/move-unit! *game* path))
     (connection/send-broadcast (broadcast-for-game *game*)
                                (assoc request
                                  :valid true
                                  :from from
-                                 :to to))))
+                                 :to (last path)
+                                 :path (:path request)))))

@@ -49,7 +49,7 @@
   (when current-unit-coord
     (if (get movement-range [x y])
      (connection/send-data {:type :move-unit
-                            :coordinate [x y]})
+                            :path current-path})
      (request-deselect-unit current-unit-coord))))
 
 (defn clicked-on [[x y]]
@@ -61,17 +61,22 @@
      (terrain-clicked [x y]))))
 
 (defn mouse-moved [[x y]]
-  (logging/log "Mouse moved: [" x " " y "]"))
+  (when running-game
+    (when (and current-path (contains? movement-range [x y]))
+      (set! current-path (pathfinding/update-path current-path [x y])))
+   (logging/log "Mouse moved: [" x " " y "]")))
 
 
 ;;; Movement Range
 
 (defmethod connection/handle-response :select-unit [message]
-  (set! current-unit-coord (:coordinate message)))
+  (set! current-unit-coord (:coordinate message))
+  (set! current-path (pathfinding/make-path (:coordinate message))))
 
 (defmethod connection/handle-response :deselect-unit [message]
   (set! current-unit-coord nil)
-  (set! movement-range nil))
+  (set! movement-range nil)
+  (set! current-path nil))
 
 (defmethod connection/handle-response :movement-range [message]
   (set! movement-range (:movement-range message)))
@@ -82,7 +87,8 @@
   (move-unit (:from message) (:to message))
   ;; Reset movement-range
   (set! movement-range nil)
-  (set! current-unit-coord nil))
+  (set! current-unit-coord nil)
+  (set! current-path nil))
 
 ;;; Handling of responses for new games
 
