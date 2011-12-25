@@ -144,7 +144,7 @@
 
 ;;; Unit Drawing
 
-(let [color-mappings {:yellow :ys
+(let [color-mappings {:yellow :yc
                       :red :os
                       :green :ge
                       :blue :bm
