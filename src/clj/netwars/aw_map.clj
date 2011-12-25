@@ -69,7 +69,7 @@ data must be in a specific format."
 Building-values have the structure [building color] whereas normal terrains are only keywords."
   [t]
   (and (vector? t)
-       (get #{:headquarter :city :base :airport :port :tower :lab} (first t))))
+       (get #{:headquarter :city :base :airport :port :tower :lab :silo} (first t))))
 
 (defn is-terrain?
   "Predicate to check if a terrain-value is normal terrain and not a building.
