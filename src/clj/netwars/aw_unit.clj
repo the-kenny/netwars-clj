@@ -41,7 +41,7 @@
     :tread
     :tires
     :air
-    :sea
+    :swim
     :transport
     :oozium
     :pipe
