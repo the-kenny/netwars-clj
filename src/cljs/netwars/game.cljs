@@ -141,7 +141,7 @@
       (drawing/highlight-square graphics c :color "rgba(255, 0, 0, 0.4)"))
     ;; Draw the current path
     (when current-path
-     (drawing/draw-path graphics path))
+     (drawing/draw-path graphics current-path))
 
     ;; This needs to be re-added after every clear. Dumb kinetic...
     (let [canvas (:canvas graphics)]
