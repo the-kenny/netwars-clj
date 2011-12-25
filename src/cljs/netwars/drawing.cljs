@@ -1,7 +1,8 @@
 (ns netwars.drawing
   (:require [netwars.connection :as connection]
             [netwars.logging :as logging]
-            [goog.events :as events]))
+            [goog.events :as events]
+            [netwars.pathfinding :as pathfinding]))
 
 ;;; Image loading and caching
 
@@ -164,7 +165,7 @@
 
 (defn draw-path [graphics path]
   (let [context (:context graphics)
-        newpath (map #(map->canvas % true) path)]
+        newpath (map #(map->canvas % true) (pathfinding/elements path))]
    (. context (beginPath))
    (set! (. context strokeStyle) "rgba(0,0,0,0.5)")
    (set! (. context lineWidth) 4)
@@ -175,7 +176,7 @@
      (.lineTo context x y))
    (. context (stroke))
    (. context (beginPath))
-   (let [end (map->canvas (last path) true)]
+   (let [end (map->canvas (last (pathfinding/elements path)) true)]
     (.arc context
           (first end) (second end)
           2.0

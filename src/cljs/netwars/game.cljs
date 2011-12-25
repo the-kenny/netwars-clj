@@ -49,7 +49,7 @@
   (when current-unit-coord
     (if (get movement-range [x y])
      (connection/send-data {:type :move-unit
-                            :path current-path})
+                            :path (pathfinding/elements current-path)})
      (request-deselect-unit current-unit-coord))))
 
 (defn clicked-on [[x y]]
@@ -63,7 +63,7 @@
 (defn mouse-moved [[x y]]
   (when running-game
     (when (and current-path (contains? movement-range [x y]))
-      (set! current-path (pathfinding/update-path current-path [x y])))
+      (pathfinding/update-path! current-path [x y]))
    (logging/log "Mouse moved: [" x " " y "]")))
 
 
