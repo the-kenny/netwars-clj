@@ -48,9 +48,9 @@
 (defn terrain-clicked [[x y]]
   (when current-unit-coord
     (if (get movement-range [x y])
-     (connection/send-data {:type :move-unit
-                            :path (pathfinding/elements current-path)})
-     (request-deselect-unit current-unit-coord))))
+      (connection/send-data {:type :move-unit
+                             :path (pathfinding/elements current-path)})
+      (request-deselect-unit current-unit-coord))))
 
 (defn clicked-on [[x y]]
   (let [unit (unit-at [x y])]
@@ -64,7 +64,7 @@
   (when running-game
     (when (and current-path (contains? movement-range [x y]))
       (pathfinding/update-path! current-path [x y]))
-   (logging/log "Mouse moved: [" x " " y "]")))
+    (logging/log "Mouse moved: [" x " " y "]")))
 
 
 ;;; Movement Range
@@ -88,8 +88,8 @@
     (let [from (first (:path message))
           to   (last  (:path message))
           fuel-costs (:fuel-costs message)]
-     (move-unit from to)
-     (set! game-units (update-in game-units [to :fuel] - fuel-costs)))
+      (move-unit from to)
+      (set! game-units (update-in game-units [to :fuel] - fuel-costs)))
     (logging/message "Attempted invalid move."))
   ;; Reset movement-range etc.
   (set! movement-range nil)
@@ -130,7 +130,7 @@
                          :map m}))
 
 (defmethod connection/handle-response :map-data [message]
-   ;; (drawing/draw-terrain board-context (get message :map-data))
+  ;; (drawing/draw-terrain board-context (get message :map-data))
   (drawing/image-from-base64 (:map-data message) #(set! terrain-image %)))
 
 (defmethod connection/handle-response :unit-data [data]
@@ -155,7 +155,7 @@
       (drawing/highlight-square graphics c :color "rgba(255, 0, 0, 0.4)"))
     ;; Draw the current path
     (when current-path
-     (drawing/draw-path graphics current-path))
+      (drawing/draw-path graphics current-path))
 
     ;; This needs to be re-added after every clear. Dumb kinetic...
     (let [canvas (:canvas graphics)]
