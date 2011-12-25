@@ -27,7 +27,8 @@
 
 ;;; Network stuff
 
-(connection/open-socket "ws://moritz-macbook.local:8080/socket")
+(let [host (.. js/window location host)]
+ (connection/open-socket (str "ws://" host "/socket")))
 
 ;;; Implement drawing the requested map
 
