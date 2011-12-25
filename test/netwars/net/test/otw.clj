@@ -14,3 +14,13 @@
     (doseq [[k v] data :let [m {k v}]]
       (is (string? (otw/encode-data m)))
       (is (map? (otw/decode-data (otw/encode-data m)))))))
+
+(deftest test-meta-encoding
+  (let [m {:foo 42
+           :uuid (java.util.UUID/randomUUID)}
+        encoded-m (encode m)
+        data  {:coord (netwars.aw-map/coord 1 2)
+               :vec [23 42 1337]
+               :set #{1 2 3}}]
+    (doseq [d (vals data) :let [dwm (with-meta d m)]]
+      (is (= encoded-m (meta (encode dwm)))))))

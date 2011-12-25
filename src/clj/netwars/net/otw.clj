@@ -18,14 +18,14 @@
 
 (extend-protocol Sendable
   Coordinate
-  (encode [c] (with-meta [(:x c) (:y c)]
-                {:otw-type :Coordinate}))
+  (encode [c] (with-meta [(:x c) (:y c)] (encode (meta c))))
   List
-  (encode [v] (map encode v))
+  (encode [v] (with-meta (map encode v) (encode (meta v))))
   IPersistentMap
-  (encode [m] (into {} (for [[k v] m] [(encode k) (encode v)])))
+  (encode [m] (with-meta (into {} (for [[k v] m] [(encode k) (encode v)]))
+                (encode (meta m))))
   IPersistentSet
-  (encode [s] (into #{} (map encode s)))
+  (encode [s] (with-meta (into #{} (map encode s)) (encode (meta s))))
   UUID
   (encode [u] (str u))
   Object
@@ -42,4 +42,6 @@
 
 (defn decode-data [s]
   {:pre [(string? s)]}
-  (into {} (for [[k v] (read-string s)] [(keyword k) v])))
+  (let [read (read-string s)]
+   (with-meta (into {} (for [[k v] read] [(keyword k) v]))
+     (meta read))))
