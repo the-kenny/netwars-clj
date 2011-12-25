@@ -92,22 +92,22 @@ Mostly useful for drawing of maps."
   (and (not (nil? t)) (not (is-water? t))))
 
 (let [cost
-      {:plain        {:foot 1   :mechanical 1   :tread 1   :tires 2   :air 1   :sea nil :transport nil :oozium 1   :pipe nil :hover 1}
-       :wreckage     {:foot 1   :mechanical 1   :tread 1   :tires 2   :air 1   :sea nil :transport nil :oozium 1   :pipe nil :hover 1}
-       :forest       {:foot 1   :mechanical 1   :tread 2   :tires 3   :air 1   :sea nil :transport nil :oozium 1   :pipe nil :hover 1}
-       :city         {:foot 1   :mechanical 1   :tread 1   :tires 1   :air 1   :sea nil :transport nil :oozium 1   :pipe nil :hover 1}
-       :base         {:foot 1   :mechanical 1   :tread 1   :tires 1   :air 1   :sea nil :transport nil :oozium 1   :pipe nil :hover 1}
-       :bridge       {:foot 1   :mechanical 1   :tread 1   :tires 1   :air 1   :sea nil :transport nil :oozium 1   :pipe nil :hover 1}
-       :headquarter  {:foot 1   :mechanical 1   :tread 1   :tires 1   :air 1   :sea nil :transport nil :oozium 1   :pipe 1   :hover 1}
-       :mountain     {:foot 2   :mechanical 1   :tread nil :tires nil :air 1   :sea nil :transport nil :oozium 1   :pipe nil :hover nil}
-       :pipe         {:foot 2   :mechanical nil :tread nil :tires nil :air nil :sea nil :transport nil :oozium nil :pipe 1   :hover nil}
-       :reef         {:foot nil :mechanical nil :tread nil :tires nil :air 1   :sea 1   :transport 1   :oozium nil :pipe nil :hover nil}
-       :street       {:foot 1   :mechanical 1   :tread 1   :tires 1   :air 1   :sea nil :transport nil :oozium 1   :pipe nil :hover nil}
-       :water        {:foot nil :mechanical nil :tread nil :tires nil :air 1   :sea 1   :transport 1   :oozium nil :pipe nil :hover nil}
-       :silo         {:foot 1   :mechanical 1   :tread 1   :tires 1   :air 1   :sea nil :transport nil :oozium 1   :pipe 1   :hover nil}
-       :river        {:foot 2   :mechanical 1   :tread nil :tires nil :air 1   :sea nil :transport nil :oozium 1   :pipe nil :hover nil}
-       :beach        {:foot 1   :mechanical 1   :tread 1   :tires 1   :air 1   :sea nil :transport 1   :oozium 1   :pipe nil :hover nil}
-       :port         {:foot 1   :mechanical 1   :tread 1   :tires 1   :air 1   :sea nil :transport 1   :oozium 1   :pipe nil :hover nil}}]
+      {:plain        {:foot 1   :mechanical 1   :tread 1   :tires 2   :fly 1   :sea nil :transport nil :oozium 1   :pipe nil :hover 1}
+       :wreckage     {:foot 1   :mechanical 1   :tread 1   :tires 2   :fly 1   :sea nil :transport nil :oozium 1   :pipe nil :hover 1}
+       :forest       {:foot 1   :mechanical 1   :tread 2   :tires 3   :fly 1   :sea nil :transport nil :oozium 1   :pipe nil :hover 1}
+       :city         {:foot 1   :mechanical 1   :tread 1   :tires 1   :fly 1   :sea nil :transport nil :oozium 1   :pipe nil :hover 1}
+       :base         {:foot 1   :mechanical 1   :tread 1   :tires 1   :fly 1   :sea nil :transport nil :oozium 1   :pipe nil :hover 1}
+       :bridge       {:foot 1   :mechanical 1   :tread 1   :tires 1   :fly 1   :sea nil :transport nil :oozium 1   :pipe nil :hover 1}
+       :headquarter  {:foot 1   :mechanical 1   :tread 1   :tires 1   :fly 1   :sea nil :transport nil :oozium 1   :pipe 1   :hover 1}
+       :mountain     {:foot 2   :mechanical 1   :tread nil :tires nil :fly 1   :sea nil :transport nil :oozium 1   :pipe nil :hover nil}
+       :pipe         {:foot 2   :mechanical nil :tread nil :tires nil :fly nil :sea nil :transport nil :oozium nil :pipe 1   :hover nil}
+       :reef         {:foot nil :mechanical nil :tread nil :tires nil :fly 1   :sea 1   :transport 1   :oozium nil :pipe nil :hover nil}
+       :street       {:foot 1   :mechanical 1   :tread 1   :tires 1   :fly 1   :sea nil :transport nil :oozium 1   :pipe nil :hover nil}
+       :water        {:foot nil :mechanical nil :tread nil :tires nil :fly 1   :sea 1   :transport 1   :oozium nil :pipe nil :hover nil}
+       :silo         {:foot 1   :mechanical 1   :tread 1   :tires 1   :fly 1   :sea nil :transport nil :oozium 1   :pipe 1   :hover nil}
+       :river        {:foot 2   :mechanical 1   :tread nil :tires nil :fly 1   :sea nil :transport nil :oozium 1   :pipe nil :hover nil}
+       :beach        {:foot 1   :mechanical 1   :tread 1   :tires 1   :fly 1   :sea nil :transport 1   :oozium 1   :pipe nil :hover nil}
+       :port         {:foot 1   :mechanical 1   :tread 1   :tires 1   :fly 1   :sea nil :transport 1   :oozium 1   :pipe nil :hover nil}}]
   (defn movement-costs
     "Returns the movement cost for a movement-type `type` on `terrain`"
     [terrain type]
