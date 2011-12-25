@@ -84,8 +84,9 @@
 ;;; Moving Units
 
 (defmethod connection/handle-response :move-unit [message]
-  (move-unit (:from message) (:to message))
-  ;; Reset movement-range
+  (when (:valid message)
+    (move-unit (:from message) (:to message)))
+  ;; Reset movement-range etc.
   (set! movement-range nil)
   (set! current-unit-coord nil)
   (set! current-path nil))

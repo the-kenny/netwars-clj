@@ -221,11 +221,17 @@
     (assert (= from (first path)))
     (assert (board/get-unit board from))
     (assert (nil? (board/get-unit board (last path))))
-    (info "Moving unit along" path)
-    (dosync (game/move-unit! *game* path))
-    (connection/send-broadcast (broadcast-for-game *game*)
-                               (assoc request
-                                 :valid true
-                                 :from from
-                                 :to (last path)
-                                 :path (:path request)))))
+    (if (path/valid-path? path board)
+      (do
+       (info "Moving unit along" path)
+       (dosync (game/move-unit! *game* path))
+       (connection/send-broadcast (broadcast-for-game *game*)
+                                  (assoc request
+                                    :valid true
+                                    :from from
+                                    :to (last path)
+                                    :path (:path request))))
+      (do
+        (error "Invalid path: " path "in" (:game-id *game*))
+        (connection/send-data client
+                              (assoc request :valid false))))))
