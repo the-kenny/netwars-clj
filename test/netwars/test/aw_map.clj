@@ -39,4 +39,7 @@
 
 (deftest test-movement-cost-table-integrity
   (doseq [[terr costs] +movement-cost-table+]
-    (is (every? +movement-types+ (keys costs)))))
+    (is (or (is-terrain? terr)
+            (is-building? [terr nil])))
+    (is (every? +movement-types+ (keys costs)))
+    (is (every? #(or (nil? %) (> % 0)) (vals costs)))))
