@@ -99,7 +99,7 @@
   "Converts canvas coordinates to netwars coordinates"
   [[x y] & center?]
   (if center?
-    [(- (* x 16) 8) (- (* y 16) 8)]
+    [(+ (* x 16) 8) (+ (* y 16) 8)]
     [(* x 16) (* y 16)]))
 
 ;;; Terrain drawing
