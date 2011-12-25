@@ -33,7 +33,10 @@
                             (* 30 (int (/ value 30)))))
      (<= 300 value 499)
      (when-let [terr (get terrain-building-values (rem (- value 300) 10))]
-       [terr (get terrain-color-values (int (/ (- value 300) 10)))])))
+       (let [color (get terrain-color-values (int (/ (- value 300) 10)))]
+         (if (and (= terr :headquarter) (= color :white))
+           [:silo color]
+           [terr color])))))
 
   (defn parse-unit [value]
     (AwMapUnit. (rem (- value 500) 40) (get unit-color-values
