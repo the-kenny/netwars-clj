@@ -39,8 +39,8 @@
                          :coordinate c}))
 
 (defn unit-clicked [[x y] unit]
-  (logging/message "Unit: " (name (:internal-name unit)) " (" (name (:color unit)) ") "
-                    (:hp unit) "hp")
+  (logging/message "Unit: " (name (:internal-name unit)) " (" (name (:color unit)) "), "
+                   (:hp unit) "hp, fuel: " (:fuel unit))
   (cond
    (nil? current-unit-coord) (request-select-unit [x y])
    (= current-unit-coord [x y]) (request-deselect-unit [x y])))
@@ -85,7 +85,11 @@
 
 (defmethod connection/handle-response :move-unit [message]
   (if (:valid message)
-    (move-unit (:from message) (:to message))
+    (let [from (first (:path message))
+          to   (last  (:path message))
+          fuel-costs (:fuel-costs message)]
+     (move-unit from to)
+     (set! game-units (update-in game-units [to :fuel] - fuel-costs)))
     (logging/message "Attempted invalid move."))
   ;; Reset movement-range etc.
   (set! movement-range nil)

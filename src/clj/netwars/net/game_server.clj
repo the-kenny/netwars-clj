@@ -222,7 +222,7 @@
     (assert (board/get-unit board from))
     (assert (nil? (board/get-unit board (last path))))
     (if (path/valid-path? path board)
-      (do
+      (let [fuel-costs (game/fuel-costs *game* path)]
        (info "Moving unit along" path)
        (dosync (game/move-unit! *game* path))
        (connection/send-broadcast (broadcast-for-game *game*)
@@ -230,7 +230,8 @@
                                     :valid true
                                     :from from
                                     :to (last path)
-                                    :path (:path request))))
+                                    :path (:path request)
+                                    :fuel-costs fuel-costs)))
       (do
         (error "Invalid path: " path "in" (:game-id *game*))
         (connection/send-broadcast (broadcast-for-game *game*)

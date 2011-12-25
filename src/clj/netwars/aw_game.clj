@@ -157,11 +157,13 @@ Returns path."
     (throw (java.lang.IllegalArgumentException.
             "Given path isn't valid")))
   (let [from (selected-coordinate game)
-        to   (last path)]
+        to   (last path)
+        fuel-costs (fuel-costs game path)]
    (alter (:board game) board/update-unit from
-          update-in [:fuel] - (fuel-costs game path))
+          update-in [:fuel] - fuel-costs)
    (alter (:board game) board/move-unit from to) ;Important: First use fuel, then move
    (log-event! game {:type :unit-moved
                      :from from
-                     :to to}))
+                     :to to
+                     :fuel-costs fuel-costs}))
   path)
