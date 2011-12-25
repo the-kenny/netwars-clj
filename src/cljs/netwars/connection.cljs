@@ -1,6 +1,5 @@
 (ns netwars.connection
   (:require [goog.events :as events]
-            [goog.json :as json]
             [goog.Timer :as timer]
             [cljs.reader :as reader]
             [netwars.logging :as logging]))
