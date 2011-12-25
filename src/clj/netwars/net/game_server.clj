@@ -233,5 +233,8 @@
                                     :path (:path request))))
       (do
         (error "Invalid path: " path "in" (:game-id *game*))
+        (connection/send-broadcast (broadcast-for-game *game*)
+                                   {:type :deselect-unit
+                                    :coordinate *coordinate*})
         (connection/send-data client
                               (assoc request :valid false))))))
