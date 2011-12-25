@@ -39,8 +39,6 @@
 ;;; TODO: Serve via http
 (defmethod connection/handle-request :unit-tiles [client request]
   (let [[tilespec tile] (load-tile "resources/pixmaps/units/")]
-    (connection/send-data
-     client
-     (assoc request
-       :tile-spec tilespec
-       :tiled-image tile))))
+    (connection/send-data client (assoc request
+                                   :tile-spec tilespec
+                                   :tiled-image tile))))

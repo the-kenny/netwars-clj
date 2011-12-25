@@ -142,11 +142,6 @@
 
 (defmethod connection/handle-request :helo [client request]
   (info "We got a new client:" (:client-id client))
-  ;; Send unit tiles
-  (let [[spec tiles] (tiling/load-tile "resources/pixmaps/units/")]
-    (send-data client {:type :unit-tiles
-                       :tile-spec spec
-                       :tiled-image tiles}))
   ;; Send game-list
   (send-data client (make-game-list-response)))
 

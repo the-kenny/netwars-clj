@@ -108,15 +108,17 @@
   (logging/clear-messages))
 
 (defn join-game [game-id]
+  (drawing/load-unit-tiles)              ;Make sure tiles are available
   (connection/send-data {:type :join-game
-                                :game-id game-id}))
+                         :game-id game-id}))
 
 
 ;;; New game fns
 
 (defn start-new-game [map-name]
+  (drawing/load-unit-tiles)              ;Make sure tiles are available
   (connection/send-data {:type :new-game,
-                                :map-name map-name}))
+                         :map-name map-name}))
 
 (defmethod connection/handle-response :new-game [message]
   (logging/log "New game created!"))

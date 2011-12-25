@@ -125,10 +125,14 @@
 
 ;;; Tile handling
 
-(defn request-unit-tiles []
-  (connection/send-data {:type :unit-tiles}))
-
 (def unit-tiles (atom nil))
+
+(defn load-unit-tiles
+  "Requests unit tiles from server. No-op if tiles are already loaded."
+  []
+  (when (nil? @unit-tiles)
+    ;; Request unit tiles
+    (connection/send-data {:type :unit-tiles})))
 
 (defmethod connection/handle-response :unit-tiles [response]
   (logging/log "got tiled unit-sprites")
