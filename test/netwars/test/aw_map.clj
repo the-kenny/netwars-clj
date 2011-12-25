@@ -1,6 +1,7 @@
 (ns netwars.test.aw-map
   (:use netwars.aw-map
-        clojure.test))
+        clojure.test
+        [netwars.aw-unit :only [+movement-types+]]))
 
 (deftest Coordinate
   (let [c (coord 2 3)]
@@ -35,3 +36,7 @@
     (is (= :plain (at m (coord 1 0))))
 
     (is (= :foobar (at (update-board m (coord 0 0) :foobar) (coord 0 0))))))
+
+(deftest test-movement-cost-table-integrity
+  (doseq [[terr costs] +movement-cost-table+]
+    (is (every? +movement-types+ (keys costs)))))
