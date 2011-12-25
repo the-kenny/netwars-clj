@@ -40,7 +40,7 @@
     :mechanical
     :tread
     :tires
-    :air
+    :fly
     :swim
     :transport
     :oozium
