@@ -47,7 +47,7 @@ With the optional second argument, it checks for validity in the context of the 
             (<= (count (rest path))
                 (min (:movement-range (meta unit)) (:fuel unit)))
             (every? #(aw-map/can-pass? (get-terrain board %)
-                                 (:movement-type (meta unit)))
+                                       (:movement-type (meta unit)))
               path)))))
 
 (defn make-path
