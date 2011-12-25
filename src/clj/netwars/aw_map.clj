@@ -99,7 +99,7 @@ Mostly useful for drawing of maps."
        :base         {:foot 1   :mechanical 1   :tread 1   :tires 1   :air 1   :sea nil :transport nil :oozium 1   :pipe nil :hover 1}
        :bridge       {:foot 1   :mechanical 1   :tread 1   :tires 1   :air 1   :sea nil :transport nil :oozium 1   :pipe nil :hover 1}
        :headquarter  {:foot 1   :mechanical 1   :tread 1   :tires 1   :air 1   :sea nil :transport nil :oozium 1   :pipe 1   :hover 1}
-       :mountain     {:foot 2   :mechanical 1   :tread nil :tires nil :air 1   :sea nil :transport nil :oozium 1   :pipe nil :hover 0}
+       :mountain     {:foot 2   :mechanical 1   :tread nil :tires nil :air 1   :sea nil :transport nil :oozium 1   :pipe nil :hover nil}
        :pipe         {:foot 2   :mechanical nil :tread nil :tires nil :air nil :sea nil :transport nil :oozium nil :pipe 1   :hover nil}
        :reef         {:foot nil :mechanical nil :tread nil :tires nil :air 1   :sea 1   :transport 1   :oozium nil :pipe nil :hover nil}
        :street       {:foot 1   :mechanical 1   :tread 1   :tires 1   :air 1   :sea nil :transport nil :oozium 1   :pipe nil :hover nil}
