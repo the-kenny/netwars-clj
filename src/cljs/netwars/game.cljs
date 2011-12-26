@@ -2,7 +2,8 @@
   (:require [netwars.connection :as connection]
             [netwars.drawing :as drawing]
             [netwars.logging :as logging]
-            [netwars.pathfinding :as pathfinding]))
+            [netwars.pathfinding :as pathfinding]
+            [netwars.unit-info :as unit-info]))
 
 ;;; TODO: Substitute with a record
 ;; {:game-id nil
@@ -39,8 +40,7 @@
                          :coordinate c}))
 
 (defn unit-clicked [[x y] unit]
-  (logging/message "Unit: " (name (:internal-name unit)) " (" (name (:color unit)) "), "
-                   (:hp unit) "hp, fuel: " (:fuel unit))
+  (unit-info/show-unit-info unit)
   (cond
    (nil? current-unit-coord) (request-select-unit [x y])
    (= current-unit-coord [x y]) (request-deselect-unit [x y])))

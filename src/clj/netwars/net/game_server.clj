@@ -138,6 +138,11 @@
                      [(:game-id game) (:info game)]))})
 
 
+(def-game-request :unit-info [client request]
+  (when *unit*
+    (info "Got request for unit info on coordinate: " *coordinate*)
+    (connection/send-data client (assoc request :unit *unit*))))
+
 ;;; :helo Handler
 
 (defmethod connection/handle-request :helo [client request]
