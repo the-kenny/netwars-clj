@@ -25,11 +25,9 @@
   (json-str {:api-version 1.0}))
 
 (defn games []
-  (let [ids (keys @server/running-games)
-        ret {:count (count ids)}]
-   (json-str (if (< 0 (count ids))
-               (assoc ret :ids ids)
-               ret))))
+  (let [ids (keys @server/running-games)]
+    (json-str {:count (count ids)
+               :ids (vec ids)})))
 
 (defn game [id]
   (json-str
@@ -38,3 +36,10 @@
        game
        {:error :not-found})
      {:error :invalid-uuid})))
+
+;;; Compojure routes
+
+(defroutes api-routes
+  (GET "/" [] (main))
+  (GET "/games" [] (games))
+  (GET "/game/:id" [id] (game id)))

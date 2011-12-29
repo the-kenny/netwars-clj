@@ -25,9 +25,7 @@
   (route/resources "/")
   (GET "/socket" [] (wrap-aleph-handler connection/websocket-handler))
   ;; Api
-  (GET "/api" [] (rest/main))
-  (GET "/api/games" [] (rest/games))
-  (GET "/api/game/:id" [id] (rest/game id))
+  (context "/api" [] rest/api-routes)
   (route/not-found "<p>aww... this doesn't exist</p>"))
 
 (let [server (atom nil)]
