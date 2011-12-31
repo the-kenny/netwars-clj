@@ -9,6 +9,11 @@
                  [compojure "1.0.0" :exclusions [org.clojure/clojure]]
                  [ring/ring-devel "1.0.1"]
                  [org.clojure/data.json "0.1.1"]]
+  :dev-dependencies [[emezeske/lein-cljsbuild "0.0.1"]]
   :repositories {"stuartsierra-releases" "http://stuartsierra.com/maven2"}
   :source-path "src/clj/"
-  :main netwars.core)
+  :main netwars.core
+  :cljsbuild {:source-dir "src/cljs"
+              :output-file "resources/public/netwars.js"
+              :optimizations :whitespace
+              :pretty-print true})
