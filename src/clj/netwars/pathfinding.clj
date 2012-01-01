@@ -1,6 +1,6 @@
 (ns netwars.pathfinding
   ;; (:use [clojure.contrib.graph :as graph]
-  ;;       [netwars.aw-map.loader :as map-loader]
+  ;;       [netwars.map-loader :as map-loader]
   ;;       [netwars.map-utils :as map])
   )
 

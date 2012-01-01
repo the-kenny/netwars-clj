@@ -107,27 +107,3 @@
                                                     (- rest costs)))
                 true #{c})))]
       (helper c (min movement-range fuel) :initial? true))))
-
-(comment
-  (require 'netwars.aw-map.loader)
-  (require 'netwars.aw-unit.loader)
-
-  (let [loaded-map (netwars.aw-map.loader/load-map "maps/7330.aws")
-        unit-spec (netwars.aw-unit.loader/load-units "resources/units.xml")
-        terrain (:terrain loaded-map)
-        units (zipmap (keys (:units loaded-map))
-                      (map #(netwars.aw-unit/make-unit unit-spec (:id %) (:color %))
-                           (vals (:units loaded-map))))
-        testboard (make-game-board terrain units)]
-    (defn dump-coords [c] (reachable-fields testboard c))
-
-    (defn draw-reachables [c]
-      (let [cs (reachable-fields testboard c)]
-       (doseq [y (range 0 (height (:terrain testboard)))
-               x (range 0 (width (:terrain testboard)))]
-         (print (cond
-                 (= c (coord x y)) " o"
-                 (contains? cs (coord x y)) " x"
-                 :true "  "))
-         (when (= 0 (rem (inc x) (width (:terrain testboard))))
-           (prn)))))))

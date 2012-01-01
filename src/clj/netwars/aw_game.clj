@@ -5,8 +5,8 @@
         [netwars.damagetable :as damagetable]
         [netwars.aw-map :as aw-map]
         [netwars.path :as path]
-        [netwars.aw-map.loader :only [load-map]]
-        [netwars.aw-unit.loader :only [load-units]]))
+        [netwars.map-loader :only [load-map]]
+        [netwars.unit-loader :only [load-units]]))
 
 ;; AwGame is a running game.
 ;; It stores info about the current players, whose turn it is, the unit spec used, etc.

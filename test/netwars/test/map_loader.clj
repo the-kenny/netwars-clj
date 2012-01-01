@@ -1,16 +1,16 @@
-(ns netwars.aw-map.test.loader
+(ns netwars.test.map-loader
   (:use clojure.test
-        netwars.aw-map.loader
+        netwars.map-loader
         netwars.aw-map
         [clojure.java.io :only [resource]]))
 
 ;;; TODO: Test metadata
 (deftest map-loading
   (let [map-file "maps/7330.aws"]
-    (is (instance? netwars.aw_map.loader.LoadedMap (load-map map-file))
+    (is (instance? netwars.map_loader.LoadedMap (load-map map-file))
         "loads a map from map-file"))
   (let [url "http://www.advancewarsnet.com/designmaps/mapfiles/7330.aws"]
-    (is (instance? netwars.aw_map.loader.LoadedMap (load-map url))
+    (is (instance? netwars.map_loader.LoadedMap (load-map url))
         "loads a map from an url"))
 
   (testing ".aws loading"

@@ -1,7 +1,7 @@
-(ns netwars.aw-map.drawer
+(ns netwars.map-drawer
   (:use netwars.aw-map
         netwars.map-utils
-        netwars.aw-map.loader
+        netwars.map-loader
         [clojure.java.io :only [resource]])
   (:import java.awt.Graphics2D
            java.awt.image.BufferedImage

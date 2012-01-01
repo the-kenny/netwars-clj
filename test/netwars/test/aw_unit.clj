@@ -1,7 +1,7 @@
 (ns netwars.test.aw-unit
   (:use netwars.aw-unit
         [clojure.java.io :only [resource]]
-        [netwars.aw-unit.loader :as loader]
+        [netwars.unit-loader :as loader]
         clojure.test))
 
 (def ^:dynamic *spec* nil)

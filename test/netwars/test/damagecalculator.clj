@@ -2,7 +2,7 @@
   (:use clojure.test
         netwars.damagecalculator
         [netwars.damagetable :as damagetable]
-        [netwars.aw-unit.loader :as unit-loader]
+        [netwars.unit-loader :as unit-loader]
         [netwars.aw-unit :as unit]))
 
 (deftest test-defense-value

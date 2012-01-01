@@ -1,4 +1,4 @@
-(ns netwars.aw-unit.loader
+(ns netwars.unit-loader
   (:require [clojure.xml :as xml]
             [clojure.zip :as zip])
   (:use [clojure.set :only [rename-keys]]

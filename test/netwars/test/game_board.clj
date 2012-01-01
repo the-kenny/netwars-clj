@@ -3,8 +3,8 @@
         [netwars.aw-map :only [coord]]
         clojure.test
         [clojure.set :as set]
-        [netwars.aw-map.loader :only [load-map]]
-        [netwars.aw-unit.loader :only [load-units]]))
+        [netwars.map-loader :only [load-map]]
+        [netwars.unit-loader :only [load-units]]))
 
 (defn make-testboard []
   (let [loaded-map (load-map "maps/7330.aws")
