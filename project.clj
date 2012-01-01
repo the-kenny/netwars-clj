@@ -9,11 +9,13 @@
                  [compojure "1.0.0" :exclusions [org.clojure/clojure]]
                  [ring/ring-devel "1.0.1"]
                  [org.clojure/data.json "0.1.1"]]
-  :dev-dependencies [[emezeske/lein-cljsbuild "0.0.1"]]
+  :dev-dependencies [[emezeske/lein-cljsbuild "0.0.2"]]
   :repositories {"stuartsierra-releases" "http://stuartsierra.com/maven2"}
   :source-path "src/clj/"
   :main netwars.core
-  :cljsbuild {:source-dir "src/cljs"
-              :output-file "resources/public/netwars.js"
-              :optimizations :whitespace
-              :pretty-print true})
+  :cljsbuild {:source-path "src/cljs/"
+              :compiler {:output-to "resources/public/netwars.js"
+                         :foreign-libs [{:file "resources/public/kinetic.js"
+                                         :provides ["kinetic"]}]
+                         :optimizations :whitespace
+                         :pretty-print true}})
