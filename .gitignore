@@ -1,8 +1,13 @@
-lib/
+.clojurescript-output/
+.lein-deps-sum
+.lein-failures
+
 resources/public
+!resources/public/kinetic.js
 !resources/public/netwars.html
 !resources/public/style.css
-!resources/public/kinetic.js
+
 classes/
 db/
-.lein-failures
+lib/
+netwars.log
