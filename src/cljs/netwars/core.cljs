@@ -1,6 +1,6 @@
 (ns netwars.core
   (:require [goog.events :as events]
-            [goog.dom :as dom]
+            [clojure.browser.dom :as dom]
             [goog.dom.classes :as classes]
             [goog.Timer :as Timer]
             [netwars.drawing :as drawing]
@@ -12,26 +12,26 @@
 ;;; Logging Stuff
 
 (defn set-connection-status [status]
-  (dom/setTextContent (dom/getElement "connectionIndicator") status))
+  (dom/set-text (dom/get-element :connectionIndicator) status))
 
 ;;; Implement drawing the requested map
 
 (defn on-load-map-submit []
   (logging/log "Requesting new map from server")
-  (game/start-new-game (.value (dom/getElement "mapName"))))
+  (game/start-new-game (.value (dom/get-element :mapName))))
 
 (connection/on-open
- #(let [elem (dom/getElement "connectionIndicator")]
+ #(let [elem (dom/get-element :connectionIndicator)]
     (classes/set elem "connected")
-    (dom/setTextContent elem "connected")))
+    (dom/set-text elem "connected")))
 (connection/on-close
- #(let [elem (dom/getElement "connectionIndicator")]
+ #(let [elem (dom/get-element :connectionIndicator)]
     (classes/set elem "disconnected")
-    (dom/setTextContent elem "closed...")))
+    (dom/set-text elem "closed...")))
 
-(def board-context (drawing/make-graphics (dom/getElement "gameBoard")))
+(def board-context (drawing/make-graphics (dom/get-element :gameBoard)))
 
-(events/listen (dom/getElement "mapForm")
+(events/listen (dom/get-element :mapForm)
                events/EventType.SUBMIT
                #(do (on-load-map-submit)
                     (. % (preventDefault))))
