@@ -2,7 +2,8 @@
   (:require [netwars.connection :as connection]
             [netwars.logging :as logging]
             [goog.events :as events]
-            [netwars.pathfinding :as pathfinding]))
+            [netwars.pathfinding :as pathfinding]
+            [kinetic :as kinetic]))
 
 ;;; Image loading and caching
 
