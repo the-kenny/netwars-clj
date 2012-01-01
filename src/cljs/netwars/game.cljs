@@ -62,7 +62,9 @@
 
 (defn mouse-moved [[x y]]
   (when running-game
-    (when (and current-path (contains? movement-range [x y]))
+    (when (and current-path
+               (contains? movement-range [x y])
+               (not (contains? (set (pathfinding/elements current-path)) [x y])))
       (pathfinding/update-path! current-path [x y]))
     (logging/log "Mouse moved: [" x " " y "]")))
 
