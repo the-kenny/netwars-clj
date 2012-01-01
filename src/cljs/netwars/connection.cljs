@@ -63,7 +63,7 @@
 
 (defn open-socket [uri]
   (let [ws (js/WebSocket. uri)]
-    (events/listen ws "open" handle-open)
-    (events/listen ws "close" handle-close)
+    (set! (. ws onopen) (fn [_] (handle-open)))
+    (set! (. ws onclose) (fn [] (handle-close)))
     (set! (. ws onmessage) #(handle-socket-message %))
     (set! *socket* ws)))
