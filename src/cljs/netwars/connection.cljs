@@ -1,5 +1,5 @@
 (ns netwars.connection
-  (:require [goog.events :as events]
+  (:require [clojure.browser.event :as event]
             [goog.Timer :as timer]
             [cljs.reader :as reader]
             [netwars.logging :as logging]))
@@ -51,8 +51,7 @@
 
 (defn start-ping-timer [interval]
   (let [t (goog.Timer. interval)]
-    (events/listen t goog.Timer/TICK
-                   #(send-data {:type :ping}))
+    (event/listen t :tick (fn [_] (send-data {:type :ping})))
     (. t (start))))
 
 (defmethod handle-response :pong [_]

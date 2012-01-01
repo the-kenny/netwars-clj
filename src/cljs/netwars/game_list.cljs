@@ -1,22 +1,22 @@
 (ns netwars.game-list
-  (:require [goog.dom :as dom]
+  (:require [clojure.browser.dom :as dom]
             [netwars.connection :as connection]
             [netwars.game :as game]
-            [goog.events :as events]))
+            [clojure.browser.event :as event]))
 
 (defn- append-game [id game]
-  (let [link (dom/createDom "a" nil (str id))]
-    (events/listen link goog.events.EventType/CLICK
+  (let [link (dom/element "a" (str id))]
+    (event/listen link :click
                    #(game/join-game id))
-   (doto (dom/getElement "gameList")
-     (.appendChild (dom/createDom "li" "gameLink" link)))))
+   (doto (dom/get-element :gameList)
+     (dom/append (dom/element "li" {:class "gameLink"} link)))))
 
 (defmethod connection/handle-response :new-listed-game [response]
   (let [game (:game response)]
     (append-game (:game-id game) (:info game))))
 
 (defmethod connection/handle-response :game-list [response]
-  (dom/removeChildren (dom/getElement "gameList"))
+  (dom/remove-children :gameList)
   (doseq [[id info] (:games response)]
     (append-game id info)))
 

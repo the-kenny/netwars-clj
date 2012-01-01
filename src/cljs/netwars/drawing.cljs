@@ -1,7 +1,7 @@
 (ns netwars.drawing
   (:require [netwars.connection :as connection]
             [netwars.logging :as logging]
-            [goog.events :as events]
+            [clojure.browser.event :as event]
             [netwars.pathfinding :as pathfinding]
             [kinetic :as kinetic]))
 
@@ -90,7 +90,7 @@
 (defn image-from-base64 [base64 callback]
   (let [image (js/Image.)]
     (set! (. image src) base64)
-    (events/listen image "load" #(callback image))))
+    (event/listen-once image :load (fn [_] (callback image)))))
 
 (defn canvas->map
   "Converts canvas coordinates to netwars coordinates"

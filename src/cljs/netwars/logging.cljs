@@ -1,13 +1,13 @@
 (ns netwars.logging
-  (:require [goog.dom :as dom]))
+  (:require [clojure.browser.dom :as dom]))
 
 (defn log [& more]
   (.log js/console (apply str more)))
 
 (defn message-html [elem]
   (let [messageLog (dom/getElement "messageLog")]
-    (dom/appendChild messageLog
-     (dom/createDom "div" nil elem))
+    (dom/append messageLog
+     (dom/element "div" elem))
     ;; Scroll to bottom found at:
     ;; http://www.ajax-community.de/javascript/6065-div-anspringen-timeout-berbr-cken.html
     (set! (. messageLog scrollTop) (.scrollHeight messageLog))))
@@ -16,4 +16,4 @@
   (message-html (apply str more)))
 
 (defn clear-messages []
-  (dom/removeChildren (dom/getElement "messageLog")))
+  (dom/remove-children :messageLog))
