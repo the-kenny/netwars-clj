@@ -5,7 +5,7 @@
   (.log js/console (apply str more)))
 
 (defn message-html [elem]
-  (let [messageLog (dom/getElement "messageLog")]
+  (let [messageLog (dom/get-element "messageLog")]
     (dom/append messageLog
      (dom/element "div" elem))
     ;; Scroll to bottom found at:

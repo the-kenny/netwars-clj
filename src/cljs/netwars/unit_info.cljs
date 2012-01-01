@@ -1,6 +1,5 @@
 (ns netwars.unit-info
-  (:require [goog.dom :as dom]
-            [netwars.connection :as connection]
+  (:require [netwars.connection :as connection]
             [netwars.logging :as logging]))
 
 (defn show-unit-info [unit]
