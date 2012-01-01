@@ -1,5 +1,5 @@
 (ns netwars.core
-  (:require [goog.events :as events]
+  (:require [clojure.browser.event :as event]
             [clojure.browser.dom :as dom]
             [goog.dom.classes :as classes]
             [goog.Timer :as Timer]
@@ -31,8 +31,8 @@
 
 (def board-context (drawing/make-graphics (dom/get-element :gameBoard)))
 
-(events/listen (dom/get-element :mapForm)
-               events/EventType.SUBMIT
+(event/listen (dom/get-element :mapForm)
+               :submit
                #(do (on-load-map-submit)
                     (. % (preventDefault))))
 
@@ -51,5 +51,5 @@
 
 ;;; TODO: Use animation when enormous cpu usage is fixed
 (let [t (goog.Timer. 100)]
-  (events/listen t goog.Timer/TICK #(drawing/redraw board-context))
+  (event/listen t :tick #(drawing/redraw board-context))
   (. t (start)))
