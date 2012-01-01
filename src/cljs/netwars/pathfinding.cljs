@@ -1,6 +1,4 @@
-(ns netwars.pathfinding
-  (:require [netwars.aw-map :as aw-map]
-            [netwars.drawing :as drawing]))
+(ns netwars.pathfinding)
 
 ;;; A path is a mutable data structure holding a ordered sequence of coordinates.
 ;;; Updates using update-path! are mutable.
