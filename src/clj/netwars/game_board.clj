@@ -1,6 +1,7 @@
 (ns netwars.game-board
-  (:use netwars.aw-map
-        netwars.aw-unit))
+  (:require [netwars.aw-map :as aw-map]
+            [netwars.aw-unit :as unit]
+            [clojure.set :as set]))
 
 ;; This namespace contains definitions and functions for GameBoard.
 ;; GameBoard combines AwMap with information about the units on it.
@@ -22,7 +23,7 @@
     (make-game-board terrain units)))
 
 (defn get-terrain [^GameBoard board coord]
-  (at (:terrain board) coord))
+  (aw-map/at (:terrain board) coord))
 
 (defn get-unit [^GameBoard board coord]
   (get (:units board) coord))
@@ -47,7 +48,7 @@
    it checks if both units have the same color."
   [board unit c]
   (and (or (nil? (get-unit board c)) (= (:color unit) (:color (get-unit board c))))
-       (can-pass? (get-terrain board c) (:movement-type (meta unit)))
+       (aw-map/can-pass? (get-terrain board c) (:movement-type (meta unit)))
        ))
 
 (defn move-unit [^GameBoard board c1 c2]
@@ -57,24 +58,22 @@
    (assoc board :units (-> (:units board) (assoc c2 u) (dissoc c1)))))
 
 (defn change-building-color [^GameBoard board c color]
-  {:pre [(is-building? (get-terrain board c))]
+  {:pre [(aw-map/is-building? (get-terrain board c))]
    :post [(= color (second (get-terrain % c)))]}
   (let [terrain (:terrain board)]
-   (assoc board :terrain (update-board terrain c
-                                       (assoc (get-terrain board c) 1 color)))))
+   (assoc board :terrain (aw-map/update-board terrain c
+                                                (assoc (get-terrain board c) 1 color)))))
 
 ;;; Attacking
 
 (defn in-attack-range? [board att-coord vic-coord]
-  (let [dist (distance att-coord vic-coord)
+  (let [dist (aw-map/distance att-coord vic-coord)
         att (get-unit board att-coord)
         def (get-unit board vic-coord)]
-    (or (contains? (:range (main-weapon att)) dist)
-        (contains? (:range (alt-weapon att)) dist))))
+    (or (contains? (:range (unit/main-weapon att)) dist)
+        (contains? (:range (unit/alt-weapon att)) dist))))
 
 ;;; Movement Range
-
-(use '[clojure.set :as set])
 
 (defn reachable-fields
   "Returns a set of all coordinates reachable by unit on coordinate c"
@@ -89,21 +88,21 @@
     ;; (println "unit:" unit)
     (letfn [(helper [c rest & {:keys [initial?]}]
               (let [t (get-terrain board c)
-                    costs (if initial? 0 (movement-costs t movement-type))]
+                    costs (if initial? 0 (aw-map/movement-costs t movement-type))]
                 ;; (println (str "[" (:x c) "," (:y c) "]") ";" t "costs:" costs)
                (cond
                 (nil? c) #{}
-                (not (in-bounds? (:terrain board) c)) #{}
-                (not (can-pass? t movement-type)) #{}
+                (not (aw-map/in-bounds? (:terrain board) c)) #{}
+                (not (aw-map/can-pass? t movement-type)) #{}
                 (and (not initial?) (not (can-walk-on-field? board unit c))) #{}
                 (> rest costs) (set/union #{c}
-                                            (helper (coord (inc (:x c)) (:y c))
+                                            (helper (aw-map/coord (inc (:x c)) (:y c))
                                                     (- rest costs))
-                                            (helper (coord (dec (:x c)) (:y c))
+                                            (helper (aw-map/coord (dec (:x c)) (:y c))
                                                     (- rest costs))
-                                            (helper (coord (:x c) (inc (:y c)))
+                                            (helper (aw-map/coord (:x c) (inc (:y c)))
                                                     (- rest costs))
-                                            (helper (coord (:x c) (dec (:y c)))
+                                            (helper (aw-map/coord (:x c) (dec (:y c)))
                                                     (- rest costs)))
                 true #{c})))]
       (helper c (min movement-range fuel) :initial? true))))

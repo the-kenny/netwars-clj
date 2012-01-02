@@ -14,6 +14,9 @@
   :source-path "src/clj/"
   :main netwars.core
   :cljsbuild {:source-path "src/cljs/"
+              :crossovers [netwars.aw-map
+                           netwars.aw-unit
+                           netwars.game-board]
               :compiler {:output-to "resources/public/netwars.js"
                          :foreign-libs [{:file "resources/public/kinetic.js"
                                          :provides ["kinetic"]}]

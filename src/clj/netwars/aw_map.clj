@@ -20,8 +20,9 @@
   [c]
   (instance? Coordinate c))
 
-(defmethod clojure.core/print-method ::Coordinate [c writer]
-  (.write writer (str "[" (:x c) "," (:y c) "]")))
+(when clojure.core/print-method
+  (defmethod clojure.core/print-method ::Coordinate [c writer]
+           (.write writer (str "[" (:x c) "," (:y c) "]"))))
 
 (defn distance
   "Manhattan metric distance between coordinates"
