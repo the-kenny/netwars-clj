@@ -1,8 +1,13 @@
 (ns netwars.net.otw
-  (:require [netwars.aw-map :as aw-map]))
+  (:require [netwars.aw-map :as aw-map]
+            [cljs.reader :as reader]))
 
 (defprotocol Sendable
   (encode [o]))
+
+(defn- encode-map [m]
+  (with-meta (into {} (for [[k v] m] [(encode k) (encode v)]))
+    (encode (meta m))))
 
 (extend-protocol Sendable
   aw-map/Coordinate
@@ -10,8 +15,9 @@
   List
   (encode [v] (with-meta (map encode v) (encode (meta v))))
   HashMap
-  (encode [m] (with-meta (into {} (for [[k v] m] [(encode k) (encode v)]))
-                (encode (meta m))))
+  (encode [m] (encode-map m))
+  ObjMap
+  (encode [m] (encode-map m))
   Set
   (encode [s] (with-meta (into #{} (map encode s)) (encode (meta s))))
   boolean
@@ -30,6 +36,6 @@
 
 (defn decode-data [s]
   {:pre [(string? s)]}
-  (let [read (read-string s)]
+  (let [read (reader/read-string s)]
    (with-meta (into {} (for [[k v] read] [(keyword k) v]))
      (meta read))))

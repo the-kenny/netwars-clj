@@ -2,16 +2,17 @@
   (:require [clojure.browser.event :as event]
             [goog.Timer :as timer]
             [cljs.reader :as reader]
-            [netwars.logging :as logging]))
+            [netwars.logging :as logging]
+            [netwars.net.otw :as otw]))
 
 (def *socket* nil)
 
 (defn encode-data [data]
-  (pr-str (into {} (for [[k v] data] [k v]))))
+  (otw/encode-data data))
 
 (defn decode-data [s]
   (logging/log s)
-  (reader/read-string s))
+  (otw/decode-data s))
 
 (defn- generate-id [& [prefix]]
   (apply str prefix (repeatedly 10 #(rand-int 10))))
