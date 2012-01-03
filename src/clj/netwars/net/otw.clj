@@ -18,7 +18,7 @@
 
 (extend-protocol Sendable
   Coordinate
-  (encode [c] (with-meta [(:x c) (:y c)] (encode (meta c))))
+  (encode [c] (with-meta (list 'coord (:x c) (:y c)) (encode (meta c))))
   List
   (encode [v] (with-meta (map encode v) (encode (meta v))))
   IPersistentMap
