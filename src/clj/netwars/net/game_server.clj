@@ -103,8 +103,7 @@
      (if-let [game# (game-for-client client#)]
        (let [~client-sym client#,
              ~request-sym request#
-             coord# (try (aw-map/coord (:coordinate request#))
-                         (catch Exception _# nil))
+             coord# (:coordinate request#)
              unit# (and coord# (board/get-unit @(:board game#) coord#))]
          (binding [*game* game#
                    *coordinate* coord#

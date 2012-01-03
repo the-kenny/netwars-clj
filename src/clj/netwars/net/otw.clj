@@ -15,44 +15,57 @@
          (Base64/encodeBase64String (.toByteArray os)))))
 
 (defprotocol Sendable
-  (encode [o]))
+  (encode [o])
+  (decode [o]))
+
+(declare encode decode)                 ;Don't know why this is needed
+
+(defn- encode-map [m]
+  (with-meta (into {} (for [[k v] m] [(encode k) (encode v)]))
+    (encode (meta m))))
+
+(defn- decode-map [m]
+  (with-meta (into {} (for [[k v] m] [(decode k) (decode v)]))
+    (decode (meta m))))
 
 (extend-protocol Sendable
   Coordinate
   (encode [c] (with-meta (list 'coord (:x c) (:y c)) (encode (meta c))))
+  (decode [o] o)
   List
   (encode [v] (with-meta (map encode v) (encode (meta v))))
+  (decode [o] (with-meta
+                (if (and (sequential? o)
+                         (= 3 (count o))
+                         (= 'coord (first o)))
+                  (coord (rest o))
+                  (map decode o))
+                (decode (meta o))))
   IPersistentMap
-  (encode [m] (with-meta (into {} (for [[k v] m] [(encode k) (encode v)]))
-                (encode (meta m))))
+  (encode [m] (encode-map m))
+  (decode [m] (decode-map m))
   IPersistentSet
   (encode [s] (with-meta (into #{} (map encode s)) (encode (meta s))))
+  (decode [s] (with-meta (into #{} (map decode s)) (decode (meta s))))
   UUID
   (encode [u] (str u))
+  (decode [u] (assert nil "unimplemented"))
   Object
   (encode [o] o)
+  (decode [o] o)
   java.awt.Image
   (encode [i] (image-to-base64 i))
+  (decode [o] (assert nil "unimplemented")) ;TODO: image-from-base64
   nil
-  (encode [_] nil))
+  (encode [_] nil)
+  (decode [_] nil))
 
 (defn encode-data [data]
   {:pre [(map? data)]}
   (binding [*print-meta* true]
     (pr-str (encode data))))
 
-(defn- decode [o]
-  (cond
-   (and (sequential? o)
-        (= 3 (count o))
-        (= 'coord (first o)))
-   (coord (rest o))
-
-   true
-   o))
-
 (defn decode-data [s]
   {:pre [(string? s)]}
   (let [read (read-string s)]
-   (with-meta (into {} (for [[k v] read] [(keyword k) (encode v)]))
-     (meta read))))
+    (decode-map read)))
