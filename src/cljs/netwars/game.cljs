@@ -61,12 +61,9 @@
      (terrain-clicked [x y]))))
 
 (defn mouse-moved [[x y]]
-  (when running-game
-    (when (and current-path
-               (contains? movement-range [x y])
-               (not (contains? (set (pathfinding/elements current-path)) [x y])))
-      (pathfinding/update-path! current-path [x y]))
-    (logging/log "Mouse moved: [" x " " y "]")))
+  (when (and running-game current-path)
+    (let [max-range (:movement-range (meta (unit-at current-unit-coord)))]
+      (pathfinding/update-path! current-path movement-range [x y] max-range))))
 
 
 ;;; Movement Range
