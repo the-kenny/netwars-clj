@@ -3,7 +3,8 @@
             [netwars.logging :as logging]
             [clojure.browser.event :as event]
             [netwars.pathfinding :as pathfinding]
-            [kinetic :as kinetic]))
+            [kinetic :as kinetic])
+  (:use [netwars.aw-map :only [coord]]))
 
 ;;; Image loading and caching
 
@@ -45,17 +46,17 @@
 
 ;;; Event Stuff
 
-(defn add-event-listener [graphics [x y] w h event f]
+(defn add-event-listener [graphics c w h event f]
   (let [kinetic (:kinetic graphics)
         context (:context graphics)
         callback #(let [mousePos (. kinetic (getMousePos))
                         x (.x mousePos)
                         y (.y mousePos)]
-                    (f [x y]))]
+                    (f (coord x y)))]
     ;; Add region event listener
     (. kinetic (beginRegion))
     (. context (beginPath))
-    (. context (rect x y w h))
+    (. context (rect (:x c) (:y c) w h))
     (. context (closePath))
     (. kinetic (addRegionEventListener event (fn [e]
                                                 (callback)
@@ -66,12 +67,12 @@
 (defn add-click-listener
   "Adds a click listener to graphics at [x,y] with width w and height h.
    Calls (f mouse-x mouse-y) on click"
-  [graphics [x y] w h f]
-  (add-event-listener graphics [x y] w h "onmousedown" f))
+  [graphics c w h f]
+  (add-event-listener graphics c w h "onmousedown" f))
 
 (defn add-move-listener
   "Adds a move listener to the canvas contained in the graphics object.
-   Calls (f [x y])"
+   Calls (f c)"
   [graphics f]
   (let [kinetic (:kinetic graphics)
         canvas (:canvas graphics)
@@ -80,8 +81,8 @@
     (.addEventListener canvas "mousemove"
                        (fn [event]
                          (let [mouse-pos (. kinetic (getMousePos))
-                               c (canvas->map [(.x mouse-pos) (.y mouse-pos)])]
-                           (when (not= c @last-atom)
+                               c (canvas->map (coord (.x mouse-pos) (.y mouse-pos)))]
+                           (when (and @last-atom (not= c @last-atom))
                              (f c)
                              (reset! last-atom c)))))))
 
@@ -94,15 +95,17 @@
 
 (defn canvas->map
   "Converts canvas coordinates to netwars coordinates"
-  [[x y]]
-  [(Math/floor (/ x 16)) (Math/floor (/ y 16))])
+  [c]
+  (coord (Math/floor (/ (:x c) 16)) (Math/floor (/ (:y c) 16))))
 
 (defn map->canvas
   "Converts canvas coordinates to netwars coordinates"
-  [[x y] & center?]
-  (if center?
-    [(+ (* x 16) 8) (+ (* y 16) 8)]
-    [(* x 16) (* y 16)]))
+  [c & center?]
+  (let [x (:x c)
+        y (:y c)]
+   (apply coord (if center?
+                  [(+ (* x 16) 8) (+ (* y 16) 8)]
+                  [(* x 16) (* y 16)]))))
 
 ;;; Terrain drawing
 
@@ -118,11 +121,11 @@
   (image-from-base64 image-data (partial draw-terrain-image graphics)))
 
 
-(defn highlight-square [graphics [x y] & {:keys [color]}]
+(defn highlight-square [graphics c & {:keys [color]}]
   (let [context (:context graphics)]
     (when color
      (set! (. context fillStyle) color))
-    (.fillRect context (* x 16) (* y 16) 16 16)))
+    (.fillRect context (* (:x c) 16) (* (:y c) 16) 16 16)))
 
 ;;; Tile handling
 
@@ -150,20 +153,20 @@
                       :green :ge
                       :blue :bm
                       :black :bh}]
- (defn draw-unit-at [graphics unit [x y]]
+ (defn draw-unit-at [graphics unit c]
    (let [internal-name (:internal-name unit)
          color (:color unit)
          canvas (:canvas graphics)
          tile (:tiled-image @unit-tiles)
          context (:context graphics)
          kinetic (:kinetic graphics)
-         [tx ty] (get (:tile-spec @unit-tiles)
+         tc (get (:tile-spec @unit-tiles)
                       [(color-mappings color) internal-name])]
      (. context (drawImage tile
-                           tx ty
+                           (:x tc) (:y tc)
                            16 16
-                           (* x 16)
-                           (* y 16)
+                           (* (:x c) 16)
+                           (* (:y c) 16)
                            16 16)))))
 
 ;;; Path drawing
@@ -177,13 +180,13 @@
    (set! (. context lineCap) "round")
    (set! (. context lineJoin) "round")
    (.moveTo context (ffirst newpath) (second (first newpath)))
-   (doseq [[x y] (rest newpath)]
-     (.lineTo context x y))
+   (doseq [c (rest newpath)]
+     (.lineTo context (:x c) (:y c)))
    (. context (stroke))
    (. context (beginPath))
    (let [end (map->canvas (last (pathfinding/elements path)) true)]
     (.arc context
-          (first end) (second end)
+          (:x end) (:y end)
           2.0
           0
           (* 2 Math/PI)))

@@ -3,7 +3,11 @@
             [netwars.drawing :as drawing]
             [netwars.logging :as logging]
             [netwars.pathfinding :as pathfinding]
-            [netwars.unit-info :as unit-info]))
+            [netwars.unit-info :as unit-info]
+            [netwars.aw-map :as aw-map]))
+
+;;; TODO: Use netwars.aw-unit.AwUnit instead of raw maps
+;;; TODO: Use netwars.game-board for storing game-state
 
 ;;; TODO: Substitute with a record
 ;; {:game-id nil
@@ -39,31 +43,31 @@
   (connection/send-data {:type :deselect-unit
                          :coordinate c}))
 
-(defn unit-clicked [[x y] unit]
+(defn unit-clicked [c unit]
   (unit-info/show-unit-info unit)
   (cond
-   (nil? current-unit-coord) (request-select-unit [x y])
-   (= current-unit-coord [x y]) (request-deselect-unit [x y])))
+   (nil? current-unit-coord) (request-select-unit c)
+   (= current-unit-coord c) (request-deselect-unit c)))
 
-(defn terrain-clicked [[x y]]
+(defn terrain-clicked [c]
   (when current-unit-coord
-    (if (get movement-range [x y])
+    (if (get movement-range c)
       (connection/send-data {:type :move-unit
                              :path (pathfinding/elements current-path)})
       (request-deselect-unit current-unit-coord))))
 
-(defn clicked-on [[x y]]
-  (let [unit (unit-at [x y])]
+(defn clicked-on [c]
+  (let [unit (unit-at c)]
     (cond
      unit
-     (unit-clicked [x y] unit)
+     (unit-clicked c unit)
      true
-     (terrain-clicked [x y]))))
+     (terrain-clicked c))))
 
-(defn mouse-moved [[x y]]
+(defn mouse-moved [c]
   (when (and running-game current-path)
     (let [max-range (:movement-range (meta (unit-at current-unit-coord)))]
-      (pathfinding/update-path! current-path movement-range [x y] max-range))))
+      (pathfinding/update-path! current-path movement-range c max-range))))
 
 
 ;;; Movement Range
@@ -159,5 +163,5 @@
     ;; This needs to be re-added after every clear. Dumb kinetic...
     (let [canvas (:canvas graphics)]
       (drawing/add-click-listener graphics
-                                  [0 0] (.width canvas) (.height canvas)
+                                  (aw-map/coord 0 0) (.width canvas) (.height canvas)
                                   #(-> % drawing/canvas->map clicked-on)))))
