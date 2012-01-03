@@ -1,5 +1,6 @@
 (ns netwars.net.otw
   (:require netwars.aw-map)             ;import fails w.o. this
+  (:use [netwars.aw-map :only [coord]])
   (:import [clojure.lang IPersistentMap IPersistentSet Keyword]
            [java.awt Image]
            [java.util List UUID]
@@ -40,8 +41,18 @@
   (binding [*print-meta* true]
     (pr-str (encode data))))
 
+(defn- decode [o]
+  (cond
+   (and (sequential? o)
+        (= 3 (count o))
+        (= 'coord (first o)))
+   (coord (rest o))
+
+   true
+   o))
+
 (defn decode-data [s]
   {:pre [(string? s)]}
   (let [read (read-string s)]
-   (with-meta (into {} (for [[k v] read] [(keyword k) v]))
+   (with-meta (into {} (for [[k v] read] [(keyword k) (encode v)]))
      (meta read))))
