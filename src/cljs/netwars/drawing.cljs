@@ -82,7 +82,7 @@
                        (fn [event]
                          (let [mouse-pos (. kinetic (getMousePos))
                                c (canvas->map (coord (.x mouse-pos) (.y mouse-pos)))]
-                           (when (and @last-atom (not= c @last-atom))
+                           (when (or (nil? @last-atom) (not= c @last-atom))
                              (f c)
                              (reset! last-atom c)))))))
 
