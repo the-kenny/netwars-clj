@@ -215,7 +215,7 @@
 
 (def-game-request :move-unit [client request]
   (let [from (game/selected-coordinate *game*)
-        path (path/make-path (map coord (:path request)))
+        path (path/make-path (:path request))
         board @(:board *game*)]
     (assert (= from (first path)))
     (assert (board/get-unit board from))
