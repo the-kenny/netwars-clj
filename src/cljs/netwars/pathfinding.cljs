@@ -31,8 +31,7 @@
    ;; Element is right next to the path and not already in path. Add it.
    (and (contains? movement-range c)
         (not (in-path? path c))
-        (= 1 (aw-map/distance (aw-map/coord (end path))
-                              (aw-map/coord c)))
+        (= 1 (aw-map/distance c (end path)))
         (if max-length (<= (length path) max-length) true))
    (append! path c)
 

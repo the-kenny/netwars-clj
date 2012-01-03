@@ -179,7 +179,7 @@
    (set! (. context lineWidth) 4)
    (set! (. context lineCap) "round")
    (set! (. context lineJoin) "round")
-   (.moveTo context (ffirst newpath) (second (first newpath)))
+   (.moveTo context (:x (first newpath)) (:y (first newpath)))
    (doseq [c (rest newpath)]
      (.lineTo context (:x c) (:y c)))
    (. context (stroke))

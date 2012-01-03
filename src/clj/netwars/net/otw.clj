@@ -28,19 +28,25 @@
   (with-meta (into {} (for [[k v] m] [(decode k) (decode v)]))
     (decode (meta m))))
 
+(defn- encode-seq [s]
+  (with-meta (map encode v) (encode (meta v))))
+
+(defn- decode-seq [s]
+  (with-meta
+    (if (and (sequential? o)
+             (= 3 (count o))
+             (= 'coord (first o)))
+      (coord (rest o))
+      (map decode o))
+    (decode (meta o))))
+
 (extend-protocol Sendable
   Coordinate
   (encode [c] (with-meta (list 'coord (:x c) (:y c)) (encode (meta c))))
   (decode [o] o)
   List
-  (encode [v] (with-meta (map encode v) (encode (meta v))))
-  (decode [o] (with-meta
-                (if (and (sequential? o)
-                         (= 3 (count o))
-                         (= 'coord (first o)))
-                  (coord (rest o))
-                  (map decode o))
-                (decode (meta o))))
+  (encode [v] (encode-seq v))
+  (decode [v] (decode-seq v))
   IPersistentMap
   (encode [m] (encode-map m))
   (decode [m] (decode-map m))

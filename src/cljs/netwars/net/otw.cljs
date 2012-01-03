@@ -15,19 +15,27 @@
   (with-meta (into {} (for [[k v] m] [(decode k) (decode v)]))
     (meta m)))
 
+(defn- encode-seq [v]
+  (with-meta (map encode v) (encode (meta v))))
+
+(defn- decode-seq [o]
+  (with-meta
+    (if (and (= 3 (count o))
+             (= 'coord (first o)))
+      (aw-map/coord (rest o))
+      (map decode o))
+    (decode (meta o))))
+
 (extend-protocol Sendable
   aw-map/Coordinate
   (encode [c] (with-meta (list 'coord (:x c) (:y c)) (encode (meta c))))
   (decode [o] o)
   List
-  (encode [v] (with-meta (map encode v) (encode (meta v))))
-  (decode [o] (with-meta
-                (if (and (sequential? o)
-                           (= 3 (count o))
-                           (= 'coord (first o)))
-                  (aw-map/coord (rest o))
-                  (map decode o))
-                (decode (meta o))))
+  (encode [v] (encode-seq v))
+  (decode [v] (decode-seq v))
+  cljs.core.Vector
+  (encode [v] (encode-seq v))
+  (decode [v] (decode-seq v))
   EmptyList
   (encode [v] '())
   (decode [o] '())
