@@ -35,18 +35,15 @@
   (binding [*print-meta* true]
     (pr-str (encode data))))
 
-(defmulti ^{:private true} decode #(sequential? %))
+(defn- decode [o]
+  (cond
+   (and (sequential? o)
+        (= 3 (count o))
+        (= 'coord (first o)))
+   (aw-map/coord (rest o))
 
-(defmethod decode :default [o]
-  o)
-
-(defmethod decode true [l]
-  (logging/log (str l))
-  (let [[f & r] l]
-    (if (and (= f 'coord)
-             (= 2 (count r)))
-      (aw-map/coord r)
-      l)))
+   true
+   o))
 
 (defn decode-data [s]
   {:pre [(string? s)]}
