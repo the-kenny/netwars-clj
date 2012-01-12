@@ -28,10 +28,10 @@
   (with-meta (into {} (for [[k v] m] [(decode k) (decode v)]))
     (decode (meta m))))
 
-(defn- encode-seq [s]
-  (with-meta (map encode v) (encode (meta v))))
+(defn- encode-seq [o]
+  (with-meta (map encode o) (encode (meta o))))
 
-(defn- decode-seq [s]
+(defn- decode-seq [o]
   (with-meta
     (if (and (sequential? o)
              (= 3 (count o))
