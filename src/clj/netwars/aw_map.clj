@@ -70,21 +70,21 @@ data must be in a specific format."
 Building-values have the structure [building color] whereas normal terrains are only keywords."
   [t]
   (and (vector? t)
-       (get #{:headquarter :city :base :airport :port :tower :lab :silo} (first t))))
+       (contains? #{:headquarter :city :base :airport :port :tower :lab :silo} (first t))))
 
 (defn is-terrain?
   "Predicate to check if a terrain-value is normal terrain and not a building.
 terrain values are ordinary keywords.
 More or less the counterpart to `is-building?`"
   [t]
-  (get #{:plain :street :bridge :segment-pipe :river :beach :wreckage :pipe
+  (contains? #{:plain :street :bridge :segment-pipe :river :beach :wreckage :pipe
          :mountain :forest :water :reef} t))
 
 (defn is-water?
   "Predicate to check if a terrain value is some kind of water.
 Mostly useful for drawing of maps."
   [t]
-  (get #{:water :reef :beach :bridge} t))
+  (contains? #{:water :reef :beach :bridge} t))
 
 (defn is-ground?
     "Predicate to check if a terrain value is some kind of ground. Counterpart to `is-water?`

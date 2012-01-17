@@ -1,6 +1,7 @@
 (ns netwars.test.aw-map
   (:use netwars.aw-map
         clojure.test
+        midje.sweet
         [netwars.aw-unit :only [+movement-types+]]))
 
 (deftest Coordinate
@@ -14,6 +15,11 @@
 
 (deftest test-distance
   (is (= 3 (distance (coord 0 0) (coord 2 1)))))
+
+(facts "about in-bounds?"
+  (in-bounds? ...board... (coord 10 10)) => true
+  (provided (width ...board...)  => 30
+            (height ...board...) => 20))
 
 ;;; Given map:
 ;;;  -------
@@ -36,6 +42,25 @@
     (is (= :plain (at m (coord 1 0))))
 
     (is (= :foobar (at (update-board m (coord 0 0) :foobar) (coord 0 0))))))
+
+(facts "about is-building?"
+  (doseq [t #{:headquarter :city :base :airport :port :tower :lab :silo}]
+   (is-building? [t ...color...]) => true)
+  (is-building? ...any...) => false)
+
+(facts "about is-terrain?"
+  (doseq [t #{:plain :street :bridge :segment-pipe :river :beach :wreckage :pipe :mountain :forest :water :reef}]
+    (is-terrain? t) => true)
+  (is-terrain? ...any...) => false)
+
+(facts "about is-water?"
+  (doseq [t #{:water :reef :beach :bridge}]
+    (is-water? t) => true)
+  (is-water? ...any...) => false)
+
+(facts "about is-ground?"
+  (is-ground? ...ground...) => true
+  (provided (is-water? ...ground...) => false))
 
 (deftest test-movement-cost-table-integrity
   (doseq [[terr costs] +movement-cost-table+]
