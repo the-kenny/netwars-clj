@@ -68,3 +68,12 @@
             (is-building? [terr nil])))
     (is (every? +movement-types+ (keys costs)))
     (is (every? #(or (nil? %) (> % 0)) (vals costs)))))
+
+(facts "about can-produce-units?"
+  (can-produce-units? [:base ...color...]) => true
+  (can-produce-units? [:port ...color...]) => true
+  (can-produce-units? [:airport ...color...]) => true
+  (can-produce-units? ...any...) => false)
+
+(fact "about defense-value"
+  (defense-value ...terrain...) => integer?)

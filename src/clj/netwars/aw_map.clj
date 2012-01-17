@@ -119,3 +119,9 @@ Mostly useful for drawing of maps."
   "Predicate to check if `movement-type` can pass `terrain`, e.g. movement-costs are non-nil."
   [terrain movement-type]
   (boolean (movement-costs terrain movement-type)))
+
+(defn can-produce-units? [t]
+  (and (sequential? t) (is-building? #{:port :base :airport} (first t))))
+
+(defn defense-value [t]
+  )
