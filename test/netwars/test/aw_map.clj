@@ -50,8 +50,7 @@
 
 (facts "about is-terrain?"
   (doseq [t #{:plain :street :bridge :segment-pipe :river :beach :wreckage :pipe :mountain :forest :water :reef}]
-    (is-terrain? t) => true)
-  (is-terrain? any) => false)
+    (is-terrain? t) => true))
 
 (facts "about is-water?"
   (doseq [t #{:water :reef :beach :bridge}]
