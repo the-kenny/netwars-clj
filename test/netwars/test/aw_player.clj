@@ -1,9 +1,9 @@
-(ns netwars.test.player
+(ns netwars.test.aw-player
   (:use clojure.test
-        netwars.player))
+        netwars.aw-player))
 
 (deftest test-make-player
-  (is (instance? netwars.player.AwPlayer (make-player "foo" :red 1000)))
+  (is (instance? netwars.aw_player.AwPlayer (make-player "foo" :red 1000)))
   (is (= "foo" (:name (make-player "foo" :red 1000))))
   (is (= 1000 (:funds (make-player "foo" :red 1000))))
   (is (= :red (:color (make-player "foo" :red 1000)))))

@@ -1,4 +1,4 @@
-(ns netwars.player)
+(ns netwars.aw-player)
 
 (defrecord AwPlayer [name color funds])
 
