@@ -22,7 +22,7 @@
 
 (when clojure.core/print-method
   (defmethod clojure.core/print-method ::Coordinate [c writer]
-           (.write writer (str "[" (:x c) "," (:y c) "]"))))
+    (.write writer (str "[" (:x c) "," (:y c) "]"))))
 
 (defn distance
   "Manhattan metric distance between coordinates"
@@ -77,8 +77,7 @@ Building-values have the structure [building color] whereas normal terrains are 
 terrain values are ordinary keywords.
 More or less the counterpart to `is-building?`"
   [t]
-  (contains? #{:plain :street :bridge :segment-pipe :river :beach :wreckage :pipe
-         :mountain :forest :water :reef} t))
+  (contains? #{:plain :street :bridge :segment-pipe :river :beach :wreckage :pipe :mountain :forest :water :reef} t))
 
 (defn is-water?
   "Predicate to check if a terrain value is some kind of water.
@@ -87,7 +86,7 @@ Mostly useful for drawing of maps."
   (contains? #{:water :reef :beach :bridge} t))
 
 (defn is-ground?
-    "Predicate to check if a terrain value is some kind of ground. Counterpart to `is-water?`
+  "Predicate to check if a terrain value is some kind of ground. Counterpart to `is-water?`
 Mostly useful for drawing of maps."
   [t]
   (and (not (nil? t)) (not (is-water? t))))
@@ -121,7 +120,16 @@ Mostly useful for drawing of maps."
   (boolean (movement-costs terrain movement-type)))
 
 (defn can-produce-units? [t]
-  (and (sequential? t) (is-building? #{:port :base :airport} (first t))))
+  (and (sequential? t) (is-building? t) (contains? #{:port :base :airport} (first t))))
 
-(defn defense-value [t]
-  )
+(defn defense-value [terrain]
+  (let [[t c] (cond
+               (keyword? terrain) [terrain]
+               (is-building? terrain) terrain
+               true [])]
+    (case t
+      (:plain :reef) 1
+      :forest 2
+      (:city :base :airport :port :lab) 3
+      (:headquarter :mountain) (if (= c :white) 3 4)
+      0)))

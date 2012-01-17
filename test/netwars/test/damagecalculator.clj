@@ -5,15 +5,6 @@
         [netwars.unit-loader :as unit-loader]
         [netwars.aw-unit :as unit]))
 
-(deftest test-defense-value
-  (doseq [t [:plain :reef]] (is (= 1 (defense-value t))))
-  (is (= 2 (defense-value :forest)))
-  (doseq [t [:city :base :airport :port :lab]] (is (= 3 (defense-value [t :red]))))
-  (is (= 3 (defense-value [:headquarter :white])))
-  (is (= 4 (defense-value [:headquarter :red])))
-  (is (= 0 (defense-value :asdfhasiodfjll))))
-
-
 (deftest test-choose-weapon
   (let [table (damagetable/load-damagetable "resources/damagetable.xml")
         unit-spec (unit-loader/load-units "resources/units.xml")

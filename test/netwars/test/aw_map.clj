@@ -51,7 +51,7 @@
 (facts "about is-terrain?"
   (doseq [t #{:plain :street :bridge :segment-pipe :river :beach :wreckage :pipe :mountain :forest :water :reef}]
     (is-terrain? t) => true)
-  (is-terrain? ...any...) => false)
+  (is-terrain? any) => false)
 
 (facts "about is-water?"
   (doseq [t #{:water :reef :beach :bridge}]
@@ -76,4 +76,6 @@
   (can-produce-units? ...any...) => false)
 
 (fact "about defense-value"
-  (defense-value ...terrain...) => integer?)
+  (defense-value ...terrain...) => integer?
+  (defense-value [:headquarter :white]) => 3
+  (defense-value [:headquarter any]) => 4)
