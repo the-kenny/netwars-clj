@@ -2,6 +2,9 @@
 
 (defrecord AwUnit [internal-name color hp fuel])
 
+(defn is-unit? [unit]
+  (instance? AwUnit unit))
+
 ;;; Private methods for generating units
 
 (defn- prepare-meta [prototype unit]

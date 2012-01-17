@@ -1,9 +1,11 @@
 (ns netwars.test.aw-game
   (:use clojure.test
+        midje.sweet
         netwars.aw-game
         [netwars.path :only [make-path]]
         [netwars.game-board :as board]
-        [netwars.aw-map :only [coord]]))
+        [netwars.aw-map :only [coord]]
+        [netwars.aw-unit :only [is-unit?]]))
 
 (def ^:dynamic *game* nil)
 
@@ -169,3 +171,10 @@
     (let [new-unit (board/get-unit @(:board *game*) to)]
       (is (< (:fuel new-unit) (:fuel unit)) "the move used fuel"))
     (is (= :unit-moved (:type (last (game-events *game*)))) "the move was logged")))
+
+;;; From here on, it's Midje
+
+(unfinished buy-unit!)
+
+(facts "about buy-unit!"
+  (buy-unit! *game* ...fabric-coord... ...valid-id...) => is-unit?)
