@@ -9,11 +9,16 @@
 
 (def ^:dynamic *game* nil)
 
+(def +aw-test-map+ "maps/7330.aws")
+
+(defn- make-test-game []
+  (make-game nil +aw-test-map+ [:player1 :player2 :player3]))
+
 (use-fixtures :each (fn [f]
-                      (binding [*game* (make-game nil
-                                                  "maps/7330.aws"
-                                                  [:player1 :player2 :player3])]
+                      (binding [*game* (make-test-game)]
                         (f))))
+
+(background (around :facts (binding [*game* (make-test-game)] ?form)))
 
 (deftest test-aw-game
   (is (instance? netwars.aw_game.AwGame *game*))
@@ -174,7 +179,6 @@
 
 ;;; From here on, it's Midje
 
-(unfinished buy-unit!)
-
 (facts "about buy-unit!"
-  (buy-unit! *game* ...fabric-coord... ...valid-id...) => is-unit?)
+  (buy-unit! *game* (coord 7 13) :infantry) => is-unit?
+  )

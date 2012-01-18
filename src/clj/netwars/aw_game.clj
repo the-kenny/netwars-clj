@@ -167,3 +167,7 @@ Returns path."
                      :to to
                      :fuel-costs fuel-costs}))
   path)
+
+(defn buy-unit! [game coord id-or-internal-name]
+  ;; Unfinished
+  )
