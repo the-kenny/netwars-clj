@@ -1,5 +1,6 @@
 (ns netwars.test.map-loader
   (:use clojure.test
+        midje.sweet
         netwars.map-loader
         netwars.aw-map
         [clojure.java.io :only [resource]]))
@@ -67,3 +68,9 @@
       (doseq [x (range (width (:terrain loaded-map)))
               y (range (height (:terrain loaded-map)))]
         (is (nil? (get (:units loaded-map) (coord x y)))))))))
+
+
+(let [map-file "maps/7330.aws"
+      loaded-map (load-map map-file)]
+ (facts "about map info"
+   (:info loaded-map) => (contains {:player-colors (has every? keyword?)})))
