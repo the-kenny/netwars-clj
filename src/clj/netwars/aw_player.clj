@@ -6,6 +6,9 @@
   {:pre [(pos? funds)]}
   (AwPlayer. name color funds))
 
+(defn is-player? [p]
+  (instance? AwPlayer p))
+
 (defn can-spend? [player amount]
   (>= (- (:funds player) amount) 0))
 
