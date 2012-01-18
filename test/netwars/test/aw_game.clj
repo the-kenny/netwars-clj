@@ -5,7 +5,8 @@
         [netwars.path :only [make-path]]
         [netwars.game-board :as board]
         [netwars.aw-map :only [coord]]
-        [netwars.aw-unit :only [is-unit?]]))
+        [netwars.aw-unit :only [is-unit?]]
+        [netwars.aw-player :as player]))
 
 (def ^:dynamic *game* nil)
 
@@ -35,22 +36,18 @@
    (log-event! *game* {:type :foobar})
    (is (= {:type :foobar} (second (game-events *game*))))))
 
-(deftest test-player-functions
+(fact (current-player *game*) => player/is-player?)
+
+(facts "about next-player!"
   (dosync
-   (is (= :player1 @(current-player *game*)))
-
-   (next-player! *game*)                ;Go to next player (:player2)
-   (is (= :player2 @(current-player *game*)))
-
-   (next-player! *game*) (next-player! *game*) ;go to :player 3, then :player1
-   (is (= :player1 @(current-player *game*))))
-
-  (is (thrown? java.lang.IllegalStateException (next-player! *game*))
-      "Throws exception outside of transaction")
-
-  (is (= 4 (count (game-events *game*))))
-  (doseq [event (rest (game-events *game*))]
-    (is (= :turn-completed (:type event)))))
+   (current-player *game*)    => (contains {:color :red})
+   (next-player! *game*)      => is-player?  ;TODO: Check if return val is last player
+   (current-player *game*)    => (contains {:color :blue})
+   (next-player! *game*)      => is-player?
+   (current-player *game*)    => (contains {:color :black})
+   (next-player! *game*)      => is-player?  ;Go back to red
+   (current-player *game*)    => (contains {:color :red}))
+  (rest (game-events *game*)) => (three-of (contains {:type :turn-completed})))
 
 (defn check-attack-event [attack-event
                           from to
