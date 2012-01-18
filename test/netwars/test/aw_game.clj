@@ -8,12 +8,11 @@
         [netwars.aw-unit :only [is-unit?]]
         [netwars.aw-player :as player]))
 
-(def ^:dynamic *game* nil)
-
 (def +aw-test-map+ "maps/7330.aws")
 
+(def ^:dynamic *game* nil)
 (defn- make-test-game []
-  (make-game nil +aw-test-map+ [:player1 :player2 :player3]))
+  (make-game nil +aw-test-map+))
 
 (use-fixtures :each (fn [f]
                       (binding [*game* (make-test-game)]

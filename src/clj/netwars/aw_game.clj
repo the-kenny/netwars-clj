@@ -6,7 +6,8 @@
         [netwars.aw-map :as aw-map]
         [netwars.path :as path]
         [netwars.map-loader :only [load-map]]
-        [netwars.unit-loader :only [load-units]]))
+        [netwars.unit-loader :only [load-units]]
+        [netwars.aw-player :as player]))
 
 ;; AwGame is a running game.
 ;; It stores info about the current players, whose turn it is, the unit spec used, etc.
@@ -24,12 +25,20 @@
                    moves                ;Every move in the game gets saved here
                    ])
 
-(defn make-game [info mapsource players]
+(def +default-funds+ 1000)
+
+(defn- sort-colors [colors]
+  (filter (set colors) [:red :blue :yellow :green :black]))
+
+(defn make-game [info mapsource]
   (let [loaded-map (load-map mapsource)
         unit-spec (load-units "resources/units.xml")
         damagetable (damagetable/load-damagetable "resources/damagetable.xml")
         board (board/generate-game-board loaded-map unit-spec)
         newinfo (assoc info :map mapsource)
+        players (map #(player/make-player %1 %2 +default-funds+)
+                     (map #(str "Player " %) (range 1 1000))
+                     (sort-colors (-> loaded-map :info :player-colors)))
         initial-event {:type :game-started
                        :info newinfo
                        :loaded-map loaded-map
