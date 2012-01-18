@@ -18,8 +18,8 @@
 
 (facts "about in-bounds?"
   (in-bounds? ...board... (coord 10 10)) => true
-  (provided (width ...board...)  => 30
-            (height ...board...) => 20))
+  (provided (width ...board...)          => 30
+            (height ...board...)         => 20))
 
 ;;; Given map:
 ;;;  -------
@@ -46,7 +46,7 @@
 (facts "about is-building?"
   (doseq [t #{:headquarter :city :base :airport :port :tower :lab :silo}]
    (is-building? [t ...color...]) => true)
-  (is-building? ...any...) => false)
+  (is-building? ...any...)        => false)
 
 (facts "about is-terrain?"
   (doseq [t #{:plain :street :bridge :segment-pipe :river :beach :wreckage :pipe :mountain :forest :water :reef}]
@@ -54,11 +54,11 @@
 
 (facts "about is-water?"
   (doseq [t #{:water :reef :beach :bridge}]
-    (is-water? t) => true)
+    (is-water? t)       => true)
   (is-water? ...any...) => false)
 
 (facts "about is-ground?"
-  (is-ground? ...ground...) => true
+  (is-ground? ...ground...)          => true
   (provided (is-water? ...ground...) => false))
 
 (deftest test-movement-cost-table-integrity
@@ -69,12 +69,12 @@
     (is (every? #(or (nil? %) (> % 0)) (vals costs)))))
 
 (facts "about can-produce-units?"
-  (can-produce-units? [:base ...color...]) => true
-  (can-produce-units? [:port ...color...]) => true
+  (can-produce-units? [:base ...color...])    => true
+  (can-produce-units? [:port ...color...])    => true
   (can-produce-units? [:airport ...color...]) => true
-  (can-produce-units? ...any...) => false)
+  (can-produce-units? ...any...)              => false)
 
 (fact "about defense-value"
-  (defense-value ...terrain...) => integer?
-  (defense-value [:headquarter :white]) => 3
-  (defense-value [:headquarter any]) => 4)
+  (defense-value ...terrain...)           => integer?
+  (defense-value [:headquarter :white])   => 3
+  (defense-value [:headquarter anything]) => 4)
