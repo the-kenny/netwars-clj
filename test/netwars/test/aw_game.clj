@@ -1,12 +1,13 @@
 (ns netwars.test.aw-game
   (:use clojure.test
         midje.sweet
-        netwars.aw-game
+         netwars.aw-game
         [netwars.path :only [make-path]]
         [netwars.game-board :as board]
-        [netwars.aw-map :only [coord]]
+        [netwars.aw-map :only [coord width height at is-building?]]
         [netwars.aw-unit :only [is-unit?]]
-        [netwars.aw-player :as player]))
+        [netwars.aw-player :as player])
+  (:import (java.lang IllegalStateException IllegalArgumentException)))
 
 (def +aw-test-map+ "maps/7330.aws")
 
@@ -49,8 +50,27 @@
    (current-player *game*)    => (contains {:color :red}))
   (rest (game-events *game*)) => (three-of (contains {:type :turn-completed})))
 
-(fact "about disable-player!"
-  (disable-player! *game* ...color...) => player/is-player?)
+(facts "about remove-player!"
+  (dosync (remove-player! *game* :black)) => player/is-player?
+
+  (map :color @(:players *game*)) =not=> (contains :black)
+
+  ;; TODO: Use dounits
+  (doseq [[c u] (-> *game* :board deref :units)]
+    (fact (:color u) =not=> :black))
+
+  ;; TODO: Use doterrain
+  (let [terrain-board (-> *game* :board deref :terrain)]
+   (doseq [x (range (width terrain-board)), y (range (height terrain-board))
+           :let [t (at terrain-board (coord x y))]]
+     (when (is-building? t)
+      (fact (second t) =not=> :black)))))
+
+(fact "about misusage of remove-player!"
+  ;; Can't remove current player
+  (dosync (remove-player! *game* (:color (current-player *game*))))
+  => (throws IllegalArgumentException))
+
 
 (defn check-attack-event [attack-event
                           from to

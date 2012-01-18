@@ -77,11 +77,34 @@
              (inc idx))))
   (current-player game))
 
-(defn disable-player!
-  "Disables a player in a running game, removes all his units and makes his building neutral"
+(defn remove-player!
+  "Removes a player in a running game.
+ Removes all his units and makes his building neutral"
   [game player-color]
-  ;; Unfinished
-  )
+
+  (when (= player-color (:color (current-player game)))
+    (throw (IllegalArgumentException.
+            (str "Can't remove current-player with color " (name player-color)))))
+
+  (dosync
+   ;; Remove units
+   ;; TODO: Use dounits
+   (doseq [[c u] (:units @(:board game))]
+     (when (= player-color (:color u))
+      (alter (:board game) board/remove-unit c)))
+   ;; Remove terrain
+   ;; TODO: Use dobuildings
+   (let [terrain-board (-> game :board deref :terrain)]
+    (doseq [x (range (width terrain-board)), y (range (height terrain-board))
+            :let [c (coord x y)
+                  t (at terrain-board c)]]
+      (when (and (is-building? t) (= player-color (second t)))
+        (alter (:board game) board/change-building-color c :white ))))
+   ;; Remove the player
+   (let [player-to-remove (first (filter #(= player-color (:color %))
+                                         @(:players game)))]
+     (alter (:players game) (fn [seq] (remove #(= (:color %) player-color) seq)))
+     player-to-remove)))
 
 ;;; Attacking
 
