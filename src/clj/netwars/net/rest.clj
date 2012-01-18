@@ -13,9 +13,10 @@
 (extend-type netwars.aw_game.AwGame
   json/Write-JSON
   (write-json [game out escape-unicode?]
-    (let [object (select-keys game [:info :players])]
+    (let [object (select-keys game [:info])]
      (json/write-json (merge object
-                             {:current-player-index @(:current-player-index game)
+                             {:players @(:players game)
+                              :current-player-index @(:current-player-index game)
                               :moves (rest @(:moves game))})
                       out escape-unicode?))))
 
