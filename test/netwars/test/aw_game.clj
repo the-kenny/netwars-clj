@@ -36,6 +36,7 @@
    (log-event! *game* {:type :foobar})
    (is (= {:type :foobar} (second (game-events *game*))))))
 
+(fact @(:players *game*) => (has every? player/is-player?))
 (fact (current-player *game*) => player/is-player?)
 
 (facts "about next-player!"
@@ -48,6 +49,9 @@
    (next-player! *game*)      => is-player?  ;Go back to red
    (current-player *game*)    => (contains {:color :red}))
   (rest (game-events *game*)) => (three-of (contains {:type :turn-completed})))
+
+(fact "about disable-player!"
+  (disable-player! *game* ...color...) => player/is-player?)
 
 (defn check-attack-event [attack-event
                           from to

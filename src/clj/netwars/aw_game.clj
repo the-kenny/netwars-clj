@@ -29,7 +29,6 @@
         unit-spec (load-units "resources/units.xml")
         damagetable (damagetable/load-damagetable "resources/damagetable.xml")
         board (board/generate-game-board loaded-map unit-spec)
-        newplayers (clojure.core/map ref players)
         newinfo (assoc info :map mapsource)
         initial-event {:type :game-started
                        :info newinfo
@@ -38,7 +37,7 @@
                        :players players}]
     (AwGame. newinfo
              (ref 0)
-             newplayers
+             (ref players)
              unit-spec
              damagetable
              (ref board)
@@ -57,17 +56,23 @@
 ;;; Player Functions
 
 (defn current-player [game]
-  @(nth (:players game) @(:current-player-index game)))
+  (nth @(:players game) @(:current-player-index game)))
 
 (defn next-player! [game]
   (log-event! game {:type :turn-completed
                     :player (current-player game)})
   (alter (:current-player-index game)
          (fn [idx]
-           (if (>= (inc idx) (count (:players game)))
+           (if (>= (inc idx) (count @(:players game)))
              0
              (inc idx))))
   (current-player game))
+
+(defn disable-player!
+  "Disables a player in a running game, removes all his units and makes his building neutral"
+  [game player-color]
+  ;; Unfinished
+  )
 
 ;;; Attacking
 
