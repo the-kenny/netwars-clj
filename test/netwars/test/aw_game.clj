@@ -177,5 +177,10 @@
 ;;; From here on, it's Midje
 
 (facts "about buy-unit!"
-  (buy-unit! *game* (coord 7 13) :infantry) => is-unit?
-  )
+  (let [base-coord (coord 7 13)
+        old-funds (:funds (current-player *game*))]
+    (dosync (buy-unit! *game* base-coord :infantry)) => is-unit?
+    (let [u (board/get-unit @(:board *game*) base-coord)]
+      u                                              => is-unit?
+      (:internal-name u)                             => :infantry)
+    (< (:funds (current-player *game*)) old-funds)   => true))
