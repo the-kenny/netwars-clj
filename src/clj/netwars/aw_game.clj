@@ -57,11 +57,11 @@
 ;;; Player Functions
 
 (defn current-player [game]
-  (nth (:players game) @(:current-player-index game)))
+  @(nth (:players game) @(:current-player-index game)))
 
 (defn next-player! [game]
   (log-event! game {:type :turn-completed
-                    :player @(current-player game)})
+                    :player (current-player game)})
   (alter (:current-player-index game)
          (fn [idx]
            (if (>= (inc idx) (count (:players game)))
