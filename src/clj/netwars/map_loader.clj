@@ -65,6 +65,11 @@
 				[:terrain-data (* :width :height 2) :dword parse-terrain-data]
 				[:unit-data (* :width :height 2) :dword parse-unit-data]])
 
+(defn- extract-colors [unit-data terrain-data]
+  (let [units (vals unit-data)
+        buildings (filter vector? (reduce concat (:data terrain-data)))]
+    (disj (set (concat (map :color units) (map second buildings))) :white)))
+
 (defn load-map [source]
   (let [ ;; I hope Little-Endianess doesn't cause problems
         buf (.order (read-binary-resource source)
@@ -98,15 +103,19 @@
         desc (read-when-possible buf
                                  (.replace (read-n-string buf (read-int32 buf))
                                            "\r\n"
-                                           "\n"))]
+                                           "\n"))
+        terrain-board (make-terrain-board
+                       [width height]
+                       (vec (map vec (partition height terrain-data))))
+        player-colors (extract-colors unit-data terrain-board)]
 
     (LoadedMap.
-     (make-terrain-board [width height]
-                         (vec (map vec (partition height terrain-data))))
+     terrain-board
      unit-data
      {:source source
       :tileset tileset
       :name name
       :author author
       :description desc
-      :version editor-version})))
+      :version editor-version
+      :player-colors player-colors})))

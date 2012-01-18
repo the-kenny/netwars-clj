@@ -73,4 +73,5 @@
 (let [map-file "maps/7330.aws"
       loaded-map (load-map map-file)]
  (facts "about map info"
-   (:info loaded-map) => (contains {:player-colors (has every? keyword?)})))
+   (:info loaded-map) => (contains {:player-colors (has every? keyword?)})
+   (-> loaded-map :info :player-colors) =not=> (contains :white)))
