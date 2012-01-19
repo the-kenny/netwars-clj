@@ -18,9 +18,10 @@
 
     ;; bare-megatank is a megatank who has no ammo for the Mega-Cannon
     ;; Is there a better way to assoc a nested value in a seq in a map?
-    (let [bare-megatank (assoc megatank :weapons (assoc-in (vec (:weapons megatank))
-                                                           [0 :ammo] 0))]
-      (is (contains? (choose-weapon table bare-megatank tank) :alt-weapon)))))
+    ;; TODO: Re-Activate when there's a method to "fire" ammo
+    #_(let [bare-megatank (assoc megatank :weapons (assoc-in (vec (:weapons megatank))
+                                                             [0 :ammo] 0))]
+        (is (contains? (choose-weapon table bare-megatank tank) :alt-weapon)))))
 
 (deftest test-damage-calculation
   (let [table (damagetable/load-damagetable "resources/damagetable.xml")

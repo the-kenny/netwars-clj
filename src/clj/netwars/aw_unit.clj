@@ -12,12 +12,12 @@
 
 (defn- prepare-main-weapon [prototype unit]
   (if-let [main (:main-weapon prototype)]
-    (update-in unit [:weapons] conj (with-meta main main))
+    (assoc-in unit [:weapons :main-weapon] (with-meta main main))
     unit))
 
 (defn- prepare-alt-weapon [prototype unit]
   (if-let [alt (:alt-weapon prototype)]
-    (update-in unit [:weapons] conj (with-meta alt alt))
+    (assoc-in unit [:weapons :alt-weapon] (with-meta alt alt))
     unit))
 
 (defn- prepare-loading [prototype unit]
@@ -97,20 +97,16 @@
 ;;; Weapon methods
 
 (defn main-weapon [u]
-  (first (:weapons u)))
+  (-> u :weapons :main-weapon))
 
 (defn alt-weapon [u]
-  (second (:weapons u)))
+  (-> u :weapons :alt-weapon))
 
 (defn weapons [u]
-  (when-let [main (main-weapon u)]
-    (if-let [alt (alt-weapon u)]
-      {:main-weapon main
-       :alt-weapon alt}
-      {:main-weapon main})))
+  (select-keys (:weapons u) [:main-weapon :alt-weapon]))
 
 (defn has-weapons? [u]
-  (contains? u :weapons))
+  (and (contains? u :weapons) (not (empty? (:weapons u)))))
 
 (defn weapon-available? [weapon]
   (not= 0 (:ammo weapon)))
