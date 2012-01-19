@@ -5,7 +5,7 @@
         [netwars.path :only [make-path]]
         [netwars.game-board :as board]
         [netwars.aw-map :only [coord width height at is-building?]]
-        [netwars.aw-unit :only [is-unit?]]
+        [netwars.aw-unit :only [is-unit? main-weapon alt-weapon]]
         [netwars.aw-player :as player])
   (:import (java.lang IllegalStateException IllegalArgumentException)))
 
@@ -119,6 +119,15 @@
                                         (game-events *game*)))
                          infantry2 infantry
                          :infantry :infantry))))
+
+(fact "about ammo usage in perform-attack!"
+  (let [artillery-c (coord 1 11)
+        infantry-c (coord 1 13)
+        artillery (board/get-unit @(:board *game*) artillery-c)
+        original-ammo (:ammo (main-weapon artillery))]
+    (dosync (perform-attack! *game* artillery-c infantry-c))
+    (-> (board/get-unit @(:board *game*) artillery-c) main-weapon :ammo)
+    => #(< % original-ammo)))
 
 (deftest test-fuel-costs
   (let [coords (map coord [[1 13] [2 13] [2 12] [3 12]])

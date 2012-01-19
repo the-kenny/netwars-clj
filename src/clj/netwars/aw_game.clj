@@ -132,6 +132,7 @@
       (if newvic
         (alter (:board game) board/update-unit vic-coord #(unit/apply-damage % dam))
         (alter (:board game) board/remove-unit vic-coord))
+      ;; TODO: Use ammonition
       (log-event! game {:type (if counterattack :counter-attack :attack)
                         :from att-coord, :to vic-coord
                         :attacker att, :victim newvic
