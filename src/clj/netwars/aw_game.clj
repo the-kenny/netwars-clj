@@ -132,7 +132,13 @@
       (if newvic
         (alter (:board game) board/update-unit vic-coord #(unit/apply-damage % dam))
         (alter (:board game) board/remove-unit vic-coord))
-      ;; TODO: Use ammonition
+      ;; This is ugly.
+      ;; We have to use a non-nice fun from damagecalculator to choose the weapon
+      (let [[main-or-alt _] (first (damage/choose-weapon (:damagetable game) att vic))]
+       (alter (:board game)
+              board/update-unit
+              att-coord
+              #(unit/fire-weapon % main-or-alt)))
       (log-event! game {:type (if counterattack :counter-attack :attack)
                         :from att-coord, :to vic-coord
                         :attacker att, :victim newvic

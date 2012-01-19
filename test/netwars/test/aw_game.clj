@@ -126,8 +126,9 @@
         artillery (board/get-unit @(:board *game*) artillery-c)
         original-ammo (:ammo (main-weapon artillery))]
     (dosync (perform-attack! *game* artillery-c infantry-c))
-    (-> (board/get-unit @(:board *game*) artillery-c) main-weapon :ammo)
-    => #(< % original-ammo)))
+    (- original-ammo
+       (-> (board/get-unit @(:board *game*) artillery-c) main-weapon :ammo))
+    => 1))
 
 (deftest test-fuel-costs
   (let [coords (map coord [[1 13] [2 13] [2 12] [3 12]])
