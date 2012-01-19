@@ -205,6 +205,21 @@ Returns path."
                      :fuel-costs fuel-costs}))
   path)
 
-(defn buy-unit! [game coord id-or-internal-name]
-  ;; Unfinished
-  )
+(defn buy-unit! [game c id-or-internal-name]
+  (let [player (current-player game)
+        unit (unit/make-unit (:unit-spec game) id-or-internal-name (:color player))
+        price (:price (meta unit))]
+    (cond
+     (board/get-unit @(:board game) c)
+     (throw (IllegalStateException.
+             (str "Can't buy unit " (name (:internal-name unit)) ". There's already a unit on " c)))
+
+     (> price (:funds player))
+     (throw (IllegalStateException.
+             (str "Not enough funds to buy " (name (:internal-name unit)))))
+
+     (<= price (:funds player))
+     ;; TODO: Update player's funds
+     (do (alter (:board game) board/add-unit c unit)
+         unit))
+))

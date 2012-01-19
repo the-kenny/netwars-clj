@@ -199,11 +199,18 @@
 
 ;;; From here on, it's Midje
 
-(facts "about buy-unit!"
-  (let [base-coord (coord 7 13)
-        old-funds (:funds (current-player *game*))]
-    (dosync (buy-unit! *game* base-coord :infantry)) => is-unit?
-    (let [u (board/get-unit @(:board *game*) base-coord)]
-      u                                              => is-unit?
-      (:internal-name u)                             => :infantry)
-    (< (:funds (current-player *game*)) old-funds)   => true))
+(let [base-coord (coord 7 13)]
+ (facts "about buy-unit!"
+   (let [old-funds (:funds (current-player *game*))]
+     (dosync (buy-unit! *game* base-coord :infantry)) => is-unit?
+     (let [u (board/get-unit @(:board *game*) base-coord)]
+       u                                              => is-unit?
+       (:internal-name u)                             => :infantry)
+     (< (:funds (current-player *game*)) old-funds)   => true))
+
+ (facts "about misuse of buy-unit!"
+   ;; Can't buy unit when there's already an unit on this coord
+   (dosync (buy-unit! *game* base-coord :infantry))
+   (dosync (buy-unit! *game* base-coord :mech)) => (throws IllegalStateException)
+   ;; Can't buy unit with insufficient funds
+   (dosync (buy-unit! *game* base-coord :megatank)) => (throws IllegalStateException)))
