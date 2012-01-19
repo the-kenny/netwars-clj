@@ -17,6 +17,8 @@
 
 (defrecord AwGame [info
                    current-player-index
+                   ;; TODO: Players should be a map, mapping color to a player
+                   ;; current-player-index could be a color to make it more clear
                    players
                    unit-spec
                    damagetable
@@ -76,6 +78,14 @@
              0
              (inc idx))))
   (current-player game))
+
+(defn update-player! [game player-color f & args]
+  (let [[idx player] (first (filter #(= player-color (-> % second :color))
+                                    (map-indexed vector @(:players game))))
+        newplayer (apply f player args)]
+    ;; TODO: This should be atomic
+    (alter (:players game) #(replace {player newplayer} %))
+    newplayer))
 
 (defn remove-player!
   "Removes a player in a running game.
@@ -219,7 +229,6 @@ Returns path."
              (str "Not enough funds to buy " (name (:internal-name unit)))))
 
      (<= price (:funds player))
-     ;; TODO: Update player's funds
      (do (alter (:board game) board/add-unit c unit)
-         unit))
-))
+         (update-player! game (:color player) player/spend-funds price)
+         unit))))
