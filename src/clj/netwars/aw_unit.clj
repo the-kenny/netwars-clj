@@ -53,9 +53,9 @@
 (defn find-prototype [spec key value]
   (first (filter #(= (get % key) value) spec)))
 
-;;; TODO: Make it possible to create units by internal-name
-(defn make-unit [spec id color]
-  (when-let [prototype (find-prototype spec :id id)]
+(defn make-unit [spec id-or-internal-name color]
+  (when-let [prototype (or (find-prototype spec :id id-or-internal-name)
+                           (find-prototype spec :internal-name id-or-internal-name))]
     (prepare-unit (AwUnit. (:internal-name prototype)
                            color
                            (:hp prototype)

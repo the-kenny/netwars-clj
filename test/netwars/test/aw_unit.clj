@@ -2,13 +2,19 @@
   (:use netwars.aw-unit
         [clojure.java.io :only [resource]]
         [netwars.unit-loader :as loader]
-        clojure.test))
+        clojure.test
+        midje.sweet))
 
 (def ^:dynamic *spec* nil)
 
-(use-fixtures :each #(binding [*spec* (loader/load-units (resource "units.xml"))]
+(defn- make-test-spec []
+  (loader/load-units (resource "units.xml")))
+
+(use-fixtures :each #(binding [*spec* (make-test-spec)]
                        (%)))
 
+(background (around :facts (binding [*spec* (make-test-spec)]
+                             ?form)))
 
 (deftest prototype-finding
   (is (= (:internal-name (find-prototype *spec* :id 0)) :infantry)
@@ -21,6 +27,10 @@
                             :carries-towel ;; Today is towel-day
                             true))
       "returns nil if the key is unknown"))
+
+(facts "about make-unit"
+  (make-unit *spec* 0         :red) => is-unit?
+  (make-unit *spec* :infantry :red) => is-unit?)
 
 (deftest test-unit-creation
   (let [weapon-unit (make-unit *spec* 0 :red)  ;Infantry
