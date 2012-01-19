@@ -15,4 +15,5 @@
   (let [player (make-player "the-kenny" :green 1000)]
     (is (can-spend? player 1000))
     (is (not (can-spend? player 1001)))
-    (is (= 42 (:funds (spend-funds player 958))))))
+    (is (= 42 (:funds (spend-funds player 958))))
+    (is (= 0 (:funds (spend-funds player 1000))))))
