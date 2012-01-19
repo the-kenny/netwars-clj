@@ -47,20 +47,7 @@
 
     (testing "weapon properties"
       (is (contains? weapon-unit :weapons))
-      (is (> (count (:weapons weapon-unit)) 0))
-      (doseq [w (:weapons weapon-unit)]
-        (is (every? #{:name :ammo :range :distance} (keys w)))
-        (is (instance? String (:name w)))
-        (is (or (integer? (:ammo w)) (= :infinity (:ammo w))))
-        (is (set? (:range w)))
-        (is (meta w) "Has the weapon metadata (the *spec*) attached?")))
-
-    (testing "freight"
-      (is (contains? transport-unit :transport))
-      (let [transport (:transport transport-unit)]
-        (is (map? transport))
-        (is (> (:limit transport) 0))
-        (is (= [] (:freight transport)))))))
+      (is (> (count (:weapons weapon-unit)) 0)))))
 
 (deftest test-transporting
   (let [transporter (make-unit *spec* 22 :green)
@@ -98,7 +85,4 @@
     (is (not (has-weapons? apc)) "An APC doesn't have weapons")
     (is (empty? (weapons apc)) "weapons returns an empty seq")))
 
-(deftest test-available-weapons
-  (is false "No tests written")
-  #_(doseq [weapon (available-weapons infantry)]
-      (is (= false (low-ammo? (val weapon))))))
+(future-facts "about available-weapons")
