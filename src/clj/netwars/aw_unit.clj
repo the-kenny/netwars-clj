@@ -114,6 +114,13 @@
 (defn available-weapons [u]
   (into {} (filter #(weapon-available? (val %)) (weapons u))))
 
+(defn fire-weapon
+  "'Fires' a weapon (:alt-weapon or :main-weapon). Mainly uses ammo."
+  [u main-or-alt]
+  ;; {:pre [(weapon-available? ((get {:main-weapon main-weapon :alt-weapon alt-weapon}
+  ;;                                 main-or-alt) u))]}
+  (update-in u [:weapons main-or-alt :ammo] #(if (keyword? %) % (dec %))))
+
 (defn low-ammo? [weapon]
   {:pre [(contains? (meta weapon) :ammo)]}
   (if (= (:ammo weapon) :infinity)

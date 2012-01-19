@@ -85,6 +85,13 @@
     (is (not (has-weapons? apc)) "An APC doesn't have weapons")
     (is (empty? (weapons apc)) "weapons returns an empty seq")))
 
+(fact "about fire-weapon"
+  (let [infantry (make-unit *spec* :infantry ...color...)
+        tank (make-unit *spec* :tank ...color...)]
+    (-> infantry (fire-weapon :main-weapon) main-weapon :ammo) => :infinity
+    (- (-> tank main-weapon :ammo)
+       (-> tank (fire-weapon :main-weapon) main-weapon :ammo)) => 1))
+
 (defn- deplete-ammo
   "Helper function which returns u with all ammunition in alt- or main-weapon depleted"
   [u main-or-alt]
