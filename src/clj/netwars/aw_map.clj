@@ -8,12 +8,12 @@
 ;; The rest of this namespace contains various functions for storing terrain data.
 
 
-(defrecord Coordinate [^int x ^int y])
+(defrecord Coordinate [^long x ^long y])
 
 (defn coord
   "Creates a coordinate from a x and a y value. x and y are coerced to int"
-  ([x y] (Coordinate. x y))
-  ([[x y]] (Coordinate. x y)))
+  ([^long x ^long y] (Coordinate. x y))
+  ([[^long x ^long y]] (Coordinate. x y)))
 
 (defn coord?
   "Predicate to check if an object is an coordinate"
@@ -53,7 +53,7 @@
   Board
   (width [t] (:width t))
   (height [t] (:height t))
-  (at [t c] (get-in (:data t) [(:x c) (:y c)]))
+  (at [t c] (get-in t [:data (:x c) (:y c)]))
   (update-board [t c v] (assoc-in t [:data (:x c) (:y c)] v)))
 
 ;;; TODO: Specify `data`

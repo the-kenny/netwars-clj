@@ -5,7 +5,7 @@
         [netwars.aw-game :as game]
         [netwars.aw-map :as aw-map]
         [netwars.game-board :as board]
-        [netwars.player :as player]
+        [netwars.aw-player :as player]
         [netwars.path :as path]
         [clojure.tools.logging :only [debug info warn error fatal]]))
 

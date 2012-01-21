@@ -75,10 +75,10 @@
 
   ;; TODO: Use doterrain
   (let [terrain-board (-> *game* :board deref :terrain)]
-   (doseq [x (range (width terrain-board)), y (range (height terrain-board))
-           :let [t (at terrain-board (coord x y))]]
-     (when (is-building? t)
-      (fact (second t) =not=> :black)))))
+   (doseq [^long x (range (width terrain-board)), ^long y (range (height terrain-board))
+           :let [t (at terrain-board (coord x y))]
+           :when (is-building? t)]
+     (fact (second t) =not=> :black))))
 
 (fact "about misusage of remove-player!"
   ;; Can't remove current player
