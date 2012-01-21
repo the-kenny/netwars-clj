@@ -50,10 +50,20 @@
    (current-player *game*)    => (contains {:color :red}))
   (rest (game-events *game*)) => (three-of (contains {:type :turn-completed})))
 
-(facts "about update-player!"
-  (dosync (update-player! *game* :red player/spend-funds 1000)) => (contains {:funds 0}))
+(facts "about get-player"
+  (get-player *game* :red)   => player/is-player?
+  (get-player *game* :red)   => (current-player *game*)
+  (get-player *game* :blue)  => (contains {:color :blue})
+  (get-player *game* :black) => (contains {:color :black}))
 
-*game*
+(facts "about update-player!"
+  (dosync
+   (update-player! *game* :red player/spend-funds 1000)) => (contains {:color :red
+                                                                       :funds 0})
+  (dosync
+   (update-player! *game* :black player/spend-funds 500)) => (contains {:color :black
+                                                                        :funds 500}))
+
 (facts "about remove-player!"
   (dosync (remove-player! *game* :black)) => player/is-player?
 

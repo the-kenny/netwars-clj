@@ -17,8 +17,6 @@
 
 (defrecord AwGame [info
                    current-player-index
-                   ;; TODO: Players should be a map, mapping color to a player
-                   ;; current-player-index could be a color to make it more clear
                    players
                    unit-spec
                    damagetable
@@ -48,7 +46,7 @@
                        :players players}]
     (AwGame. newinfo
              (ref 0)
-             (ref players)
+             (ref (vec players))
              unit-spec
              damagetable
              (ref board)
@@ -67,7 +65,7 @@
 ;;; Player Functions
 
 (defn current-player [game]
-  (nth @(:players game) @(:current-player-index game)))
+  (get @(:players game) @(:current-player-index game)))
 
 (defn next-player! [game]
   (log-event! game {:type :turn-completed
@@ -79,13 +77,13 @@
              (inc idx))))
   (current-player game))
 
+(defn get-player [game color]
+  (first (filter #(= (:color %) color) @(:players game))))
+
 (defn update-player! [game player-color f & args]
-  (let [[idx player] (first (filter #(= player-color (-> % second :color))
-                                    (map-indexed vector @(:players game))))
-        newplayer (apply f player args)]
-    ;; TODO: This should be atomic
-    (alter (:players game) #(replace {player newplayer} %))
-    newplayer))
+  (alter (:players game) #(let [p (get-player game player-color)]
+                            (replace {p (apply f p args)} %)))
+  (get-player game player-color))
 
 (defn remove-player!
   "Removes a player in a running game.
