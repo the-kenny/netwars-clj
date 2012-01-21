@@ -109,8 +109,7 @@
       (when (and (is-building? t) (= player-color (second t)))
         (alter (:board game) board/change-building-color c :white ))))
    ;; Remove the player
-   (let [player-to-remove (first (filter #(= player-color (:color %))
-                                         @(:players game)))]
+   (let [player-to-remove (get-player player-color)]
      (alter (:players game) (fn [seq] (remove #(= (:color %) player-color) seq)))
      player-to-remove)))
 
