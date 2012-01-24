@@ -10,7 +10,7 @@
      (dom/element "div" elem))
     ;; Scroll to bottom found at:
     ;; http://www.ajax-community.de/javascript/6065-div-anspringen-timeout-berbr-cken.html
-    (set! (. messageLog scrollTop) (.scrollHeight messageLog))))
+    (set! (.-scrollTop messageLog) (.-scrollHeight messageLog))))
 
 (defn message [& more]
   (message-html (apply str more)))

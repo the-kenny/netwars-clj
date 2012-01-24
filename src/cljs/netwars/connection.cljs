@@ -29,7 +29,7 @@
 
 ;;; Connnection Stuff
 (defn handle-socket-message [socket-event]
-  (let [obj (decode-data (.data socket-event))]
+  (let [obj (decode-data (.-data socket-event))]
     (handle-response obj)))
 
 (let [closefns (atom [])]
@@ -53,7 +53,7 @@
 (defn start-ping-timer [interval]
   (let [t (goog.Timer. interval)]
     (event/listen t :tick (fn [_] (send-data {:type :ping})))
-    (. t (start))))
+    (.start t)))
 
 (defmethod handle-response :pong [_]
   ;; TODO: Implement a timeout for reconnecting here
@@ -63,7 +63,7 @@
 
 (defn open-socket [uri]
   (let [ws (js/WebSocket. uri)]
-    (set! (. ws onopen) (fn [_] (handle-open)))
-    (set! (. ws onclose) (fn [] (handle-close)))
-    (set! (. ws onmessage) #(handle-socket-message %))
+    (set! (.-onopen ws) (fn [_] (handle-open)))
+    (set! (.-onclose ws) (fn [] (handle-close)))
+    (set! (.-onmessage ws) #(handle-socket-message %))
     (set! *socket* ws)))

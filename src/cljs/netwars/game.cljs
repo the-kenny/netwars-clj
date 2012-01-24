@@ -163,5 +163,5 @@
     ;; This needs to be re-added after every clear. Dumb kinetic...
     (let [canvas (:canvas graphics)]
       (drawing/add-click-listener graphics
-                                  (aw-map/coord 0 0) (.width canvas) (.height canvas)
+                                  (aw-map/coord 0 0) (.-width canvas) (.-height canvas)
                                   #(-> % drawing/canvas->map clicked-on)))))

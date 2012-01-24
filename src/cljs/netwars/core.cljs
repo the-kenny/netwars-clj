@@ -18,7 +18,7 @@
 
 (defn on-load-map-submit []
   (logging/log "Requesting new map from server")
-  (game/start-new-game (.value (dom/get-element :mapName))))
+  (game/start-new-game (.-value (dom/get-element :mapName))))
 
 (connection/on-open
  #(let [elem (dom/get-element :connectionIndicator)]
@@ -34,7 +34,7 @@
 (event/listen (dom/get-element :mapForm)
                :submit
                #(do (on-load-map-submit)
-                    (. % (preventDefault))))
+                    (.preventDefault %)))
 
 ;;; Request game list on open
 (connection/on-open #(connection/send-data {:type :helo}))
@@ -45,11 +45,11 @@
 
  ;;; Network stuff
 
-(let [host (.. js/window location host)]
+(let [host (.. js/window -location -host)]
   (connection/open-socket (str "ws://" host "/socket")))
 
 
 ;;; TODO: Use animation when enormous cpu usage is fixed
 (let [t (goog.Timer. 100)]
   (event/listen t "tick" #(drawing/redraw board-context))
-  (. t (start)))
+  (.start t))
