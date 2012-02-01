@@ -4,13 +4,15 @@
                  [commons-codec "1.5" :exclusions [commons-logging]]
                  [org.clojure/tools.logging "0.2.0"]
                  [log4j/log4j "1.2.16"]
-                 [clj-logging-config "1.9.6"
-                  :exclusions [swank-clojure/swank-clojure]]
-                 [compojure "1.0.1" :exclusions [org.clojure/clojure]]
+                 [clj-logging-config "1.9.6"]
+                 [compojure "1.0.1"]
                  [ring/ring-devel "1.0.1"]
                  [org.clojure/data.json "0.1.1"]]
   :dev-dependencies [[lein-cljsbuild "0.0.8"]
                      [midje "1.3.1"]]
+  :exclusions [org.clojure/clojure
+               swank-clojure/swank-clojure]
+  :extra-files-to-clean ["resoures/public/netwars.js"]
   :repositories {"stuartsierra-releases" "http://stuartsierra.com/maven2"}
   :source-path "src/clj/"
   :main netwars.core
