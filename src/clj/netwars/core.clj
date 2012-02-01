@@ -37,9 +37,10 @@
    (info "server started"))
 
   (defn stop []
-    (@server)
-    (reset! server nil)
-    (info "Server stopped")))
+    (when @server
+      (@server)
+      (reset! server nil)
+      (info "Server stopped"))))
 
 (defn -main []
   (set-loggers!
