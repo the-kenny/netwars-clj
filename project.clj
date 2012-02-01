@@ -15,6 +15,7 @@
   :extra-files-to-clean ["resoures/public/netwars.js"]
   :repositories {"stuartsierra-releases" "http://stuartsierra.com/maven2"}
   :source-path "src/clj/"
+  :hooks [leiningen.cljsbuild]
   :main netwars.core
   :cljsbuild {:source-path "src/cljs/"
               :crossovers [netwars.aw-map
