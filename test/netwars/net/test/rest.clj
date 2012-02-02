@@ -17,8 +17,10 @@
   (json/read-json (games)) =>  (contains {:count integer? :ids sequential?}))
 
 (fact
-  (when-let [id (first (:ids (json/read-json (games))))]
+  (let [id (first (:ids (json/read-json (games))))]
+    id => string?
     (json/read-json (game id)) => (contains {:info map?
                                              :players sequential?
                                              :moves sequential?
-                                             :current-player-index integer?})))
+                                             :current-player-index integer?
+                                             :round-counter integer?})))
