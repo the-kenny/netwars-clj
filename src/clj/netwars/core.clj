@@ -10,8 +10,12 @@
         [compojure.handler :as handler]
         [ring.util.response :only [redirect]]
         [ring.middleware.stacktrace :as ringtrace]
+        [clojure.java.browse :only [browse-url]]
         clojure.tools.logging
         clj-logging-config.log4j))
+
+(def webapp-url "http://localhost")
+(def webapp-port 8080)
 
 (set-loggers!
  "netwars.net"
@@ -29,12 +33,14 @@
   (route/not-found "<p>aww... this doesn't exist</p>"))
 
 (let [server (atom nil)]
-  (defn start []
+  (defn start [& open-browser]
    (reset! server (start-http-server (-> #'main-routes
                                          ringtrace/wrap-stacktrace
                                          wrap-ring-handler)
-                                     {:port 8080 :websocket true}))
-   (info "server started"))
+                                     {:port webapp-port :websocket true}))
+   (info "server started")
+   (when open-browser
+     (browse-url (str webapp-url ":" webapp-port))))
 
   (defn stop []
     (when @server
@@ -48,4 +54,4 @@
    {:level :info
     :pattern "%d %p: %m%n"
     :out (java.io.File. "netwars.log")})
-  (start))
+  (start true))
