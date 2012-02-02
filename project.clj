@@ -18,7 +18,6 @@
   :source-path "src/clj/"
   :hooks [leiningen.cljsbuild]
   :main netwars.core
-  :warn-on-reflection true
   :cljsbuild {:source-path "src/cljs/"
               :crossovers [netwars.aw-map
                            netwars.aw-unit
