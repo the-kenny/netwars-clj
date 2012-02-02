@@ -17,6 +17,7 @@
      (json/write-json (merge object
                              {:players @(:players game)
                               :current-player-index @(:current-player-index game)
+                              :round-counter @(:round-counter game)
                               :moves (rest @(:moves game))})
                       out escape-unicode?))))
 
