@@ -17,6 +17,7 @@
 
 (defrecord AwGame [info
                    current-player-index
+                   round-counter
                    players
                    unit-spec
                    damagetable
@@ -45,12 +46,13 @@
                        :unit-spec unit-spec
                        :players players}]
     (AwGame. newinfo
-             (ref 0)
+             (ref 0)                    ;current-player-index
+             (ref 1)                    ;round-counter
              (ref (vec players))
              unit-spec
              damagetable
              (ref board)
-             (ref nil)
+             (ref nil)                  ;current-unit
              (ref [initial-event]))))
 
 ;;; Game events
@@ -64,6 +66,9 @@
 
 ;;; Player Functions
 
+(defn player-count [game]
+  (count @(:players game)))
+
 (defn current-player [game]
   (get @(:players game) @(:current-player-index game)))
 
@@ -72,8 +77,10 @@
                     :player (current-player game)})
   (alter (:current-player-index game)
          (fn [idx]
-           (if (>= (inc idx) (count @(:players game)))
-             0
+           (if (>= (inc idx) (player-count game))
+             (do
+               (alter (:round-counter game) inc)
+               0)
              (inc idx))))
   (current-player game))
 
@@ -112,6 +119,11 @@
    (let [player-to-remove (get-player game player-color)]
      (alter (:players game) (fn [seq] (remove #(= (:color %) player-color) seq)))
      player-to-remove)))
+
+(defn current-round
+  "Returns the current round"
+  [game]
+  @(:round-counter game))
 
 ;;; Attacking
 

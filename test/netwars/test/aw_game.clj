@@ -86,6 +86,12 @@
   => (throws IllegalArgumentException))
 
 
+(facts "about current-round"
+  (current-round *game*) => 1
+  ;; Go to next round (skip N players)
+  (dosync (dotimes [_ (player-count *game*)] (next-player! *game*)))
+  (current-round *game*) => 2)
+
 (defn check-attack-event [attack-event
                           from to
                           att-internal vic-internal]
