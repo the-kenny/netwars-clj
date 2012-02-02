@@ -7,7 +7,6 @@
                            wrap-ring-handler]]
         compojure.core
         [compojure.route :as route]
-        [compojure.handler :as handler]
         [ring.util.response :only [redirect]]
         [ring.middleware.stacktrace :as ringtrace]
         [clojure.java.browse :only [browse-url]]
