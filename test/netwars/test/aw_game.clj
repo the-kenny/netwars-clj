@@ -4,7 +4,7 @@
          netwars.aw-game
         [netwars.path :only [make-path]]
         [netwars.game-board :as board]
-        [netwars.aw-map :only [coord width height at is-building?]]
+        [netwars.aw-map :only [coord width height at is-building? buildings]]
         [netwars.aw-unit :only [is-unit? main-weapon alt-weapon]]
         [netwars.aw-player :as player])
   (:import (java.lang IllegalStateException IllegalArgumentException)))
@@ -73,12 +73,9 @@
   (doseq [[c u] (-> *game* :board deref :units)]
     (fact (:color u) =not=> :black))
 
-  ;; TODO: Use doterrain
   (let [terrain-board (-> *game* :board deref :terrain)]
-   (doseq [^long x (range (width terrain-board)), ^long y (range (height terrain-board))
-           :let [t (at terrain-board (coord x y))]
-           :when (is-building? t)]
-     (fact (second t) =not=> :black))))
+    (buildings terrain-board) => (has every? (fn [[_ [_ color]]]
+                                               (not= color :black)))))
 
 (fact "about misusage of remove-player!"
   ;; Can't remove current player

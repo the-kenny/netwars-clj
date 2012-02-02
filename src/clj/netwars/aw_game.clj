@@ -107,14 +107,13 @@
    (doseq [[c u] (:units @(:board game))]
      (when (= player-color (:color u))
       (alter (:board game) board/remove-unit c)))
+
    ;; Remove terrain
-   ;; TODO: Use dobuildings
    (let [terrain-board (-> game :board deref :terrain)]
-    (doseq [x (range (width terrain-board)), y (range (height terrain-board))
-            :let [c (coord x y)
-                  t (at terrain-board c)]]
-      (when (and (is-building? t) (= player-color (second t)))
-        (alter (:board game) board/change-building-color c :white ))))
+     (doseq [[coord [_ color]] (aw-map/buildings terrain-board)]
+       (when (= player-color color)
+         (alter (:board game) board/change-building-color coord :white))))
+
    ;; Remove the player
    (let [player-to-remove (get-player game player-color)]
      (alter (:players game) (fn [seq] (remove #(= (:color %) player-color) seq)))
