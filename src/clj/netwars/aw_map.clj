@@ -48,6 +48,21 @@
   (and (< -1 (:x c) (width b))
        (< -1 (:y c) (height b))))
 
+;; (let [terrain-board (-> game :board deref :terrain)]
+;;     (doseq [x (range (width terrain-board)), y (range (height terrain-board))
+;;             :let [c (coord x y)
+;;                   t (at terrain-board c)]]
+;;       (when (and (is-building? t) (= player-color (second t)))
+;;         (alter (:board game) board/change-building-color c :white ))))
+
+(defmacro doboard [[[c-sym v-sym] board] & body]
+  `(let [board# ~board]
+     (doseq [x# (range (width board#))
+             y# (range (height board#))
+             :let [~c-sym (coord x# y#)
+                   ~v-sym (at board# ~c-sym)]]
+       ~@body)))
+
 
 (defrecord TerrainBoard [width height data]
   Board
@@ -90,6 +105,13 @@ Mostly useful for drawing of maps."
 Mostly useful for drawing of maps."
   [t]
   (and (not (nil? t)) (not (is-water? t))))
+
+(defn buildings [board]
+  {:pre [(instance? TerrainBoard board)]}
+  (filter #(is-building? (second %)) (for [x (range (width board))
+                                           y (range (height board))
+                                           :let [c (coord x y)]]
+                                       [c (at board c)])))
 
 (def +movement-cost-table+
   {:plain        {:foot 1   :mechanical 1   :tread 1   :tires 2   :fly 1   :swim nil :transport nil :oozium 1   :pipe nil :hover 1}

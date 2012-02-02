@@ -21,6 +21,16 @@
   (provided (width ...board...)          => 30
             (height ...board...)         => 20))
 
+(facts "about doboard"
+  (let [counter (atom 0)]
+   (doboard [[c t] (make-terrain-board [3 2] [[:water :water]
+                                              [:plain :water]
+                                              [:water :water]])]
+            t => keyword?
+            c => coord?
+            (swap! counter inc))
+   @counter) => 6)
+
 ;;; Given map:
 ;;;  -------
 ;;; | w p w |
@@ -60,6 +70,15 @@
 (facts "about is-ground?"
   (is-ground? ...ground...)          => true
   (provided (is-water? ...ground...) => false))
+
+(facts "about buildings"
+  (let [board (make-terrain-board [3 2] [[[:base :green] :water]
+                                         [:plain :water]
+                                         [:water [:city :red]]])]
+    (buildings board) => sequential?
+    (count (buildings board)) => 2
+    (buildings board) => (has every? (fn [[c t]]
+                                       (and (coord? c) (is-building? t))))))
 
 (deftest test-movement-cost-table-integrity
   (doseq [[terr costs] +movement-cost-table+]
