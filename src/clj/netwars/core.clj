@@ -31,21 +31,25 @@
   (context "/api" [] rest/api-routes)
   (route/not-found "<p>aww... this doesn't exist</p>"))
 
-(let [server (atom nil)]
-  (defn start [& open-browser]
-   (reset! server (start-http-server (-> #'main-routes
-                                         ringtrace/wrap-stacktrace
-                                         wrap-ring-handler)
-                                     {:port webapp-port :websocket true}))
-   (info "server started")
-   (when open-browser
-     (browse-url (str webapp-url ":" webapp-port))))
+(def server (atom nil))
 
-  (defn stop []
-    (when @server
-      (@server)
-      (reset! server nil)
-      (info "Server stopped"))))
+(defn start [& open-browser]
+  (reset! server (start-http-server (-> #'main-routes
+                                        ringtrace/wrap-stacktrace
+                                        wrap-ring-handler)
+                                    {:port webapp-port :websocket true}))
+  (info "server started")
+  (when open-browser
+    (browse-url (str webapp-url ":" webapp-port))))
+
+(defn stop []
+  (when @server
+    (@server)
+    (reset! server nil)
+    ;; Hack: Remove running games
+    (dosync
+     (ref-set game-server/running-games nil)
+     (ref-set game-server/client-game-map nil))    (info "Server stopped")))
 
 (defn -main []
   (set-loggers!
