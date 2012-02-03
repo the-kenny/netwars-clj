@@ -48,20 +48,14 @@
   (and (< -1 (:x c) (width b))
        (< -1 (:y c) (height b))))
 
-;; (let [terrain-board (-> game :board deref :terrain)]
-;;     (doseq [x (range (width terrain-board)), y (range (height terrain-board))
-;;             :let [c (coord x y)
-;;                   t (at terrain-board c)]]
-;;       (when (and (is-building? t) (= player-color (second t)))
-;;         (alter (:board game) board/change-building-color c :white ))))
-
-(defmacro doboard [[[c-sym v-sym] board] & body]
-  `(let [board# ~board]
-     (doseq [x# (range (width board#))
-             y# (range (height board#))
-             :let [~c-sym (coord x# y#)
-                   ~v-sym (at board# ~c-sym)]]
-       ~@body)))
+(when defmacro                          ;Guard for Clojurescript
+  (defmacro doboard [[[c-sym v-sym] board] & body]
+   `(let [board# ~board]
+      (doseq [x# (range (width board#))
+              y# (range (height board#))
+              :let [~c-sym (coord x# y#)
+                    ~v-sym (at board# ~c-sym)]]
+        ~@body))))
 
 
 (defrecord TerrainBoard [width height data]
