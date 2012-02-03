@@ -1,3 +1,0 @@
-export CLOJURESCRIPT_HOME=clojurescript/
-
-sh cljs-watch/cljs-watch src/ '{:optimizations false :output-to "resources/public/netwars.js"}'
