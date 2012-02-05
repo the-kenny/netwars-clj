@@ -48,16 +48,6 @@
   (and (< -1 (:x c) (width b))
        (< -1 (:y c) (height b))))
 
-(when defmacro                          ;Guard for Clojurescript
-  (defmacro doboard [[[c-sym v-sym] board] & body]
-   `(let [board# ~board]
-      (doseq [x# (range (width board#))
-              y# (range (height board#))
-              :let [~c-sym (coord x# y#)
-                    ~v-sym (at board# ~c-sym)]]
-        ~@body))))
-
-
 (defrecord TerrainBoard [width height data]
   Board
   (width [t] (:width t))

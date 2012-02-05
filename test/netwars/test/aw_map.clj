@@ -21,16 +21,6 @@
   (provided (width ...board...)          => 30
             (height ...board...)         => 20))
 
-(facts "about doboard"
-  (let [counter (atom 0)]
-   (doboard [[c t] (make-terrain-board [3 2] [[:water :water]
-                                              [:plain :water]
-                                              [:water :water]])]
-            t => keyword?
-            c => coord?
-            (swap! counter inc))
-   @counter) => 6)
-
 ;;; Given map:
 ;;;  -------
 ;;; | w p w |
