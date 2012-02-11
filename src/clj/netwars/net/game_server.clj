@@ -36,7 +36,7 @@
   (vals @running-games))
 
 (defn store-game!
-  "Stores an AwGame in the running-games sore. The game needs a unique id in :game-id"
+  "Stores an AwGame in the running-games store. The game needs a unique id in :game-id"
   [game]
   {:pre [(:game-id game)]}
   (info "Stored game:" (:info game))
@@ -118,20 +118,20 @@
 
 ;;; Game-related Send Functions
 
-(defn send-units [client game]
+(defn ^:private send-units [client game]
   (let [units (-> game :board deref :units)]
     (info "Sending units from game" (:game-id game) "to client" (:client-id client))
     (connection/send-data client {:type :unit-data
                                   :units units})))
 
-(defn send-game-data [game client]
+(defn ^:private send-game-data [game client]
   (info "Sending game-data for game" (:game-id game) "to client" (:client-id client))
   (connection/send-data client {:type :game-data
                                 :info (:info game)})
   (map-server/send-map-data client (-> game :board deref))
   (send-units client game))
 
-(defn make-game-list-response []
+(defn ^:private make-game-list-response []
   {:type :game-list
    :games (into {} (for [game (game-list)]
                      [(:game-id game) (:info game)]))})
