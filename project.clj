@@ -9,9 +9,7 @@
                  [ring/ring-devel "1.0.1"]
                  [org.clojure/data.json "0.1.1"]]
   :dev-dependencies [[lein-cljsbuild "0.0.8"]
-                     [midje "1.3.1"]
-                     [lein-midje "1.0.7"]  ;This shouldn't be here, but travis wants it
-                     ]
+                     [midje "1.3.1"]]
   :exclusions [org.clojure/clojure
                swank-clojure/swank-clojure]
   :extra-files-to-clean ["resoures/public/netwars.js"]
