@@ -21,14 +21,14 @@
   (instance? Coordinate c))
 
 (when clojure.core/print-method
-  (defmethod clojure.core/print-method ::Coordinate [c writer]
+  (defmethod clojure.core/print-method ::Coordinate [c ^java.lang.writer writer]
     (.write writer (str "[" (:x c) "," (:y c) "]"))))
 
 (defn distance
   "Manhattan metric distance between coordinates"
   [c1 c2]
-  (+ (Math/abs (- (:x c2) (:x c1)))
-     (Math/abs (- (:y c2) (:y c1)))))
+  (+ (Math/abs (long (- (:x c2) (:x c1))))
+     (Math/abs (long (- (:y c2) (:y c1))))))
 
 ;; (defn distance
 ;;  "Euclidean distance between 2 points"
