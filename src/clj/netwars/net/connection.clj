@@ -1,6 +1,5 @@
 (ns netwars.net.connection
-  (:use
-        aleph.http
+  (:use aleph.http
         [clojure.tools.logging :only [debug info warn error fatal]]
         netwars.net.otw)
   (:require [lamina.core :as lamina]))

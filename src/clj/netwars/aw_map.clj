@@ -21,7 +21,7 @@
   (instance? Coordinate c))
 
 (when clojure.core/print-method
-  (defmethod clojure.core/print-method ::Coordinate [c ^java.lang.writer writer]
+  (defmethod clojure.core/print-method ::Coordinate [c ^java.io.Writer writer]
     (.write writer (str "[" (:x c) "," (:y c) "]"))))
 
 (defn distance

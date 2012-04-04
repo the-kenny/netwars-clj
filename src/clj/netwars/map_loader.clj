@@ -1,6 +1,6 @@
 (ns netwars.map-loader
   (:use netwars.aw-map
-        netwars.impl.map-loader))
+        netwars.binary-data))
 
 (defrecord AwMapUnit [id color])
 (defrecord LoadedMap [^netwars.aw_map.TerrainBoard terrain units info])

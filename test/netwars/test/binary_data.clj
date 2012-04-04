@@ -1,6 +1,6 @@
-(ns netwars.impl.test.map-loader
-  (:use netwars.impl.map-loader
-        clojure.test))
+(ns netwars.test.binary-data
+  (:use clojure.test
+        netwars.binary-data))
 
 (defn- test-buffer [buf & {:keys [size first-byte]}]
   (is (instance? java.nio.ByteBuffer buf))
@@ -30,5 +30,3 @@
   (is (= (int 1109590016) (read-int32 (make-test-buffer))))
   (is (= "AWS" (read-null-string (make-test-buffer 65 87 83 0 0 0))))
   (is (= "AWS" (read-n-string (make-test-buffer 65 87 83 0 0 0) 3))))
-
-(deftest optional-reading)

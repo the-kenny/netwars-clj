@@ -1,4 +1,4 @@
-(ns netwars.impl.map-loader
+(ns netwars.binary-data
   (:require [clojure.java.io :as io])
   (:import java.nio.ByteBuffer))
 
