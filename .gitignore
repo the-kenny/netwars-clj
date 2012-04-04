@@ -1,4 +1,6 @@
-.clojurescript-output/
+/.crossover-cljs/
+/.lein-cljsbuild-compiler-*/
+/.clojurescript-output/
 .lein-deps-sum
 .lein-failures
 
@@ -11,8 +13,3 @@ classes/
 db/
 lib/
 netwars.log
-
-# Copied cljs-files from lein-cljsbuild
-src/cljs/netwars/aw_map.cljs
-src/cljs/netwars/aw_unit.cljs
-src/cljs/netwars/game_board.cljs

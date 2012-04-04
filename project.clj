@@ -1,27 +1,29 @@
 (defproject netwars "0.0.1-SNAPSHOT"
   :dependencies [[org.clojure/clojure "1.3.0"]
-                 [aleph "0.2.1-alpha2-SNAPSHOT"]
+                 [org.clojure/data.json "0.1.1"]
+                 [aleph "0.2.1-beta2"]
                  [commons-codec "1.5" :exclusions [commons-logging]]
                  [org.clojure/tools.logging "0.2.0"]
                  [log4j/log4j "1.2.16"]
                  [clj-logging-config "1.9.6"]
                  [compojure "1.0.1"]
-                 [ring/ring-devel "1.0.1"]
-                 [org.clojure/data.json "0.1.1"]]
-  :dev-dependencies [[lein-cljsbuild "0.0.8"]
-                     [midje "1.3.1"]]
+                 [ring/ring-devel "1.0.1"]]
   :exclusions [org.clojure/clojure
                swank-clojure/swank-clojure]
   :extra-files-to-clean ["resoures/public/netwars.js"]
-  :source-path "src/clj/"
-  :hooks [leiningen.cljsbuild]
-  :main netwars.core
-  :cljsbuild {:source-path "src/cljs/"
-              :crossovers [netwars.aw-map
+  :source-paths ["src/clj/"]
+  ;; :main netwars.core
+  :warn-on-reflection true
+  :cljsbuild {:crossovers [netwars.aw-map
                            netwars.aw-unit
                            netwars.game-board]
-              :compiler {:output-to "resources/public/netwars.js"
-                         :foreign-libs [{:file "resources/public/kinetic.js"
-                                         :provides ["kinetic"]}]
+              :builds [{:source-path "src/cljs/"
+                        :compiler
+                        {:output-to "resources/public/netwars.js"
+                         :pretty-print true
                          :optimizations :whitespace
-                         :pretty-print true}})
+                         :foreign-libs [{:provides ["kinetic"]
+                                         :file "resources/public/kinetic.js"}]}}]}
+  :profiles {:dev {:dependencies [[midje "1.3.1"]]
+                   :plugins [[org.clojars.the-kenny/lein-midje "1.0.9"]]}}
+  :plugins [[lein-cljsbuild "0.1.4"]])

@@ -1,9 +1,9 @@
 (ns netwars.net.connection
-  (:use lamina.core
+  (:use
         aleph.http
-        [aleph.formats :as formats]
         [clojure.tools.logging :only [debug info warn error fatal]]
-        netwars.net.otw))
+        netwars.net.otw)
+  (:require [lamina.core :as lamina]))
 
 (defrecord ClientConnection [client-id connection])
 
@@ -33,8 +33,8 @@
 
 (defn send-data [client data]
   (debug "Sending data" data "to" (:client-id client))
-  (if-not (closed? (:connection client))
-   (enqueue (:connection client) (encode-data data))
+  (if-not (lamina/closed? (:connection client))
+   (lamina/enqueue (:connection client) (encode-data data))
    (error "Attempted to send to closed channel of client:" (:client-id client))))
 
 (defn send-broadcast [broadcast data]
@@ -46,21 +46,21 @@
 (def connection-pool (atom {}))
 
 (def broadcast-channel (make-broadcast-channel))
-(def connect-channel (permanent-channel))
-(def disconnect-channel (permanent-channel))
+(def connect-channel (lamina/permanent-channel))
+(def disconnect-channel (lamina/permanent-channel))
 
 (defmulti handle-request (fn [client data] (get data :type)))
 
 (defn- enqueue-disconnect [client]
   (info "Got disconnect:" (:client-id client))
-  (enqueue disconnect-channel client))
+  (lamina/enqueue disconnect-channel client))
 
 (defn- enqueue-connect [ch handshake]
   (let [c (make-client-connection (java.util.UUID/randomUUID) ch)]
     (info "Got new connection:" (:client-id c))
-    (enqueue connect-channel c)
-    (on-closed ch #(enqueue-disconnect c))
-    (receive-all ch #(when (string? %)
+    (lamina/enqueue connect-channel c)
+    (lamina/on-closed ch #(enqueue-disconnect c))
+    (lamina/receive-all ch #(when (string? %)
                        (let [data (decode-data %)]
                          (debug "Got data:" data)
                         (handle-request c data))))
@@ -68,10 +68,10 @@
 
 
 (defn on-disconnect [f]
-  (receive-all disconnect-channel f))
+  (lamina/receive-all disconnect-channel f))
 
 (defn on-connect [f]
-  (receive-all connect-channel f))
+  (lamina/receive-all connect-channel f))
 
 (on-connect #(swap! connection-pool assoc (:client-id %) %))
 (on-disconnect (fn [client]
