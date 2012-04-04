@@ -1,18 +1,19 @@
 (ns netwars.damagecalculator
-  (:use [netwars.aw-unit :as unit]
-        [netwars.damagetable :as damagetable]
-        [netwars.aw-map :only [defense-value]]
-        [clojure.set :only [rename-keys]]))
+  (:require [netwars.aw-unit :as aw-unit]
+            [netwars.aw-map :as aw-map]
+            [clojure.set :as set]))
 
+(defn get-damage [damagetable attacker defender]
+  (get-in damagetable [attacker defender]))
 
 (defn choose-weapon [damagetable attacker victim]
-  (let [damage (damagetable/get-damage damagetable
-                                       (:internal-name attacker)
-                                       (:internal-name victim))
-        weapons (available-weapons attacker)
-        comb (select-keys weapons (keys (rename-keys damage
-                                                     {:alt-damage :alt-weapon
-                                                      :damage :main-weapon})))]
+  (let [damage (get-damage damagetable
+                           (:internal-name attacker)
+                           (:internal-name victim))
+        weapons (aw-unit/available-weapons attacker)
+        comb (select-keys weapons (keys (set/rename-keys damage
+                                                         {:alt-damage :alt-weapon
+                                                          :damage :main-weapon})))]
     (cond
      (:main-weapon comb) {:main-weapon comb}
      (:alt-weapon comb) {:alt-weapon comb})))
@@ -24,11 +25,11 @@
   (let [hp1 (:hp attacker)
         hp2 (:hp victim)
         ;; td1 (defense-value t1)
-        td2 (defense-value t2)
+        td2 (aw-map/defense-value t2)
         [wt w] (first (choose-weapon damagetable attacker victim))
-        damages (damagetable/get-damage damagetable
-                                        (:internal-name attacker)
-                                        (:internal-name victim))
+        damages (get-damage damagetable
+                            (:internal-name attacker)
+                            (:internal-name victim))
         base-damage (case wt
                       :main-weapon (:damage damages)
                       :alt-weapon (:alt-damage damages))]

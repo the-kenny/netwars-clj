@@ -2,6 +2,9 @@
   (:use clojure.test
         netwars.damagetable))
 
+(defn ^:private get-damage [table attacker defender]
+  (get-in table [attacker defender]))
+
 (deftest test-load-damagetable
   (is (map? (load-damagetable "resources/damagetable.xml")))
   (is (map? (load-damagetable "resources/damagetable.xml"))

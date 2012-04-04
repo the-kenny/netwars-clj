@@ -7,7 +7,14 @@
             [netwars.connection :as connection]
             [netwars.game-list :as game-list]
             [netwars.game :as game]
-            [netwars.logging :as logging]))
+            [netwars.logging :as logging]
+
+            ;; Load all crossovers prevent strippint
+            [netwars.aw-map :as aw-map]
+            [netwars.aw-unit :as aw-unit]
+            [netwars.damagecalculator :as damagecalculator]
+            [netwars.game-board :as game-board]
+            [netwars.map-utils :as map-utils]))
 
 ;;; Logging Stuff
 
