@@ -4,7 +4,8 @@
             [netwars.logging :as logging]
             [netwars.pathfinding :as pathfinding]
             [netwars.unit-info :as unit-info]
-            [netwars.aw-map :as aw-map]))
+            [netwars.aw-map :as aw-map]
+            [netwars.game-board :as game-board]))
 
 ;;; TODO: Use netwars.aw-unit.AwUnit instead of raw maps
 ;;; TODO: Use netwars.game-board for storing game-state
@@ -134,7 +135,7 @@
 
 (defmethod connection/handle-response :map-data [message]
   ;; (drawing/draw-terrain board-context (get message :map-data))
-  (drawing/image-from-base64 (:map-data message) #(set! terrain-image %)))
+  (drawing/image-from-base64 (:map-image message) #(set! terrain-image %)))
 
 (defmethod connection/handle-response :unit-data [data]
   (logging/log "got " (count (:units data)) " units")
