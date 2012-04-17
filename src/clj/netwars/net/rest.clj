@@ -31,11 +31,11 @@
 
 (defn damagetable [name]
   (json-str (damagetable/load-damagetable "resources/damagetable.xml")))
-(alter-var-root #'damagetable memoize)
+;; (alter-var-root #'damagetable memoize)
 
 (defn unit-spec [name]
   (json-str (unit-loader/load-units "resources/units.xml")))
-(alter-var-root #'unit-spec memoize)
+;; (alter-var-root #'unit-spec memoize)
 
 ;; (defn games []
 ;;   (let [ids (keys @server/running-games)]
