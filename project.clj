@@ -28,4 +28,4 @@
                                          :file "resources/public/kinetic.js"}]}}]}
   :profiles {:dev {:dependencies [[midje "1.3.1"]]
                    :plugins [[org.clojars.the-kenny/lein-midje "1.0.9"]]}}
-  :plugins [[lein-cljsbuild "0.1.4"]])
+  :plugins [[lein-cljsbuild "0.1.8"]])
