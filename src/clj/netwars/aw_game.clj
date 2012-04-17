@@ -111,16 +111,16 @@
                                                                att
                                                                vic)))))]
       (let [newgame (-> game
-                 (assoc :board newboard)
-                 (log-event {:type (if counterattack :counter-attack :attack)
-                             :from att-coord, :to vic-coord
-                             :attacker att, :victim newvic
-                             :damage dam}))]
+                        (assoc :board newboard)
+                        (log-event {:type (if counterattack :counter-attack :attack)
+                                    :from att-coord, :to vic-coord
+                                    :attacker att, :victim newvic
+                                    :damage dam}))]
         (if (and newvic
-                   (board/in-attack-range? (:board newgame) vic-coord att-coord)
-                   (not counterattack))
+                 (board/in-attack-range? (:board newgame) vic-coord att-coord)
+                 (not counterattack))
           (perform-attack newgame vic-coord att-coord :counterattack true)
-          game)))))
+          newgame)))))
 
 ;;; Fuel Costs
 

@@ -16,7 +16,7 @@
                                                           :damage :main-weapon})))]
     (cond
      (:main-weapon comb) {:main-weapon comb}
-     (:alt-weapon comb) {:alt-weapon comb})))
+     (:alt-weapon  comb) {:alt-weapon  comb})))
 
 ;;	damage = floor(base-damage * (100 - (td2 * hp2)) * (hp1 / 10) * 100 / 10000);
 (defn calculate-unrounded-damage [damagetable

@@ -240,7 +240,6 @@
        (is (< (:fuel new-unit) (:fuel unit)) "the move used fuel"))
      (is (= :unit-moved (:type (last (game-events *game*)))) "the move was logged"))))
 
-;.;. Achievement is its own reward. -- David Lynch
 ;;; From here on, it's Midje
 
 (let [base-coord (coord 7 13)]
