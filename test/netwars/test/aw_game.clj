@@ -7,8 +7,7 @@
         [netwars.aw-unit :only [is-unit? main-weapon alt-weapon]]
         [netwars.game-creator :only [make-game]])
   (:require [netwars.game-board :as board]
-            [netwars.aw-player :as player])
-  (:import (java.lang IllegalStateException IllegalArgumentException)))
+            [netwars.aw-player :as player]))
 
 (def +aw-test-map+ "maps/7330.aws")
 
@@ -27,9 +26,9 @@
   (is (= :game-started (-> *game* :moves first :type))))
 
 (deftest test-action-logging
-  (is (thrown? java.lang.IllegalStateException
+  (is (thrown? java.lang.Exception
                (log-event *game* {:type 42})))
-  (is (thrown? java.lang.AssertionError
+  (is (thrown? java.lang.Exception
                (log-event *game* {})))
 
   (is (= 1 (count (game-events *game*))))
@@ -97,15 +96,17 @@
 
 (fact "about misusage of remove-player"
   ;; Can't remove current player
-  (remove-player *game* (:color (current-player *game*)))
-  => (throws IllegalArgumentException))
+  (remove-player *game* (:color (current-player *game*))) => throws)
 
 
 (facts "about current-round"
   (current-round *game*) => 1
   ;; Go to next round (skip N players)
-  (-> (reduce (fn [game _] (next-player game)) (range (player-count *game*)))
-      (current-round) => 2))
+  (-> (reduce (fn [game _]
+                (next-player game))
+              *game*
+              (range (player-count *game*)))
+      (current-round)) => 2)
 
 (defn check-attack-event [attack-event
                           from to
@@ -156,10 +157,12 @@
         infantry-c (coord 1 13)
         artillery (board/get-unit (:board *game*) artillery-c)
         original-ammo (:ammo (main-weapon artillery))
-        new-ammo (board/get-unit (:board (perform-attack *game*
-                                                         artillery-c
-                                                         infantry-c))
-                                 artillery-c)]
+        new-ammo (-> *game*
+                     (perform-attack artillery-c infantry-c)
+                     :board
+                     (board/get-unit artillery-c)
+                     main-weapon
+                     :ammo)]
     (- original-ammo new-ammo) => 1))
 
 (deftest test-fuel-costs
@@ -168,13 +171,13 @@
     (is (integer? (fuel-costs *game* path)))
     (is (< 0 (fuel-costs *game* path)))
     (is (= 3 (fuel-costs *game* path)) "This path costs 3")
-    (is (thrown? java.lang.IllegalArgumentException
+    (is (thrown? java.lang.Exception
                  (fuel-costs *game* (make-path (rest coords))))
         "Throws when there is no unit on the first coordinate")))
 
 (deftest test-select-unit
   (testing "without a transaction"
-    (is (thrown? java.lang.IllegalStateException
+    (is (thrown? java.lang.Exception
                  (select-unit *game* (coord 1 13)))))
   (let [c (coord 1 13)]
     (is (= (-> *game* (select-unit c) :current-unit) c))))
@@ -193,7 +196,7 @@
 
 (deftest test-deselect-unit
   (testing "without a transaction"
-    (is (thrown? java.lang.IllegalStateException
+    (is (thrown? java.lang.Exception
                  (deselect-unit *game*))))
   (let [c (coord 1 13)
         *game* (select-unit *game* c)]
@@ -217,13 +220,13 @@
     (is (netwars.path/valid-path? path (:board *game*))
         "Make sure path used in tests is valid on board")
     (testing "without transaction"
-      (is (thrown? java.lang.IllegalStateException
+      (is (thrown? java.lang.Exception
                    (move-unit *game* path))))
     (testing "without :current-unit"
-      (is (thrown? java.lang.IllegalStateException
+      (is (thrown? java.lang.Exception
                    (move-unit *game* path))))
     (testing "with `to` outside movement-range"
-      (is (thrown? java.lang.IllegalArgumentException
+      (is (thrown? java.lang.Exception
                    (move-unit (select-unit *game* from)
                               (make-path [from to (coord 0 0)])))))
 
@@ -237,6 +240,7 @@
        (is (< (:fuel new-unit) (:fuel unit)) "the move used fuel"))
      (is (= :unit-moved (:type (last (game-events *game*)))) "the move was logged"))))
 
+;.;. Achievement is its own reward. -- David Lynch
 ;;; From here on, it's Midje
 
 (let [base-coord (coord 7 13)]
@@ -252,6 +256,6 @@
    ;; Can't buy unit when there's already an unit on this coord
    (-> *game*
        (buy-unit base-coord :infantry)
-       (buy-unit base-coord :mech))       => (throws IllegalStateException)
+       (buy-unit base-coord :mech))           => throws
    ;; Can't buy unit with insufficient funds
-   (buy-unit *game* base-coord :megatank) => (throws IllegalStateException)))
+   (buy-unit *game* base-coord :megatank)     => throws))

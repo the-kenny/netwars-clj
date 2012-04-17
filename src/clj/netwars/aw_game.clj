@@ -41,16 +41,17 @@
   (get (:players game) (:current-player-index game)))
 
 (defn next-player [game]
-  (-> game
-      (log-event {:type :turn-completed
-                  :player (current-player game)})
-      (update-in [:current-player-index]
-                 (fn [idx]
-                   (if (>= (inc idx) (player-count game))
-                     0
-                     (inc idx))))
-      ;; TODO: turn-counter
-      ))
+  (let [newgame (-> game
+                    (log-event {:type :turn-completed
+                                :player (current-player game)})
+                    (update-in [:current-player-index]
+                               (fn [idx]
+                                 (if (>= (inc idx) (player-count game))
+                                   0
+                                   (inc idx)))))]
+    (if (= 0 (:current-player-index newgame))
+      (update-in newgame [:round-counter] inc)
+      newgame)))
 
 (defn get-player [game color]
   (first (filter #(= (:color %) color) (:players game))))
@@ -65,10 +66,8 @@
  Removes all his units and makes his building neutral"
   [game player-color]
 
-  (when (= player-color (:color (current-player game)))
-    (throw (IllegalArgumentException.
-            (str "Can't remove current-player with color " (name player-color)))))
-
+  (assert (not= player-color (:color (current-player game)))
+          (str "Can't remove current-player with color " (name player-color)))
 
   ;; Remove units
   ;; (doseq [[c u] (:units (:board game))]
@@ -130,8 +129,7 @@
   [game path]
   (let [board (:board game)
         unit (board/get-unit board (first path))]
-    (when (nil? unit)
-      (throw (java.lang.IllegalArgumentException. (str "No unit on " (first path)))))
+    (assert unit (str "No unit on " (first path)))
     (when (path/valid-path? path board)
       (reduce + (map #(aw-map/movement-costs (board/get-terrain board %)
                                              (:movement-type (meta unit)))
@@ -174,15 +172,11 @@
 Returns path."
   [game path]
   {:pre [(path/path? path)]}
-  (when-not (selected-unit game)
-    (throw (java.lang.IllegalStateException.
-            "Tried to move unit without selected-unit")))
-  (when-not (every? #(contains? (movement-range game) %) path)
-    (throw (java.lang.IllegalArgumentException.
-            "Tried to move unit to non-reachable field")))
-  (when-not (path/valid-path? path (:board game))
-     (throw (java.lang.IllegalArgumentException.
-             "Given path isn't valid")))
+  (assert (selected-unit game) "Tried to move unit without selected-unit")
+  (assert (every? #(contains? (movement-range game) %) path)
+          "Tried to move unit to non-reachable field")
+  (assert (path/valid-path? path (:board game))
+          "Given path isn't valid")
 
   (let [from (selected-coordinate game)
         to   (last path)
@@ -201,18 +195,13 @@ Returns path."
   (let [player (current-player game)
         unit (unit/make-unit (:unit-spec game) id-or-internal-name (:color player))
         price (:price (meta unit))]
-    (cond
-     (board/get-unit (:board game) c)
-     (throw (IllegalStateException.
-             (str "Can't buy unit " (name (:internal-name unit)) ". There's already a unit on " c)))
-
-     (> price (:funds player))
-     (throw (IllegalStateException.
-             (str "Not enough funds to buy " (name (:internal-name unit)))))
-
-     (<= price (:funds player))
-     (-> game
-      (update-in [:board] board/add-unit c unit)
-      (update-player (:color player) player/spend-funds price)
-      ;; TODO: Logging
-      ))))
+    (assert (nil? (board/get-unit (:board game) c))
+            (str "Can't buy unit " (name (:internal-name unit)) "."
+                 "There's already a unit on " c))
+    (assert (<= price (:funds player))
+            (str "Not enough funds to buy " (name (:internal-name unit))))
+    (-> game
+        (update-in [:board] board/add-unit c unit)
+        (update-player (:color player) player/spend-funds price)
+        ;; TODO: Logging
+        )))
