@@ -27,16 +27,16 @@
 (defn drop-neighbours-behind
   "Drops the cardinal and intercardinal directions from `nbs` opposite to `direction`"
   [direction nbs]
-  (select-keys nbs (case direction
-                     :north [:north
-                             :north-west :north-east
-                             :east :west]
-                     :east [:east
-                            :north-east :south-east
-                            :north :south]
-                     :west [:west
-                            :north-west :north-west
-                            :north :south]
-                     :south [:south
-                             :south-west :south-east
-                             :east :west])))
+  (select-keys nbs (get {:north [:north
+                                 :north-west :north-east
+                                 :east :west]
+                         :east [:east
+                                :north-east :south-east
+                                :north :south]
+                         :west [:west
+                                :north-west :north-west
+                                :north :south]
+                         :south [:south
+                                 :south-west :south-east
+                                 :east :west]}
+                        direction)))

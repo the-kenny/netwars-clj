@@ -30,15 +30,15 @@
         damages (get-damage damagetable
                             (:internal-name attacker)
                             (:internal-name victim))
-        base-damage (case wt
-                      :main-weapon (:damage damages)
-                      :alt-weapon (:alt-damage damages))]
+        base-damage (cond
+                      (= wt :main-weapon) (:damage damages)
+                      (= wt :alt-weapon)  (:alt-damage damages))]
     (Math/floor (/ (* base-damage (- 100 (* td2 hp2)) (/ hp1 10) 100) 10000))))
 
 ;;; TODO: Values in Advance Wars look more random
 (defn round-damage [damage]
-  (if (> (rem (int damage) 10) 0)
-    (let [i (rem (int damage) 10)]
+  (if (> (rem (Math/floor damage) 10) 0)
+    (let [i (rem (Math/floor damage) 10)]
       (cond
        (> i 5) (* (Math/ceil (/ damage 10)) 10)
        (< i 5) (* (Math/floor (/ damage 10)) 10)
@@ -48,7 +48,7 @@
 (defn calculate-damage [damagetable
                         [attacker t1]
                         [victim   t2]]
-  (int (/ (round-damage (calculate-unrounded-damage damagetable
+  (Math/floor (/ (round-damage (calculate-unrounded-damage damagetable
                                                     [attacker t1]
                                                     [victim t2]))
           10)))

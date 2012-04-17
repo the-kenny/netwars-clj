@@ -128,14 +128,26 @@ Mostly useful for drawing of maps."
 (defn can-produce-units? [t]
   (and (sequential? t) (is-building? t) (contains? #{:port :base :airport} (first t))))
 
+(def ^:private +defense-values+
+  {:plain 1
+   :reef  1
+   :forest 2
+   :city 3
+   :base 3
+   :airport 3
+   :port 3
+   :lab 3
+   :headquarter 3
+   :mountain 3})
+
+;;; TODO: Get rid of this silly [mountain white] = missile thingy
 (defn defense-value [terrain]
   (let [[t c] (cond
                (keyword? terrain) [terrain]
                (is-building? terrain) terrain
                true [])]
-    (case t
-      (:plain :reef) 1
-      :forest 2
-      (:city :base :airport :port :lab) 3
-      (:headquarter :mountain) (if (= c :white) 3 4)
-      0)))
+    (let [base (get +defense-values+ t)]
+      (if (and (= c :white)
+               (= t :mountain))
+        (inc base)
+        base))))
