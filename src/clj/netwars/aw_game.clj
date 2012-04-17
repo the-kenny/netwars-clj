@@ -190,7 +190,7 @@ Returns path."
    (-> game
        (update-in [:board] board/update-unit from
                   update-in [:fuel] - fuel-costs)
-       (alter [:board] board/move-unit from to) ;Important: First use fuel, then move
+       (update-in [:board] board/move-unit from to) ;Important: First use fuel, then move
        (log-event {:type :unit-moved
                    :from from
                    :to to
