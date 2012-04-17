@@ -8,12 +8,12 @@
 ;; The rest of this namespace contains various functions for storing terrain data.
 
 
-(defrecord Coordinate [^long x ^long y])
+(defrecord Coordinate [x y])
 
 (defn coord
   "Creates a coordinate from a x and a y value. x and y are coerced to int"
-  ([^long x ^long y] (Coordinate. x y))
-  ([[^long x ^long y]] (Coordinate. x y)))
+  ([x y] (Coordinate. x y))
+  ([[x y]] (Coordinate. x y)))
 
 (defn coord?
   "Predicate to check if an object is an coordinate"
@@ -27,8 +27,8 @@
 (defn distance
   "Manhattan metric distance between coordinates"
   [c1 c2]
-  (+ (Math/abs (long (- (:x c2) (:x c1))))
-     (Math/abs (long (- (:y c2) (:y c1))))))
+  (+ (Math/abs (- (:x c2) (:x c1)))
+     (Math/abs (- (:y c2) (:y c1)))))
 
 ;; (defn distance
 ;;  "Euclidean distance between 2 points"

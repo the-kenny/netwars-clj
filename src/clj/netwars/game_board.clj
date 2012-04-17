@@ -86,23 +86,24 @@
     ;; (println "movement-range:" movement-range)
     ;; (println "fuel:" fuel)
     ;; (println "unit:" unit)
-    (letfn [(helper [c rest & {:keys [initial?]}]
-              (let [t (get-terrain board c)
-                    costs (if initial? 0 (aw-map/movement-costs t movement-type))]
-                ;; (println (str "[" (:x c) "," (:y c) "]") ";" t "costs:" costs)
-               (cond
-                (nil? c) #{}
-                (not (aw-map/in-bounds? (:terrain board) c)) #{}
-                (not (aw-map/can-pass? t movement-type)) #{}
-                (and (not initial?) (not (can-walk-on-field? board unit c))) #{}
-                (> rest costs) (set/union #{c}
-                                            (helper (aw-map/coord (inc (:x c)) (:y c))
-                                                    (- rest costs))
-                                            (helper (aw-map/coord (dec (:x c)) (:y c))
-                                                    (- rest costs))
-                                            (helper (aw-map/coord (:x c) (inc (:y c)))
-                                                    (- rest costs))
-                                            (helper (aw-map/coord (:x c) (dec (:y c)))
-                                                    (- rest costs)))
-                true #{c})))]
+    (let [helper (fn helper [c rest & {:keys [initial?]}]
+                   (let [t (get-terrain board c)
+                         costs (if initial? 0 (aw-map/movement-costs t movement-type))]
+                     ;; (println (str "[" (:x c) "," (:y c) "]") ";" t "costs:" costs)
+                     (cond
+                      (nil? c) #{}
+                      (not (aw-map/in-bounds? (:terrain board) c)) #{}
+                      (not (aw-map/can-pass? t movement-type)) #{}
+                      (and (not initial?) (not (can-walk-on-field? board unit c))) #{}
+                      (> rest costs) (set/union
+                                      #{c}
+                                      (helper (aw-map/coord (inc (:x c)) (:y c))
+                                              (- rest costs))
+                                      (helper (aw-map/coord (dec (:x c)) (:y c))
+                                              (- rest costs))
+                                      (helper (aw-map/coord (:x c) (inc (:y c)))
+                                              (- rest costs))
+                                      (helper (aw-map/coord (:x c) (dec (:y c)))
+                                              (- rest costs)))
+                      true #{c})))]
       (helper c (min movement-range fuel) :initial? true))))

@@ -112,7 +112,7 @@
   (not= 0 (:ammo weapon)))
 
 (defn available-weapons [u]
-  (into {} (filter #(weapon-available? (val %)) (weapons u))))
+  (into {} (filter (fn [[k v]] (weapon-available? v)) (weapons u))))
 
 (defn fire-weapon
   "'Fires' a weapon (:alt-weapon or :main-weapon). Mainly uses ammo."
