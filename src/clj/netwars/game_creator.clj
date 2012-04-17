@@ -27,11 +27,11 @@
                        :unit-spec unit-spec
                        :players players}]
     (AwGame. newinfo
-             (ref 0)                    ;current-player-index
-             (ref 1)                    ;round-counter
-             (ref (vec players))
+             0                    ;current-player-index
+             1                    ;round-counter
+             (vec players)
              unit-spec
              damagetable
-             (ref board)
-             (ref nil)                  ;current-unit
-             (ref [initial-event]))))
+             board
+             nil                  ;current-unit
+             [initial-event])))
