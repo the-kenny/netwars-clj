@@ -6,7 +6,8 @@
         [netwars.game-board :as board]
         [netwars.aw-map :only [coord width height at is-building? buildings]]
         [netwars.aw-unit :only [is-unit? main-weapon alt-weapon]]
-        [netwars.aw-player :as player])
+        [netwars.aw-player :as player]
+        [netwars.game-creator :only [make-game]])
   (:import (java.lang IllegalStateException IllegalArgumentException)))
 
 (def +aw-test-map+ "maps/7330.aws")

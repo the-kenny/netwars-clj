@@ -13,7 +13,8 @@
   :extra-files-to-clean ["resoures/public/netwars.js"]
   :source-paths ["src/clj/"]
   ;; :main netwars.core
-  :cljsbuild {:crossovers [netwars.aw-map
+  :cljsbuild {:crossovers [netwars.aw-game
+                           netwars.aw-map
                            netwars.aw-unit
                            netwars.damagecalculator
                            netwars.game-board

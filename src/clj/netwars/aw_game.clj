@@ -1,13 +1,10 @@
 (ns netwars.aw-game
-  (:use [netwars.game-board :as board]
-        [netwars.aw-unit :as unit]
-        [netwars.damagecalculator :as damage]
-        [netwars.damagetable :as damagetable]
-        [netwars.aw-map :as aw-map]
-        [netwars.path :as path]
-        [netwars.map-loader :only [load-map]]
-        [netwars.unit-loader :only [load-units]]
-        [netwars.aw-player :as player]))
+  (:require [netwars.game-board :as board]
+            [netwars.aw-unit :as unit]
+            [netwars.damagecalculator :as damage]
+            [netwars.aw-map :as aw-map]
+            [netwars.path :as path]
+            [netwars.aw-player :as player]))
 
 ;; AwGame is a running game.
 ;; It stores info about the current players, whose turn it is, the unit spec used, etc.
@@ -25,35 +22,6 @@
                    current-unit         ;Stores the selected unit
                    moves                ;Every move in the game gets saved here
                    ])
-
-(def +default-funds+ 1000)
-
-(defn- sort-colors [colors]
-  (filter (set colors) [:red :blue :yellow :green :black]))
-
-(defn make-game [info mapsource]
-  (let [loaded-map (load-map mapsource)
-        unit-spec (load-units "resources/units.xml")
-        damagetable (damagetable/load-damagetable "resources/damagetable.xml")
-        board (board/generate-game-board loaded-map unit-spec)
-        newinfo (assoc info :map mapsource)
-        players (map #(player/make-player %1 %2 +default-funds+)
-                     (map #(str "Player " %) (range 1 1000))
-                     (sort-colors (-> loaded-map :info :player-colors)))
-        initial-event {:type :game-started
-                       :info newinfo
-                       :loaded-map loaded-map
-                       :unit-spec unit-spec
-                       :players players}]
-    (AwGame. newinfo
-             (ref 0)                    ;current-player-index
-             (ref 1)                    ;round-counter
-             (ref (vec players))
-             unit-spec
-             damagetable
-             (ref board)
-             (ref nil)                  ;current-unit
-             (ref [initial-event]))))
 
 ;;; Game events
 
@@ -166,7 +134,7 @@
         unit (board/get-unit board (first path))]
     (when (nil? unit)
       (throw (java.lang.IllegalArgumentException. (str "No unit on " (first path)))))
-    (when (valid-path? path board)
+    (when (path/valid-path? path board)
       (reduce + (map #(aw-map/movement-costs (board/get-terrain board %)
                                              (:movement-type (meta unit)))
                      (rest path))))))

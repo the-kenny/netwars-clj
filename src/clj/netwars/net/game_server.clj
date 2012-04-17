@@ -3,6 +3,7 @@
         [netwars.net.map-server :as map-server]
         [netwars.net.tiling :as tiling]
         [netwars.aw-game :as game]
+        [netwars.game-creator :as game-creator]
         [netwars.aw-map :as aw-map]
         [netwars.game-board :as board]
         [netwars.aw-player :as player]
@@ -79,7 +80,7 @@
 (defn start-new-game
   "Creates an AwGame with parameters from its argument"
   [config]
-  (let [game (game/make-game config (str map-base-path (:map-name config)))
+  (let [game (game-creator/make-game config (str map-base-path (:map-name config)))
         broadcast (connection/make-broadcast-channel)]
     (assoc game :broadcast-channel broadcast)))
 

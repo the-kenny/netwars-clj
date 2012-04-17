@@ -10,6 +10,7 @@
             [netwars.logging :as logging]
 
             ;; Load all crossovers prevent strippint
+            [netwars.aw-game :as aw-game]
             [netwars.aw-map :as aw-map]
             [netwars.aw-unit :as aw-unit]
             [netwars.damagecalculator :as damagecalculator]
