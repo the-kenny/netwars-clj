@@ -42,7 +42,7 @@
       (cond
        (> i 5) (* (Math/ceil (/ damage 10)) 10)
        (< i 5) (* (Math/floor (/ damage 10)) 10)
-       (= i 5) (* ((rand-nth [#(Math/floor %) #(Math/ceil %)]) (/ damage 10)) 10)))
+       true    (* ((rand-nth [#(Math/floor %) #(Math/ceil %)]) (/ damage 10)) 10)))
     damage))
 
 (defn calculate-damage [damagetable

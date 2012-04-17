@@ -106,8 +106,8 @@
      (is (= 10 (:hp (board/get-unit @(:board *game*) artillery))))
      (is (= 10 (:hp (board/get-unit @(:board *game*) infantry))))
      (perform-attack! *game* artillery infantry)
-     (is (= 10 (:hp (board/get-unit @(:board *game*) artillery))))
-     (is (= 5 (:hp (board/get-unit @(:board *game*) infantry))))
+     (is (= 10  (:hp (board/get-unit @(:board *game*) artillery))))
+     (is (= 5.0 (:hp (board/get-unit @(:board *game*) infantry))))
      (check-attack-event (first (filter #(= :attack (:type %))
                                        (game-events *game*)))
                          artillery infantry
@@ -123,8 +123,8 @@
      (is (= 10 (:hp (board/get-unit @(:board *game*) infantry))))
      (is (= 10 (:hp (board/get-unit @(:board *game*) infantry2))))
      (perform-attack! *game* infantry infantry2)
-     (is (contains? #{9 8} (:hp (board/get-unit @(:board *game*) infantry))))
-     (is (contains? #{4 5} (:hp (board/get-unit @(:board *game*) infantry2))))
+     (is (contains? #{9.0 8.0} (:hp (board/get-unit @(:board *game*) infantry))))
+     (is (contains? #{4.0 5.0} (:hp (board/get-unit @(:board *game*) infantry2))))
      (check-attack-event (first (filter #(= :attack (:type %))
                                         (game-events *game*)))
                          infantry infantry2

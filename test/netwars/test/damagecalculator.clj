@@ -45,12 +45,12 @@
     (doseq [x (range 10)]
       (is (contains? #{20.0 10.0} (round-damage 15.0))))
 
-    (is (= 5 (calculate-damage table
-                                [artillery :plain]
-                                [infantry [:headquarter :red]])))
-    (is (= 2 (calculate-damage table
-                               [(assoc infantry :hp 4) :forest]
-                               [(assoc infantry :hp 8) :street])))
-    (is (= 1 (calculate-damage table
-                               [(assoc infantry :hp 2) :forest]
-                               [(assoc infantry :hp 8) :street])))))
+    (is (= 5.0 (calculate-damage table
+                                 [artillery :plain]
+                                 [infantry [:headquarter :red]])))
+    (is (= 2.0 (calculate-damage table
+                                 [(assoc infantry :hp 4) :forest]
+                                 [(assoc infantry :hp 8) :street])))
+    (is (= 1.0 (calculate-damage table
+                                 [(assoc infantry :hp 2) :forest]
+                                 [(assoc infantry :hp 8) :street])))))

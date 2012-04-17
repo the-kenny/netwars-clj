@@ -55,7 +55,7 @@
 (facts "about is-water?"
   (doseq [t #{:water :reef :beach :bridge}]
     (is-water? t)       => true)
-  (is-water? ...any...) => false)
+  (is-water? :forest)   => false)
 
 (facts "about is-ground?"
   (is-ground? ...ground...)          => true
