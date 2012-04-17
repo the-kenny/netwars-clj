@@ -1,8 +1,6 @@
 (ns netwars.path
-  (:use [netwars.aw-map :only [distance]]
-        [netwars.game-board :as board]
-        [netwars.aw-map :as aw-map])
-  (:import netwars.aw_map.Coordinate))
+  (:require [netwars.game-board :as board]
+            [netwars.aw-map :as aw-map]))
 
 (deftype AwPath [coordinates]
   Object
@@ -21,8 +19,9 @@
   clojure.lang.Seqable
   (seq [this] (seq coordinates)))
 
-(defmethod clojure.core/print-method AwPath [o p]
-  (.write p (.toString o)))
+(when clojure.core/print-method
+  (defmethod clojure.core/print-method AwPath [o p]
+   (.write p (.toString o))))
 
 (defn path?
   "Predicate to test if an object is a path."
@@ -34,19 +33,19 @@
 With the optional second argument, it checks for validity in the context of the given board."
   ([path]
      (and (>= (count path) 2)
-          (every? #(instance? Coordinate %) path)
+          (every? aw-map/coord? path)
           ;; Check if euclidean-distance doesn't exceed 1
-          (every? #(= (apply distance %) 1) (partition 2 1 path))
+          (every? #(= (apply aw-map/distance %) 1) (partition 2 1 path))
           (= (count path) (count (set path))) ;naive check for duplicates
           ))
   ([path board]
-     (let [unit (get-unit board (first path))]
+     (let [unit (board/get-unit board (first path))]
        (and (valid-path? path)
-            (get-unit board (first path))
-            (not (get-unit board (last path)))
+            (board/get-unit board (first path))
+            (not (board/get-unit board (last path)))
             (<= (count (rest path))
                 (min (:movement-range (meta unit)) (:fuel unit)))
-            (every? #(aw-map/can-pass? (get-terrain board %)
+            (every? #(aw-map/can-pass? (board/get-terrain board %)
                                        (:movement-type (meta unit)))
               path)))))
 
