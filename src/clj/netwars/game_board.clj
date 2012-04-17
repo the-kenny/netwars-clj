@@ -64,6 +64,12 @@
    (assoc board :terrain (aw-map/update-board terrain c
                                                 (assoc (get-terrain board c) 1 color)))))
 
+(defn neutralize-buildings [board color]
+  (let [buildings (filter (fn [[c [typ col]]]
+                            (= color col))
+                          (aw-map/buildings (:terrain board)))]
+    (reduce #(change-building-color %1 %2 :white) board (map first buildings))))
+
 ;;; Attacking
 
 (defn in-attack-range? [board att-coord vic-coord]

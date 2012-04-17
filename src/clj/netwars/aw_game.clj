@@ -75,15 +75,12 @@
   ;;   (when (= player-color (:color u))
   ;;    (alter (:board game) board/remove-unit c)))
 
-  ;; ;; Remove terrain
-  ;; (let [terrain-board (-> game :board  :terrain)]
-  ;;   (doseq [[coord [_ color]] (aw-map/buildings terrain-board)]
-  ;;     (when (= player-color color)
-  ;;       (alter (:board game) board/change-building-color coord :white))))
+  (-> game
+      ;; Remove terrain
+      (update-in [:board] #(board/neutralize-buildings % player-color))
 
-  ;; Remove the player
-
-  (update-in game [:players] (fn [seq] (remove #(= (:color %) player-color) seq))))
+      ;; Remove the player
+      (update-in [:players] (fn [seq] (remove #(= (:color %) player-color) seq)))))
 
 (defn current-round
   "Returns the current round"

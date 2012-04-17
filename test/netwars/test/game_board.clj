@@ -1,7 +1,8 @@
 (ns netwars.test.game-board
   (:use netwars.game-board
-        [netwars.aw-map :only [coord]]
+        [netwars.aw-map :only [coord buildings]]
         clojure.test
+        midje.sweet
         [clojure.set :as set]
         [netwars.map-loader :only [load-map]]
         [netwars.unit-loader :only [load-units]]))
@@ -17,6 +18,13 @@
 
 (deftest test-game-board
   (is (instance? netwars.game_board.GameBoard (make-testboard))))
+
+(deftest test-neutralize-buildings
+  (is (empty (-> (make-testboard)
+                 #_(neutralize-buildings :black)
+                 :terrain
+                 (buildings)
+                 (filter (fn [[_ [t c]]] (= c :red)))))))
 
 (def artillery-coord (coord 1 11))
 (def infantry-coord (coord 1 13))
