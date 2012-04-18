@@ -9,6 +9,10 @@
             [netwars.game :as game]
             [netwars.logging :as logging]
 
+            [clojure.browser.net :as net]
+            [goog.net :as gnet]
+            [cljs.reader :as reader]
+
             ;; Load all crossovers prevent strippint
             [netwars.aw-game :as aw-game]
             [netwars.aw-map :as aw-map]
@@ -61,3 +65,12 @@
 (let [t (goog.Timer. 100)]
   (event/listen t "tick" #(drawing/redraw board-context))
   (.start t))
+
+(defn test-game-loading []
+  (goog.net.XhrIo/send "http://localhost:8080/api/new-game/7330.aws"
+                   (fn [e]
+                     (.log js/console (-> e
+                                          .-target
+                                          .getResponseText
+                                          reader/read-string
+                                          aw-game/map->AwGame)))))
