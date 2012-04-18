@@ -1,8 +1,7 @@
 (ns netwars.net.otw
   (:require netwars.aw-map)             ;import fails w.o. this
   (:use [netwars.aw-map :only [coord]])
-  (:import [clojure.lang IPersistentMap IPersistentSet Keyword]
-           [java.awt Image]
+  (:import [java.awt Image]
            [java.util List UUID]
            [netwars.aw_map Coordinate]
            [org.apache.commons.codec.binary Base64]))
@@ -44,13 +43,16 @@
   Coordinate
   (encode [c] (with-meta (list 'coord (:x c) (:y c)) (encode (meta c))))
   (decode [o] o)
-  List
+  clojure.lang.IPersistentVector
+  (encode [v] (vec (encode-seq v)))
+  (decode [v] (vec (decode-seq v)))
+  clojure.lang.IPersistentList
   (encode [v] (encode-seq v))
   (decode [v] (decode-seq v))
-  IPersistentMap
+  clojure.lang.IPersistentMap
   (encode [m] (encode-map m))
   (decode [m] (decode-map m))
-  IPersistentSet
+  clojure.lang.IPersistentSet
   (encode [s] (with-meta (into #{} (map encode s)) (encode (meta s))))
   (decode [s] (with-meta (into #{} (map decode s)) (decode (meta s))))
   UUID
