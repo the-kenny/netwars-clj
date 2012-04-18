@@ -202,4 +202,7 @@ Returns path."
         (update-in [:board] board/add-unit c unit)
         (update-player (:color player) player/spend-funds price)
         ;; TODO: Logging
-        )))
+        (log-event {:type :bought-unit
+                    :unit unit
+                    :price price
+                    :coordinate c}))))

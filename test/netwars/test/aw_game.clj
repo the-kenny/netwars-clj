@@ -240,7 +240,8 @@
      (let [u (board/get-unit (:board *game*) base-coord)]
        u                                              => is-unit?
        (:internal-name u)                             => :infantry)
-     (< (:funds (current-player *game*)) old-funds)   => true))
+     (< (:funds (current-player *game*)) old-funds)   => true
+     (-> *game* game-events last)                     => (contains {:type :bought-unit})))
 
  (facts "about misuse of buy-unit"
    ;; Can't buy unit when there's already an unit on this coord
