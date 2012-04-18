@@ -26,9 +26,7 @@
   (is (= :game-started (-> *game* :moves first :type))))
 
 (deftest test-action-logging
-  (is (thrown? java.lang.Exception
-               (log-event *game* {:type 42})))
-  (is (thrown? java.lang.Exception
+  (is (thrown? java.lang.Error
                (log-event *game* {})))
 
   (is (= 1 (count (game-events *game*))))
@@ -120,24 +118,22 @@
 (deftest test-perform-attack
   (let [artillery (coord 1 11)
         infantry (coord 1 13)]
-    (dosync
-     (is (= 10 (:hp (board/get-unit (:board *game*) artillery))))
-     (is (= 10 (:hp (board/get-unit (:board *game*) infantry))))
-     (let [*game* (perform-attack *game* artillery infantry)]
-       (is (= 10  (:hp (board/get-unit (:board *game*) artillery))))
-       (is (= 5.0 (:hp (board/get-unit (:board *game*) infantry))))
-       (check-attack-event (first (filter #(= :attack (:type %))
-                                          (game-events *game*)))
-                           artillery infantry
-                           :artillery :infantry)))))
+    (is (= 10 (:hp (board/get-unit (:board *game*) artillery))))
+    (is (= 10 (:hp (board/get-unit (:board *game*) infantry))))
+    (let [*game* (perform-attack *game* artillery infantry)]
+      (is (= 10  (:hp (board/get-unit (:board *game*) artillery))))
+      (is (= 5.0 (:hp (board/get-unit (:board *game*) infantry))))
+      (check-attack-event (first (filter #(= :attack (:type %))
+                                         (game-events *game*)))
+                          artillery infantry
+                          :artillery :infantry))))
 
 (deftest test-counter-attack
   ;; Add a new infantry next to another for testing
   (let [infantry (coord 1 13)
         infantry2 (coord 2 13)
-        *game* (update-in *game* [:game] board/add-unit infantry2
+        *game* (update-in *game* [:board] board/add-unit infantry2
                           (board/get-unit (:board *game*) infantry))]
-
     (is (= 10 (:hp (board/get-unit (:board *game*) infantry))))
     (is (= 10 (:hp (board/get-unit (:board *game*) infantry2))))
     (let [*game* (perform-attack *game* infantry infantry2)]
@@ -171,14 +167,11 @@
     (is (integer? (fuel-costs *game* path)))
     (is (< 0 (fuel-costs *game* path)))
     (is (= 3 (fuel-costs *game* path)) "This path costs 3")
-    (is (thrown? java.lang.Exception
+    (is (thrown? java.lang.Error
                  (fuel-costs *game* (make-path (rest coords))))
         "Throws when there is no unit on the first coordinate")))
 
 (deftest test-select-unit
-  (testing "without a transaction"
-    (is (thrown? java.lang.Exception
-                 (select-unit *game* (coord 1 13)))))
   (let [c (coord 1 13)]
     (is (= (-> *game* (select-unit c) :current-unit) c))))
 
@@ -195,13 +188,14 @@
         ":current-unit should be non-nil after select-unit")))
 
 (deftest test-deselect-unit
-  (testing "without a transaction"
-    (is (thrown? java.lang.Exception
-                 (deselect-unit *game*))))
+  (is (thrown? java.lang.Error
+               (deselect-unit *game*)))
   (let [c (coord 1 13)
-        *game* (select-unit *game* c)]
-    (is (= c (deselect-unit *game*)))
-    (is (= nil (selected-unit *game*)))))
+        newgame (select-unit *game* c)]
+    (is (= c (:current-unit newgame)))
+    (is (not (nil? (selected-unit newgame))))
+    (is (= nil (:current-unit (deselect-unit newgame))))
+    (is (= nil (selected-unit (deselect-unit newgame))))))
 
 (deftest test-movement-range
   (let [c (coord 1 13)
@@ -219,26 +213,23 @@
         unit (board/get-unit (:board *game*) from)]
     (is (netwars.path/valid-path? path (:board *game*))
         "Make sure path used in tests is valid on board")
-    (testing "without transaction"
-      (is (thrown? java.lang.Exception
-                   (move-unit *game* path))))
     (testing "without :current-unit"
-      (is (thrown? java.lang.Exception
+      (is (thrown? java.lang.Error
                    (move-unit *game* path))))
     (testing "with `to` outside movement-range"
-      (is (thrown? java.lang.Exception
+      (is (thrown? java.lang.Error
                    (move-unit (select-unit *game* from)
                               (make-path [from to (coord 0 0)])))))
 
-    (let [*game* (move-unit (select-unit *game* from) path)]
-     (is (= (select-keys unit [:internal-name :color])
-            (select-keys (board/get-unit@(:board *game*) to)
-                         ;; Test for name and color as fuel changes...
-                         [:internal-name :color])) "unit really moved to `to`")
-     (is (nil? (board/get-unit (:board *game*) from)) "unit really moved from `from`")
-     (let [new-unit (board/get-unit (:board *game*) to)]
-       (is (< (:fuel new-unit) (:fuel unit)) "the move used fuel"))
-     (is (= :unit-moved (:type (last (game-events *game*)))) "the move was logged"))))
+    (let [newgame (move-unit (select-unit *game* from) path)]
+      (is (= (select-keys unit [:internal-name :color])
+             (select-keys (board/get-unit (:board newgame) to)
+                          ;; Test for name and color as fuel changes...
+                          [:internal-name :color])) "unit really moved to `to`")
+      (is (nil? (board/get-unit (:board newgame) from)) "unit really moved from `from`")
+      (let [new-unit (board/get-unit (:board newgame) to)]
+        (is (< (:fuel new-unit) (:fuel unit)) "the move used fuel"))
+      (is (= :unit-moved (:type (last (game-events newgame)))) "the move was logged"))))
 
 ;;; From here on, it's Midje
 

@@ -149,17 +149,18 @@
 
 ;;; TODO: Make sure that only the current player can select units
 (defn select-unit
-  "Sets the selected unit to unit at coordinate c. Must be called in a transaction."
+  "Sets the selected unit to unit at coordinate c."
   [game unit-coordinate]
-  {:pre [(-> game :board  (board/get-unit unit-coordinate))]
-   :post [(= unit-coordinate (:current-unit game))]}
+  {:pre  [(-> game :board (board/get-unit unit-coordinate))]
+   :post [(= unit-coordinate (:current-unit %))]}
   (assoc game :current-unit unit-coordinate))
 
 (defn deselect-unit
-  "Sets the currently selected unit of game to nil. Returns the last value."
+  "Sets the currently selected unit of game to nil."
   [game]
-  (let [c (:current-unit game)]
-    (assoc game :current-unit nil)))
+  {:pre [(:current-unit game)]
+   :post [(nil? (:current-unit %))]}
+  (assoc game :current-unit nil))
 
 (defn movement-range
   "Returns a set of all reachable fields for the currently selected unit."
@@ -188,8 +189,7 @@ Returns path."
        (log-event {:type :unit-moved
                    :from from
                    :to to
-                   :fuel-costs fuel-costs})))
-  path)
+                   :fuel-costs fuel-costs}))))
 
 (defn buy-unit [game c id-or-internal-name]
   (let [player (current-player game)
