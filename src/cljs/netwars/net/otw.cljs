@@ -1,7 +1,8 @@
 (ns netwars.net.otw
   (:require [netwars.aw-map :as aw-map]
             [cljs.reader :as reader]
-            [netwars.logging :as logging]))
+            [netwars.logging :as logging]
+            [cljs.core :as cljs.core]))
 
 (defprotocol Sendable
   (encode [o])
@@ -23,7 +24,7 @@
     (if (and (= 3 (count o))
              (= 'coord (first o)))
       (aw-map/coord (rest o))
-      (map decode o))
+      (into (empty o) (map decode o)))
     (decode (meta o))))
 
 (extend-protocol Sendable
@@ -31,14 +32,15 @@
   (encode [c] (with-meta (list 'coord (:x c) (:y c)) (encode (meta c))))
   (decode [o] o)
   List
-  (encode [v] (encode-seq v))
-  (decode [v] (decode-seq v))
-  cljs.core.Vector
-  (encode [v] (encode-seq v))
-  (decode [v] (decode-seq v))
+  (encode [s] (encode-seq s))
+  (decode [s] (decode-seq s))
+  PersistentVector
+  (encode [s] (encode-seq s))
+  (decode [s] (decode-seq s))
   EmptyList
-  (encode [v] '())
-  (decode [o] '())
+  (encode [s] (encode-seq s))
+  (decode [s] (decode-seq s))
+
   HashMap
   (encode [m] (encode-map m))
   (decode [m] (decode-map m))

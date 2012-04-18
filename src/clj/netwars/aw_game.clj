@@ -23,6 +23,18 @@
                    moves                ;Every move in the game gets saved here
                    ])
 
+(defn map->AwGame [m]
+  (let [game  (AwGame. (:info m)
+                 (:current-player-index m)
+                 (:round-counter m)
+                 (map player/map->AwPlayer (:players m))
+                 (:unit-spec m)
+                 (:damagetable m)
+                 (board/map->GameBoard (:board m))
+                 (:current-unit m)
+                 (or (:moves m) []))]
+    (into game (apply dissoc m (keys game)))))
+
 ;;; Game events
 
 (defn game-events [game]

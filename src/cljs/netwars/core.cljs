@@ -9,6 +9,7 @@
             [netwars.game :as game]
             [netwars.logging :as logging]
 
+            [netwars.net.otw :as otw]
             [clojure.browser.net :as net]
             [goog.net :as gnet]
             [cljs.reader :as reader]
@@ -66,11 +67,15 @@
   (event/listen t "tick" #(drawing/redraw board-context))
   (.start t))
 
-(defn test-game-loading []
+(def current-game (atom nil))
+
+(defn load-test-game []
   (goog.net.XhrIo/send "http://localhost:8080/api/new-game/7330.aws"
-                   (fn [e]
-                     (.log js/console (-> e
-                                          .-target
-                                          .getResponseText
-                                          reader/read-string
-                                          aw-game/map->AwGame)))))
+                       (fn [e]
+                         (let [game (-> e
+                                        .-target
+                                        .getResponseText
+                                        otw/decode-data
+                                        aw-game/map->AwGame)]
+                           (reset! current-game game))
+                         (logging/log "Loaded game."))))

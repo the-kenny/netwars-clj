@@ -12,6 +12,12 @@
 ;;; Game Board
 (defrecord GameBoard [terrain units])
 
+(defn map->GameBoard [m]
+  (let [board (GameBoard. (aw-map/map->TerrainBoard (:terrain m))
+                          (:units m))]
+    (into board
+          (apply dissoc m (keys board)))))
+
 (defn make-game-board [terrain units]
   (GameBoard. terrain units))
 
