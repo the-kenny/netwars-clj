@@ -43,6 +43,9 @@
   Coordinate
   (encode [c] (with-meta (list 'coord (:x c) (:y c)) (encode (meta c))))
   (decode [o] o)
+  clojure.lang.IRecord
+  (encode [v] (encode-map v))
+  (decode [v] (decode-map v))
   clojure.lang.IPersistentVector
   (encode [v] (vec (encode-seq v)))
   (decode [v] (vec (decode-seq v)))
