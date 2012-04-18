@@ -69,14 +69,12 @@
   (assert (not= player-color (:color (current-player game)))
           (str "Can't remove current-player with color " (name player-color)))
 
-  ;; Remove units
-  ;; (doseq [[c u] (:units (:board game))]
-  ;;   (when (= player-color (:color u))
-  ;;    (alter (:board game) board/remove-unit c)))
-
   (-> game
       ;; Remove terrain
       (update-in [:board] #(board/neutralize-buildings % player-color))
+
+      ;; Remove units
+      (update-in [:board] #(board/remove-units % player-color))
 
       ;; Remove the player
       (update-in [:players] (fn [seq] (remove #(= (:color %) player-color) seq)))))

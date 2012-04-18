@@ -42,6 +42,12 @@
    :post [(nil? (get-unit % coord))]}
   (assoc board :units (dissoc (:units board) coord)))
 
+(defn remove-units [board color]
+  (let [units (filter (fn [[c u]]
+                            (= (:color u) color))
+                          (:units board))]
+    (reduce remove-unit board (map first units))))
+
 (defn can-walk-on-field?
   "Returns true if unit can pass a field.
    Checks if the movement-type can pass the field and if an unit is on the field,

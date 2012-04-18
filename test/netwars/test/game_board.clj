@@ -20,11 +20,20 @@
   (is (instance? netwars.game_board.GameBoard (make-testboard))))
 
 (deftest test-neutralize-buildings
-  (is (empty (-> (make-testboard)
-                 #_(neutralize-buildings :black)
-                 :terrain
-                 (buildings)
-                 (filter (fn [[_ [t c]]] (= c :red)))))))
+  (let [color :black]
+    (is (empty? (filter (fn [[_ [t c]]] (= c color))
+                        (-> (make-testboard)
+                            (neutralize-buildings color)
+                            :terrain
+                            (buildings)
+                            ))))))
+
+(deftest test-remove-units
+  (let [color :black]
+    (is (empty? (filter (fn [[_ u]] (= (:color u) color))
+                        (-> (make-testboard)
+                            (remove-units color)
+                            :units))))))
 
 (def artillery-coord (coord 1 11))
 (def infantry-coord (coord 1 13))
