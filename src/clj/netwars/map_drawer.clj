@@ -239,6 +239,13 @@ For example: [:pipe :uldr] or [:seaside :corner :dr]"
     (.finalize graphics)
     image))
 
+(comment
+  (require 'netwars.game-creator)
+  (def testmap (netwars.game-creator/make-game {} "maps/7330.aws"))
+  (javax.imageio.ImageIO/write (render-terrain-board (-> testmap :board :terrain))
+                               "png"
+                               (java.io.File. "/Users/moritz/testmap.png")))
+
 ;; (defn render-map-to-image [loaded-map]
 ;;   (let [terrain (:terrain loaded-map)
 ;;         image (BufferedImage. (* 16 (width terrain))
