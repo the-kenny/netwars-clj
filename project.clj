@@ -15,12 +15,13 @@
   ;; :main netwars.core
   :cljsbuild {:crossovers [netwars.aw-game
                            netwars.aw-map
+                           netwars.aw-player
                            netwars.aw-unit
                            netwars.damagecalculator
                            netwars.game-board
                            netwars.map-utils
                            netwars.path
-                           netwars.aw-player]
+                           netwars.tiles]
               :builds [{:source-path "src/cljs/"
                         :compiler
                         {:output-to "resources/public/netwars.js"
