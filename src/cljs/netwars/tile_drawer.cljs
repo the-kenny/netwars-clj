@@ -3,13 +3,13 @@
             [netwars.logging :as logging]
             [clojure.browser.dom :as dom]))
 
-(defn- load-tile-image* [tile]
-  (let [file (tiles/tile-filename tile)
-        image (js/Image.)]
+
+(defn- load-tile-image* [file]
+  (let [image (js/Image.)]
     (set! (.-src image) file)
     (set! (.-onload image) #(logging/log "image loaded:" file))
     image))
-(def load-tile-image (memoize load-tile-image*))
+(def load-tile-image (comp (memoize load-tile-image*) tiles/tile-filename))
 
 (def +terrain-tiles-image+ (load-tile-image tiles/+terrain-tiles+))
 (def +unit-tiles-image+ (load-tile-image tiles/+unit-tiles+))
