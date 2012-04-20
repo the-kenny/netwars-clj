@@ -4,10 +4,7 @@
 .lein-deps-sum
 .lein-failures
 
-resources/public
-!resources/public/kinetic.js
-!resources/public/netwars.html
-!resources/public/style.css
+resources/public/netwars.js
 
 classes/
 db/
