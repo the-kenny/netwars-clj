@@ -10,6 +10,7 @@
             [netwars.logging :as logging]
 
             [netwars.net.otw :as otw]
+            [netwars.tiles :as tiles]
             [clojure.browser.net :as net]
             [goog.net :as gnet]
             [cljs.reader :as reader]
