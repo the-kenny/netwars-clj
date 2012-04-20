@@ -3,6 +3,8 @@
         netwars.map-utils
         netwars.map-loader
         [clojure.java.io :only [resource]])
+  (:require [netwars.tiles :as tiles]
+            [clojure.java.io :as io])
   (:import java.awt.Graphics2D
            java.awt.image.BufferedImage
            javax.imageio.ImageIO))
@@ -180,7 +182,7 @@ For example: [:pipe :uldr] or [:seaside :corner :dr]"
            (drawing-fn (cons :buildings type)))
 
 (defmethod draw-tile :default [type _ drawing-fn]
-  (drawing-fn [(name type)]))
+  (drawing-fn [(keyword type)]))
 
 ;;; End of orientation-section
 
@@ -192,36 +194,30 @@ For example: [:pipe :uldr] or [:seaside :corner :dr]"
         (get (swap! tile-cache assoc file (ImageIO/read res))
              file)))))
 
-(defn load-terrain-tile
-  "Loads a terrain tile from pixmaps/grounds.
-  Every segment is a keyword describing a level in the filesystem structure:
-  street/lr.png would be [:street :lr]
-  If a segment is nil, it will be ignored."
-  [[& segments]]
-  (load-pixmap (str (reduce #(when %2 (str %1 "/" (name %2)))
-                            "pixmaps/ground"
-                            (remove nil? segments))
-                    ".png")))
-
-(defn load-building-tile [[building color]]
-  (load-pixmap (str "pixmaps/ground/buildings/"
-                    (name building)
-                    "/"
-                    (name color)
-                    ".png")))
-
-(defn draw-img [graphics c tile]
-  (.drawImage graphics
-              tile
-              (- (* (:x c) 16) (- (.getWidth tile) 16))
-              (- (* (:y c) 16) (- (.getHeight tile) 16))
-              nil))
+(defn- terrain-tile-image []
+  (->  tiles/+terrain-tiles+
+       tiles/tile-filename
+       io/resource
+       ImageIO/read))
+(alter-var-root #'terrain-tile-image memoize)
 
 (defn drawing-fn [graphics c path]
-  (if-let [tile #^BufferedImage (if (is-building? (first path))
-                                  (load-building-tile path)
-                                  (load-terrain-tile path))]
-    (draw-img graphics c tile)
+  (if-let [area (tiles/tile-rect tiles/+terrain-tiles+
+                                 path)]
+    (let [{sx :x, sy :y, width :width, height :height} area
+          {dx :x, dy :y} c
+          image (terrain-tile-image)]
+      (.drawImage graphics
+                  image
+                  (* dx 16)
+                  (- (* dy 16) (- (.getHeight image) 16))
+                  (+ (* dx 16) width)
+                  (- (+ (* dy 16) height) (- (.getHeight image) 16))
+                  sx
+                  sy
+                  (+ sx width)
+                  (+ sy height)
+                  nil))
     (println path " not found.")))
 
 (defn render-terrain-board [terrain-board]
@@ -229,7 +225,7 @@ For example: [:pipe :uldr] or [:seaside :corner :dr]"
                               (* 16 (height terrain-board))
                               BufferedImage/TYPE_INT_ARGB)
         graphics (.createGraphics image)]
-    (.drawImage graphics (load-pixmap "pixmaps/background.png") 0 0 nil)
+    (.drawImage graphics (load-pixmap "background.png") 0 0 nil)
     (doseq [x (range (width terrain-board))
             y (range (height terrain-board))
             :let [c (coord x y)]]
