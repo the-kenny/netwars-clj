@@ -38,18 +38,18 @@
 ;; (pprint (into {} (for [[k {:keys [x y]}] (first (load-tile "resources/pixmaps/units/"))] [k (list 'coord x y)])))
 ;; (javax.imageio.ImageIO/write (second (load-tile "resources/pixmaps/units/")) "png" (java.io.File. "/Users/moritz/units.png"))
 
-(defrecord TileArea [x y width height])
+(defrecord TileRect [x y width height])
 
-(defn coord->TileArea
+(defn coord->TileRect
   ([c width height]
-     (TileArea. (:x c) (:y c) width height))
-  ([c] (coord->TileArea c 0 0)))
+     (TileRect. (:x c) (:y c) width height))
+  ([c] (coord->TileRect c 0 0)))
 
 (defn origin [ta]
   (coord (:x ta) (:y ta)))
 
-(defn tile-name [tile]
-  (:tile-name tile))
+(defn tile-filename [tile]
+  (:tile-filename tile))
 
 ;;; TODO: Find a better way to do this in ClojureScript
 
@@ -62,13 +62,13 @@
 ;; (defn tile-image [tile]
 ;;   (ImageIO/read (tile-path tile)))
 
-(defn tile-area [tile path]
-  (let [c (get-in tile [:tile-spec (vec path)])
-        [width height] (:tile-size tile)]
-    (coord->TileArea c width height)))
+(defn tile-rect [tile path]
+  (when-let [c (get-in tile [:tile-spec (vec path)])]
+    (let [[width height] (:tile-size tile)]
+      (coord->TileRect c width height))))
 
-(def +unit-meta+
-  {:tile-path "unit-meta.png"
+(def +unit-meta-tiles+
+  {:tile-filename "unit-meta.png"
    :tile-size [16 16]
    :tile-spec {[:ammo]    (coord 0 0)
                [:capture] (coord 16 0)
@@ -87,7 +87,7 @@
                [:minus]   (coord 128 0)}})
 
 (def +unit-tiles+
-  {:tile-path "units.png"
+  {:tile-filename "units.png"
    :tile-size [16 16]
    :tile-spec {[:black :anti-air]    (coord 16 0)
                [:black :apc]         (coord 32 0)
@@ -225,7 +225,7 @@
 ;; (javax.imageio.ImageIO/write (second (load-tile "resources/pixmaps/units/")) "png" (java.io.File. "/Users/moritz/units.png"))
 
 (def +terrain-tiles+
-  {:tile-path "terrain.png"
+  {:tile-filename "terrain.png"
    :tile-size [16 16]
    :tile-spec {[:beach :d]                       (coord 0 0)
                [:beach :dr]                      (coord 16 0)
