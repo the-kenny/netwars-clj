@@ -1,6 +1,14 @@
 (ns netwars.tiles
   (:use [netwars.aw-map :only [coord]]))
 
+
+;; (ns netwars.net.tiling
+;;   (:use [netwars.aw-map :only [coord]]
+;;         [netwars.net.connection :as connection]
+;;         [netwars.net.otw :as otw])
+;;   (:import java.awt.image.BufferedImage
+;;            java.awt.Graphics2D
+;;            javax.imageio.ImageIO))
 ;; (defn- make-tiling-spec [directory]
 ;;   (let [files (filter #(.isFile %) (file-seq (java.io.File. directory)))]
 ;;     (for [file files]
@@ -14,7 +22,7 @@
 ;;        [(vec (map keyword key)) file]))))
 
 ;; (defn- make-tile [spec]
-;;   (let [image (BufferedImage. (* 16 (count spec)) 16 BufferedImage/TYPE_INT_ARGB)
+;;   (let [image (BufferedImage. (* 16 (count spec)) 32 BufferedImage/TYPE_INT_ARGB)
 ;;         graphics (.createGraphics image)
 ;;         tile-coords (for [x (range (count spec))
 ;;                           :let [[key file] (nth spec x)]]
@@ -226,7 +234,7 @@
 
 (def +terrain-tiles+
   {:tile-filename "terrain.png"
-   :tile-size [16 16]
+   :tile-size [16 32]
    :tile-spec {[:beach :d]                       (coord 0 0)
                [:beach :dr]                      (coord 16 0)
                [:beach :l]                       (coord 32 0)
