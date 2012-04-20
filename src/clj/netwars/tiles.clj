@@ -1,14 +1,14 @@
 (ns netwars.tiles
   (:use [netwars.aw-map :only [coord]]))
 
-
-;; (ns netwars.net.tiling
+;; (ns netwars.tiles
 ;;   (:use [netwars.aw-map :only [coord]]
 ;;         [netwars.net.connection :as connection]
 ;;         [netwars.net.otw :as otw])
 ;;   (:import java.awt.image.BufferedImage
 ;;            java.awt.Graphics2D
 ;;            javax.imageio.ImageIO))
+
 ;; (defn- make-tiling-spec [directory]
 ;;   (let [files (filter #(.isFile %) (file-seq (java.io.File. directory)))]
 ;;     (for [file files]
@@ -16,20 +16,23 @@
 ;;                     (.getPath)
 ;;                     (.substring (count directory))
 ;;                     (.split (java.util.regex.Pattern/quote java.io.File/separator))
-;;                     vec
-;;                     ;; (update-in [1] #(.substring % 0 (- (count %) 4)))
-;;                     )]
-;;        [(vec (map keyword key)) file]))))
+;;                     vec)]
+;;        [(vec (map #(-> % (.replace ".png" "") keyword) key)) file]))))
 
 ;; (defn- make-tile [spec]
-;;   (let [image (BufferedImage. (* 16 (count spec)) 32 BufferedImage/TYPE_INT_ARGB)
+;;   (let [subs (partition-by ffirst spec)
+;;         image (BufferedImage. (* 16 (reduce max (map count subs)))
+;;                               (* 16 (count subs))
+;;                               BufferedImage/TYPE_INT_ARGB)
 ;;         graphics (.createGraphics image)
-;;         tile-coords (for [x (range (count spec))
-;;                           :let [[key file] (nth spec x)]]
+;;         tile-coords (for [y (range (count subs))
+;;                           :let [sub (nth subs y)]
+;;                           x (range (count sub))
+;;                           :let [[key file] (nth sub x)]]
 ;;                       (do (.drawImage graphics (ImageIO/read file)
-;;                                       (* x 16) 0
+;;                                       (* x 16) (* y 32)
 ;;                                       nil)
-;;                           [key (coord (* x 16) 0)]))]
+;;                           [key (coord (* x 16) (* y 32))]))]
 
 ;;     (.finalize graphics)
 ;;     [(into {} tile-coords) image]))
@@ -97,136 +100,136 @@
 (def +unit-tiles+
   {:tile-filename "units.png"
    :tile-size [16 16]
-   :tile-spec {[:black :anti-air]    (coord 16 0)
-               [:black :apc]         (coord 32 0)
-               [:black :artillery]   (coord 48 0)
-               [:black :b-boat]      (coord 64 0)
-               [:black :b-bomb]      (coord 80 0)
-               [:black :b-copter]    (coord 96 0)
-               [:black :battleship]  (coord 112 0)
-               [:black :bomber]      (coord 128 0)
-               [:black :carrier]     (coord 144 0)
-               [:black :cruiser]     (coord 160 0)
-               [:black :fighter]     (coord 176 0)
-               [:black :infantry]    (coord 192 0)
-               [:black :lander]      (coord 208 0)
-               [:black :md-tank]     (coord 224 0)
-               [:black :mech]        (coord 240 0)
-               [:black :megatank]    (coord 256 0)
-               [:black :missiles]    (coord 272 0)
-               [:black :neotank]     (coord 288 0)
-               [:black :oozium]      (coord 304 0)
-               [:black :piperunner]  (coord 320 0)
-               [:black :recon]       (coord 336 0)
-               [:black :rockets]     (coord 352 0)
-               [:black :stealth]     (coord 368 0)
-               [:black :submarine]   (coord 384 0)
-               [:black :t-copter]    (coord 400 0)
-               [:black :tank]        (coord 416 0)
-               [:blue :anti-air]     (coord 432 0)
-               [:blue :apc]          (coord 448 0)
-               [:blue :artillery]    (coord 464 0)
-               [:blue :b-boat]       (coord 480 0)
-               [:blue :b-bomb]       (coord 496 0)
-               [:blue :b-copter]     (coord 512 0)
-               [:blue :battleship]   (coord 528 0)
-               [:blue :bomber]       (coord 544 0)
-               [:blue :carrier]      (coord 560 0)
-               [:blue :cruiser]      (coord 576 0)
-               [:blue :fighter]      (coord 592 0)
-               [:blue :infantry]     (coord 608 0)
-               [:blue :lander]       (coord 624 0)
-               [:blue :md-tank]      (coord 640 0)
-               [:blue :mech]         (coord 656 0)
-               [:blue :megatank]     (coord 672 0)
-               [:blue :missiles]     (coord 688 0)
-               [:blue :neotank]      (coord 704 0)
-               [:blue :oozium]       (coord 720 0)
-               [:blue :piperunner]   (coord 736 0)
-               [:blue :recon]        (coord 752 0)
-               [:blue :rockets]      (coord 768 0)
-               [:blue :stealth]      (coord 784 0)
-               [:blue :submarine]    (coord 800 0)
-               [:blue :t-copter]     (coord 816 0)
-               [:blue :tank]         (coord 832 0)
-               [:green :anti-air]    (coord 848 0)
-               [:green :apc]         (coord 864 0)
-               [:green :artillery]   (coord 880 0)
-               [:green :b-boat]      (coord 896 0)
-               [:green :b-bomb]      (coord 912 0)
-               [:green :b-copter]    (coord 928 0)
-               [:green :battleship]  (coord 944 0)
-               [:green :bomber]      (coord 960 0)
-               [:green :carrier]     (coord 976 0)
-               [:green :cruiser]     (coord 992 0)
-               [:green :fighter]     (coord 1008 0)
-               [:green :infantry]    (coord 1024 0)
-               [:green :lander]      (coord 1040 0)
-               [:green :md-tank]     (coord 1056 0)
-               [:green :mech]        (coord 1072 0)
-               [:green :megatank]    (coord 1088 0)
-               [:green :missiles]    (coord 1104 0)
-               [:green :neotank]     (coord 1120 0)
-               [:green :oozium]      (coord 1136 0)
-               [:green :piperunner]  (coord 1152 0)
-               [:green :recon]       (coord 1168 0)
-               [:green :rockets]     (coord 1184 0)
-               [:green :stealth]     (coord 1200 0)
-               [:green :submarine]   (coord 1216 0)
-               [:green :t-copter]    (coord 1232 0)
-               [:green :tank]        (coord 1248 0)
-               [:red :anti-air]      (coord 1264 0)
-               [:red :apc]           (coord 1280 0)
-               [:red :artillery]     (coord 1296 0)
-               [:red :b-boat]        (coord 1312 0)
-               [:red :b-bomb]        (coord 1328 0)
-               [:red :b-copter]      (coord 1344 0)
-               [:red :bomber]        (coord 1376 0)
-               [:red :carrier]       (coord 1392 0)
-               [:red :cruiser]       (coord 1408 0)
-               [:red :fighter]       (coord 1424 0)
-               [:red :infantry]      (coord 1440 0)
-               [:red :lander]        (coord 1456 0)
-               [:red :md-tank]       (coord 1472 0)
-               [:red :mech]          (coord 1488 0)
-               [:red :megatank]      (coord 1504 0)
-               [:red :missiles]      (coord 1520 0)
-               [:red :neotank]       (coord 1536 0)
-               [:red :oozium]        (coord 1552 0)
-               [:red :piperunner]    (coord 1568 0)
-               [:red :recon]         (coord 1584 0)
-               [:red :rockets]       (coord 1600 0)
-               [:red :stealth]       (coord 1616 0)
-               [:red :submarine]     (coord 1632 0)
-               [:red :t-copter]      (coord 1648 0)
-               [:red :tank]          (coord 1664 0)
-               [:yellow :anti-air]   (coord 1680 0)
-               [:yellow :apc]        (coord 1696 0)
-               [:yellow :artillery]  (coord 1712 0)
-               [:yellow :b-boat]     (coord 1728 0)
-               [:yellow :b-bomb]     (coord 1744 0)
-               [:yellow :b-copter]   (coord 1760 0)
-               [:yellow :battleship] (coord 1776 0)
-               [:yellow :bomber]     (coord 1792 0)
-               [:yellow :carrier]    (coord 1808 0)
-               [:yellow :cruiser]    (coord 1824 0)
-               [:yellow :fighter]    (coord 1840 0)
-               [:yellow :infantry]   (coord 1856 0)
-               [:yellow :lander]     (coord 1872 0)
-               [:yellow :md-tank]    (coord 1888 0)
-               [:yellow :mech]       (coord 1904 0)
-               [:yellow :megatank]   (coord 1920 0)
-               [:yellow :missiles]   (coord 1936 0)
-               [:yellow :neotank]    (coord 1952 0)
-               [:yellow :oozium]     (coord 1968 0)
-               [:yellow :piperunner] (coord 1984 0)
-               [:yellow :recon]      (coord 2000 0)
-               [:yellow :rockets]    (coord 2016 0)
-               [:yellow :stealth]    (coord 2032 0)
-               [:yellow :submarine]  (coord 2048 0)
-               [:yellow :t-copter]   (coord 2064 0)
-               [:yellow :tank]       (coord 2080 0)
-               [:red :battleship]    (coord 1360 0)}})
+   :tile-spec {[:black :anti-air]    (coord 0 16),
+               [:black :apc]         (coord 16 16),
+               [:black :artillery]   (coord 32 16),
+               [:black :b-boat]      (coord 48 16),
+               [:black :b-bomb]      (coord 64 16),
+               [:black :b-copter]    (coord 80 16),
+               [:black :battleship]  (coord 96 16),
+               [:black :bomber]      (coord 112 16),
+               [:black :carrier]     (coord 128 16),
+               [:black :cruiser]     (coord 144 16),
+               [:black :fighter]     (coord 160 16),
+               [:black :infantry]    (coord 176 16),
+               [:black :lander]      (coord 192 16),
+               [:black :md-tank]     (coord 208 16),
+               [:black :mech]        (coord 224 16)
+               [:black :megatank]    (coord 240 16),
+               [:black :missiles]    (coord 256 16),
+               [:black :neotank]     (coord 272 16),
+               [:black :oozium]      (coord 288 16),
+               [:black :piperunner]  (coord 304 16),
+               [:black :recon]       (coord 320 16),
+               [:black :rockets]     (coord 336 16),
+               [:black :stealth]     (coord 352 16),
+               [:black :submarine]   (coord 368 16),
+               [:black :t-copter]    (coord 384 16),
+               [:black :tank]        (coord 400 16),
+               [:blue :anti-air]     (coord 0 32),
+               [:blue :apc]          (coord 16 32),
+               [:blue :artillery]    (coord 32 32),
+               [:blue :b-boat]       (coord 48 32),
+               [:blue :b-bomb]       (coord 64 32),
+               [:blue :b-copter]     (coord 80 32),
+               [:blue :battleship]   (coord 96 32),
+               [:blue :bomber]       (coord 112 32),
+               [:blue :carrier]      (coord 128 32),
+               [:blue :cruiser]      (coord 144 32),
+               [:blue :fighter]      (coord 160 32),
+               [:blue :infantry]     (coord 176 32),
+               [:blue :lander]       (coord 192 32),
+               [:blue :md-tank]      (coord 208 32),
+               [:blue :mech]         (coord 224 32),
+               [:blue :megatank]     (coord 240 32),
+               [:blue :missiles]     (coord 256 32),
+               [:blue :neotank]      (coord 272 32),
+               [:blue :oozium]       (coord 288 32),
+               [:blue :piperunner]   (coord 304 32),
+               [:blue :recon]        (coord 320 32),
+               [:blue :rockets]      (coord 336 32),
+               [:blue :stealth]      (coord 352 32),
+               [:blue :submarine]    (coord 368 32),
+               [:blue :t-copter]     (coord 384 32),
+               [:blue :tank]         (coord 400 32),
+               [:green :anti-air]    (coord 0 48),
+               [:green :apc]         (coord 16 48),
+               [:green :artillery]   (coord 32 48),
+               [:green :b-boat]      (coord 48 48),
+               [:green :b-bomb]      (coord 64 48),
+               [:green :b-copter]    (coord 80 48),
+               [:green :battleship]  (coord 96 48),
+               [:green :bomber]      (coord 112 48),
+               [:green :carrier]     (coord 128 48),
+               [:green :cruiser]     (coord 144 48),
+               [:green :fighter]     (coord 160 48),
+               [:green :infantry]    (coord 176 48),
+               [:green :lander]      (coord 192 48),
+               [:green :md-tank]     (coord 208 48),
+               [:green :mech]        (coord 224 48),
+               [:green :megatank]    (coord 240 48),
+               [:green :missiles]    (coord 256 48),
+               [:green :neotank]     (coord 272 48),
+               [:green :oozium]      (coord 288 48),
+               [:green :piperunner]  (coord 304 48),
+               [:green :recon]       (coord 320 48),
+               [:green :rockets]     (coord 336 48),
+               [:green :stealth]     (coord 352 48),
+               [:green :submarine]   (coord 368 48),
+               [:green :t-copter]    (coord 384 48),
+               [:red :anti-air]      (coord 0 64),
+               [:red :apc]           (coord 16 64),
+               [:red :artillery]     (coord 32 64),
+               [:red :b-boat]        (coord 48 64),
+               [:red :b-bomb]        (coord 64 64),
+               [:red :b-copter]      (coord 80 64),
+               [:red :battleship]    (coord 96 64),
+               [:red :bomber]        (coord 112 64),
+               [:red :carrier]       (coord 128 64),
+               [:red :cruiser]       (coord 144 64),
+               [:red :fighter]       (coord 160 64),
+               [:red :infantry]      (coord 176 64),
+               [:red :lander]        (coord 192 64),
+               [:red :md-tank]       (coord 208 64),
+               [:red :mech]          (coord 224 64),
+               [:red :megatank]      (coord 240 64),
+               [:red :missiles]      (coord 256 64),
+               [:red :neotank]       (coord 272 64),
+               [:red :oozium]        (coord 288 64),
+               [:red :piperunner]    (coord 304 64),
+               [:red :recon]         (coord 320 64),
+               [:red :rockets]       (coord 336 64),
+               [:red :stealth]       (coord 352 64),
+               [:red :submarine]     (coord 368 64),
+               [:red :t-copter]      (coord 384 64),
+               [:red :tank]          (coord 400 64),
+               [:yellow :anti-air]   (coord 0 80),
+               [:yellow :apc]        (coord 16 80),
+               [:yellow :artillery]  (coord 32 80),
+               [:yellow :b-boat]     (coord 48 80),
+               [:yellow :b-bomb]     (coord 64 80),
+               [:yellow :b-copter]   (coord 80 80),
+               [:yellow :battleship] (coord 96 80),
+               [:yellow :bomber]     (coord 112 80),
+               [:yellow :carrier]    (coord 128 80),
+               [:yellow :cruiser]    (coord 144 80),
+               [:yellow :fighter]    (coord 160 80),
+               [:yellow :infantry]   (coord 176 80),
+               [:yellow :lander]     (coord 192 80),
+               [:yellow :md-tank]    (coord 208 80),
+               [:yellow :mech]       (coord 224 80),
+               [:yellow :megatank]   (coord 240 80),
+               [:yellow :missiles]   (coord 256 80),
+               [:yellow :neotank]    (coord 272 80),
+               [:yellow :oozium]     (coord 288 80),
+               [:yellow :piperunner] (coord 304 80),
+               [:yellow :recon]      (coord 320 80),
+               [:yellow :rockets]    (coord 336 80),
+               [:yellow :stealth]    (coord 352 80),
+               [:yellow :submarine]  (coord 368 80),
+               [:yellow :t-copter]   (coord 384 80),
+               [:yellow :tank]       (coord 400 80),
+               [:green :tank]        (coord 400 48)}})
 
 
 ;; (pprint (into {} (for [[k {:keys [x y]}] (first (load-tile "resources/pixmaps/units/"))] [k (list 'coord x y)])))
