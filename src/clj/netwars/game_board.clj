@@ -14,7 +14,8 @@
 
 (defn map->GameBoard [m]
   (let [board (GameBoard. (aw-map/map->TerrainBoard (:terrain m))
-                          (into {} (for [[c u] (:units m)] [c (unit/map->AwUnit u)])))]
+                          (into {} (for [[c u] (:units m)] [c (with-meta (unit/map->AwUnit u)
+                                                                (meta u))])))]
     (into board
           (apply dissoc m (keys board)))))
 
@@ -59,9 +60,9 @@
    Checks if the movement-type can pass the field and if an unit is on the field,
    it checks if both units have the same color."
   [board unit c]
+  (assert (meta unit))
   (and (or (nil? (get-unit board c)) (= (:color unit) (:color (get-unit board c))))
-       (aw-map/can-pass? (get-terrain board c) (:movement-type (meta unit)))
-       ))
+       (aw-map/can-pass? (get-terrain board c) (:movement-type (meta unit)))))
 
 (defn move-unit [^GameBoard board c1 c2]
   {:pre [(not (nil? (get-unit board c1))) (nil? (get-unit board c2))]
@@ -100,6 +101,7 @@
         movement-range (:movement-range (meta unit))
         movement-type (:movement-type (meta unit))
         fuel (:fuel unit)]
+    (assert (meta unit))
     ;; (println "movement-type:" movement-type)
     ;; (println "movement-range:" movement-range)
     ;; (println "fuel:" fuel)
