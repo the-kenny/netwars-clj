@@ -90,7 +90,7 @@
       (.restore context)))
   (callback canvas game))
 
-(defn test-drawing [canvas game]
+(defn draw-game [canvas game]
   (prepare-canvas canvas game
                   (fn [canvas game]
                     (draw-terrain canvas game
