@@ -15,6 +15,7 @@
 
             [netwars.game-drawer :as game-drawer]
             [netwars.test-games :as test-games]
+            [netwars.action-menu :as action-menu]
 
             ;; Load all crossovers prevent stripping
             [netwars.aw-game :as aw-game]
