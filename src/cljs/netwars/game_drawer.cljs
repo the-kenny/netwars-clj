@@ -32,12 +32,16 @@
                 [xn yn]))))
   ([c] (coord->canvas c false)))
 
-(defn- load-terrain
-  ([map-name callback]
-     (let [image (js/Image.)]
-       (set! (.-onload image) #(callback image))
-       (set! (.-src image) (str "api/render-map/" map-name))
-       image)))
+(let [cache (atom {})]
+ (defn- load-terrain
+   ([map-name callback]
+      (if-let [cached (get @cache map-name)]
+        (callback cached)
+        (let [image (js/Image.)]
+          (set! (.-onload image) #(callback image))
+          (set! (.-src image) (str "api/render-map/" map-name))
+          (swap! cache assoc map-name image)
+          image)))))
 ;; (def load-terrain (memoize load-terrain*))
 
 (defn- draw-unit [context c unit]
