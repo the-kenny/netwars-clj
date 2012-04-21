@@ -250,3 +250,14 @@
        (buy-unit base-coord :mech))           => throws
    ;; Can't buy unit with insufficient funds
    (buy-unit *game* base-coord :megatank)     => throws))
+
+
+(facts "about capture-building"
+  (let [infantry (coord 1 13)
+        white-city (coord 1 1)
+        *game* (update-in *game* [:board] board/add-unit white-city
+                          (board/get-unit (:board *game*) infantry))]
+    (-> *game*
+        (capture-building white-city)
+        :board
+        (board/get-terrain white-city)) => [:city :red]))

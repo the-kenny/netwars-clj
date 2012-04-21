@@ -78,9 +78,11 @@ Building-values have the structure [building color] whereas normal terrains are 
    :post [(is-building? %)]}
   (let [[t c val] building]
     (cond
-     (nil? val) [t c (- +building-capture-points+ points)]
-     (< 0 (- val points)) [t new-color]
-     (= 0 (- val points)) [t c (- val points)])))
+     (nil? val) (if (= points +building-capture-points+)
+                  [t new-color]
+                  [t c (- +building-capture-points+ points)])
+     (<= (- val points) 0) [t new-color]
+     (>  (- val points) 0) [t c (- val points)])))
 
 (defn is-terrain?
   "Predicate to check if a terrain-value is normal terrain and not a building.

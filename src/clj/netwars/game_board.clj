@@ -83,6 +83,16 @@
                           (aw-map/buildings (:terrain board)))]
     (reduce #(change-building-color %1 %2 :white) board (map first buildings))))
 
+(defn capture-building [board c]
+  {:pre [(get-unit board c)
+         (aw-map/is-building? (get-terrain board c))]}
+  (let [terrain (:terrain board)]
+   (assoc board :terrain
+          (aw-map/update-board terrain c
+                               (aw-map/capture-building (get-terrain board c)
+                                                        (:hp (get-unit board c))
+                                                        (:color (get-unit board c)))))))
+
 ;;; Attacking
 
 (defn in-attack-range? [board att-coord vic-coord]

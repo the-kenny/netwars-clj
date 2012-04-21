@@ -219,3 +219,13 @@ Returns path."
                     :unit unit
                     :price price
                     :coordinate c}))))
+
+;;; Capturing buildings
+;;; TODO: Capture only works for selected-unit
+(defn capture-building [game c]
+  {:pre [(board/get-unit (:board game) c)
+         (aw-map/is-building? (board/get-terrain (:board game) c))
+         (unit/can-capture? (board/get-unit (:board game) c))
+         (not= (:color (board/get-unit    (:board game) c))
+               (second (board/get-terrain (:board game) c)))]}
+  (update-in game [:board] board/capture-building c))
