@@ -27,7 +27,7 @@
   (let [game  (AwGame. (:info m)
                  (:current-player-index m)
                  (:round-counter m)
-                 (map player/map->AwPlayer (:players m))
+                 (vec (map player/map->AwPlayer (:players m)))
                  (:unit-spec m)
                  (:damagetable m)
                  (board/map->GameBoard (:board m))
