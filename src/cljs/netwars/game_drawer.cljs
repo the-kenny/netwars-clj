@@ -14,10 +14,10 @@
 (defn canvas->coord
   "Converts canvas coordinates to netwars coordinates"
   [c]
-  (coord (Math/floor (/ (:x c)
-                        +field-width+))
-         (Math/floor (/ (:y c)
-                        +field-height+))))
+  (aw-map/coord (Math/floor (/ (:x c)
+                               +field-width+))
+                (Math/floor (/ (:y c)
+                               +field-height+))))
 
 (defn coord->canvas
   "Converts netwars coordinates to canvas coordinates"
