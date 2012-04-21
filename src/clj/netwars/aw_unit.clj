@@ -126,3 +126,6 @@
   (if (= (:ammo weapon) :infinity)
     false
     (< (:ammo weapon) (/ (:ammo (meta weapon)) 2))))
+
+(defn can-capture? [unit]
+  (contains? #{:infantry :mech} (:internal-name unit)))
