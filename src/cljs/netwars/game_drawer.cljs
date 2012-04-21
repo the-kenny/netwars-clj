@@ -47,11 +47,12 @@
 
 (defn- draw-unit [context c unit]
   ;; TODO: Draw unit meta information
-  (tile-drawer/draw-tile context
-                         tiles/+unit-tiles+
-                         [(:color unit) (:internal-name unit)]
-                         [(:x c) (:y c)]
-                         (fn [] nil)))
+  (let [cc (coord->canvas c)]           ;canvas coordinate
+   (tile-drawer/draw-tile context
+                          tiles/+unit-tiles+
+                          [(:color unit) (:internal-name unit)]
+                          [(:x cc) (:y cc)]
+                          (fn [] nil))))
 
 (defn- prepare-canvas [canvas game callback]
   (let [width (aw-map/width (-> game :board :terrain))
@@ -71,11 +72,23 @@
 (defn- draw-units [canvas game callback]
   (let [context (.getContext canvas "2d")]
     (doseq [[c u] (-> game :board :units)]
-      (draw-unit context (coord->canvas c) u)))
+      (draw-unit context c u)))
+  (callback canvas game))
+
+(defn draw-selected-unit [canvas game callback]
+  ;; (when-let [unit (aw-game/selected-unit game)]
+  ;;   (let [context (.getContext canvas "2d")]
+  ;;    (set! (.-globalCompositeOperation context) "lighter")
+  ;;    (draw-unit context (aw-game/selected-coordinate game) unit)
+  ;;    (set! (.-globalCompositeOperation context) "source-over")))
   (callback canvas game))
 
 (defn test-drawing [canvas game]
   (prepare-canvas canvas game
-                  (fn [canvas game] (draw-terrain canvas game
-                                                  (fn [canvas game]
-                                                    (draw-units canvas game #(logging/log "Drawing finished!")))))))
+                  (fn [canvas game]
+                    (draw-terrain canvas game
+                                  (fn [canvas game]
+                                    (draw-units canvas game
+                                                (fn [canvas game]
+                                                  (draw-selected-unit canvas game
+                                                                      #(logging/log "Drawing finished!")))))))))
