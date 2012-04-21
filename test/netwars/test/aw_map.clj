@@ -45,8 +45,14 @@
 
 (facts "about is-building?"
   (doseq [t #{:headquarter :city :base :airport :port :tower :lab :silo}]
-   (is-building? [t ...color...]) => true)
-  (is-building? ...any...)        => false)
+    (is-building? [t ...color...]) => true)
+  (is-building? [:city :red 5])    => true
+  (is-building? ...any...)         => false)
+
+(facts "about capture-building"
+  (capture-building [:city :white] 6 :red)   => [:city :white 4]
+  (capture-building [:city :white 4] 5 :red) => [:city :red]
+  (capture-building [:city :white 5] 3 :red) => [:city :white 2])
 
 (facts "about is-terrain?"
   (doseq [t #{:plain :street :bridge :segment-pipe :river :beach :wreckage :pipe :mountain :forest :water :reef}]

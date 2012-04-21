@@ -71,6 +71,17 @@ Building-values have the structure [building color] whereas normal terrains are 
   (and (vector? t)
        (contains? #{:headquarter :city :base :airport :port :tower :lab :silo} (first t))))
 
+(def +building-capture-points+ 10)
+
+(defn capture-building [building points new-color]
+  {:pre [(is-building? building)]
+   :post [(is-building? %)]}
+  (let [[t c val] building]
+    (cond
+     (nil? val) [t c (- +building-capture-points+ points)]
+     (< 0 (- val points)) [t new-color]
+     (= 0 (- val points)) [t c (- val points)])))
+
 (defn is-terrain?
   "Predicate to check if a terrain-value is normal terrain and not a building.
 terrain values are ordinary keywords.
