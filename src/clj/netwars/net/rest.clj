@@ -50,7 +50,7 @@
 
 (defn render-map [map-name]
   ;; TODO: This performs badly
-  (let [game (game-creator/make-game {} (str "maps/" map-name))
+  (let [game (game-creator/make-game {} map-name)
         image (map-drawer/render-terrain-board (-> game :board :terrain))
         in (java.io.PipedInputStream.)]
     ;; Now this is fun stuff:
@@ -63,7 +63,7 @@
      :body in}))
 
 (defn make-game [map-name]
-  (->  (game-creator/make-game {} (str "maps/" map-name))
+  (->  (game-creator/make-game {} map-name)
        (dissoc :moves)
        (assoc  :map-url (map-url map-name))
        (otw/encode-data)))

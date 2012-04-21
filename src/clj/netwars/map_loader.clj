@@ -112,7 +112,7 @@
     (LoadedMap.
      terrain-board
      unit-data
-     {:source source
+     {:file-path source
       :tileset tileset
       :name name
       :author author
