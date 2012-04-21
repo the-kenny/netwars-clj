@@ -13,6 +13,9 @@
             [goog.net :as gnet]
             [cljs.reader :as reader]
 
+            [netwars.game-drawer :as game-drawer]
+            [netwars.test-games :as test-games]
+
             ;; Load all crossovers prevent stripping
             [netwars.aw-game :as aw-game]
             [netwars.aw-map :as aw-map]
@@ -23,6 +26,40 @@
             [netwars.tile-drawer :as tile-drawer]))
 
 (def current-game (atom nil))
+
+(defn unit-clicked [game unit c]
+  (logging/log c)
+  (cond
+   ;; Bug: (= c null) => crash; (= null c) => false
+   (= (aw-game/selected-coordinate game) c) (aw-game/deselect-unit game)
+   true (aw-game/select-unit game c)))
+
+(defn clicked-on [c]
+  (when @current-game
+    (swap! current-game
+           (fn [game]
+             (let [board (:board game)
+                   terrain (game-board/get-terrain board c)
+                   unit (game-board/get-unit board c)]
+               (cond
+                unit (unit-clicked game unit c)
+                true game))))))
+
+(defn register-handlers [canvas]
+  (event/listen canvas :click
+                (fn [event]
+                  (clicked-on (game-drawer/canvas->coord
+                               (aw-map/coord (.-offsetX event) (.-offsetY event))))))
+  ;; We use add-watch to redraw the canvas every time the state changes
+  (add-watch current-game :redrawer
+           (fn [key ref old new]
+             (game-drawer/draw-game canvas new))))
+
+(register-handlers (dom/get-element :gameBoard))
+
+(reset! current-game netwars.test-games/basic-game)
+
+;;; Testing functions
 
 (defn load-test-game []
   (logging/log "Loading game...")
