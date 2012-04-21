@@ -41,7 +41,7 @@
           (set! (.-onload image) #(callback image))
           (set! (.-src image) (str "api/render-map/" map-name))
           (swap! cache assoc map-name image)
-          image)))))
+          nil)))))
 ;; (def load-terrain (memoize load-terrain*))
 
 (defn- draw-unit [context c unit]
@@ -49,7 +49,8 @@
   (tile-drawer/draw-tile context
                          tiles/+unit-tiles+
                          [(:color unit) (:internal-name unit)]
-                         [(:x c) (:y c)]))
+                         [(:x c) (:y c)]
+                         (fn [] nil)))
 
 (defn- prepare-canvas [canvas game callback]
   (let [width (aw-map/width (-> game :board :terrain))
@@ -75,5 +76,5 @@
 (defn test-drawing [canvas game]
   (prepare-canvas canvas game
                   (fn [canvas game] (draw-terrain canvas game
-                                                  (fn [game canvas]
-                                                    (draw-units game canvas #(logging/log "Drawing finished!")))))))
+                                                  (fn [canvas game]
+                                                    (draw-units canvas game #(logging/log "Drawing finished!")))))))
