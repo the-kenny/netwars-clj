@@ -115,6 +115,7 @@
                       (not (aw-map/in-bounds? (:terrain board) c)) #{}
                       (not (aw-map/can-pass? t movement-type)) #{}
                       (and (not initial?) (not (can-walk-on-field? board unit c))) #{}
+                      ;; TODO: (Performance) don't go back to the last field
                       (> rest costs) (set/union
                                       #{c}
                                       (helper (aw-map/coord (inc (:x c)) (:y c))
