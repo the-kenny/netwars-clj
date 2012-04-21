@@ -76,11 +76,18 @@
   (callback canvas game))
 
 (defn draw-selected-unit [canvas game callback]
-  ;; (when-let [unit (aw-game/selected-unit game)]
-  ;;   (let [context (.getContext canvas "2d")]
-  ;;    (set! (.-globalCompositeOperation context) "lighter")
-  ;;    (draw-unit context (aw-game/selected-coordinate game) unit)
-  ;;    (set! (.-globalCompositeOperation context) "source-over")))
+  (when-let [unit (aw-game/selected-unit game)]
+    (let [context (.getContext canvas "2d")
+          selected-coord (coord->canvas (aw-game/selected-coordinate game))]
+      (.save context)
+      (set! (.-fillStyle context) "rgba(255, 0, 0, 0.4)")
+      (doseq [c (disj (aw-game/movement-range game) selected-coord)
+              :let [{:keys [x y]} (coord->canvas c)]]
+        (.fillRect context x y +field-width+ +field-height+))
+      (set! (.-fillStyle context) "rgba(0, 0, 0, 0.3)")
+      (let [{:keys [x y]} selected-coord]
+       (.fillRect context x y +field-width+ +field-height+))
+      (.restore context)))
   (callback canvas game))
 
 (defn test-drawing [canvas game]
