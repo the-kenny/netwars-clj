@@ -9,7 +9,7 @@
   (:require [netwars.game-board :as board]
             [netwars.aw-player :as player]))
 
-(def +aw-test-map+ "maps/7330.aws")
+(def +aw-test-map+ "7330.aws")
 
 (def ^:dynamic *game* nil)
 (defn- make-test-game []
