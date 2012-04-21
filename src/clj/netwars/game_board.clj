@@ -14,7 +14,7 @@
 
 (defn map->GameBoard [m]
   (let [board (GameBoard. (aw-map/map->TerrainBoard (:terrain m))
-                          (:units m))]
+                          (into {} (for [[c u] (:units m)] [c (unit/map->AwUnit u)])))]
     (into board
           (apply dissoc m (keys board)))))
 
