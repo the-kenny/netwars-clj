@@ -4,11 +4,14 @@
             [clojure.browser.dom :as dom]))
 
 
-(defn- load-tile-image* [file]
-  (let [image (js/Image.)]
-    (set! (.-src image) file)
-    (set! (.-onload image) #(logging/log "image loaded:" file))
-    image))
+(defn- load-tile-image*
+  ([file callback]
+     (let [image (js/Image.)]
+       (set! (.-src image) file)
+       (set! (.-onload image) callback)
+       image))
+  ([file]
+     (load-tile-image* file #(logging/log "image loaded:" file))))
 (def load-tile-image (comp (memoize load-tile-image*) tiles/tile-filename))
 
 (def +terrain-tiles-image+ (load-tile-image tiles/+terrain-tiles+))
