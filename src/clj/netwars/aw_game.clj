@@ -205,6 +205,7 @@ Returns path."
   (let [player (current-player game)
         unit (unit/make-unit (:unit-spec game) id-or-internal-name (:color player))
         price (:price (meta unit))]
+    (assert (meta unit))
     (assert (nil? (board/get-unit (:board game) c))
             (str "Can't buy unit " (name (:internal-name unit)) "."
                  "There's already a unit on " c))
