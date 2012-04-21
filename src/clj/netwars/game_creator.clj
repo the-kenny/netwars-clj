@@ -17,7 +17,7 @@
         unit-spec (load-units "resources/units.xml")
         damagetable (damagetable/load-damagetable "resources/damagetable.xml")
         board (board/generate-game-board loaded-map unit-spec)
-        newinfo (assoc info :map mapsource)
+        newinfo (assoc info :map (:info loaded-map))
         players (map #(player/make-player %1 %2 +default-funds+)
                      (map #(str "Player " %) (range 1 1000))
                      (sort-colors (-> loaded-map :info :player-colors)))
