@@ -27,12 +27,25 @@
 
 (def current-game (atom nil))
 
-(defn unit-clicked [game unit c]
-  (logging/log c)
+(defn own-unit-clicked [game c unit]
   (cond
    ;; Bug: (= c null) => crash; (= null c) => false
    (= (aw-game/selected-coordinate game) c) (aw-game/deselect-unit game)
    true (aw-game/select-unit game c)))
+
+(defn enemy-unit-clicked [game c unit]
+  game)
+
+(defn unit-clicked [game c]
+  (let [unit (-> game :board (game-board/get-unit c))]
+    (if (= (:color unit) (:color (aw-game/current-player game)))
+     (own-unit-clicked game c unit)
+     (enemy-unit-clicked game c unit))))
+
+(defn terrain-clicked [game c]
+  (let [terrain (-> game :board (game-board/get-terrain c))]
+    (logging/log (apply str (map name (seq terrain))))
+    game))
 
 (defn clicked-on [c]
   (when @current-game
@@ -42,7 +55,8 @@
                    terrain (game-board/get-terrain board c)
                    unit (game-board/get-unit board c)]
                (cond
-                unit (unit-clicked game unit c)
+                unit    (unit-clicked    game c)
+                terrain (terrain-clicked game c)
                 true game))))))
 
 (defn register-handlers [canvas]
