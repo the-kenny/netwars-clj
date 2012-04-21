@@ -3,12 +3,11 @@
             [netwars.logging :as logging]
             [clojure.browser.dom :as dom]))
 
-
 (defn- load-tile-image*
   ([file callback]
      (let [image (js/Image.)]
-       (set! (.-src image) file)
        (set! (.-onload image) callback)
+       (set! (.-src image) file)
        image))
   ([file]
      (load-tile-image* file #(logging/log "image loaded:" file))))
