@@ -40,6 +40,13 @@
        image)))
 ;; (def load-terrain (memoize load-terrain*))
 
+(defn- draw-unit [context c unit]
+  ;; TODO: Draw unit meta information
+  (tile-drawer/draw-tile context
+                         tiles/+unit-tiles+
+                         [(:color unit) (:internal-name unit)]
+                         [(:x c) (:y c)]))
+
 (defn- prepare-canvas [canvas game callback]
   (let [width (aw-map/width (-> game :board :terrain))
         height (aw-map/height (-> game :board :terrain))]
@@ -55,7 +62,14 @@
                               0 0)
                   (callback canvas game))))
 
+(defn- draw-units [canvas game callback]
+  (let [context (.getContext canvas "2d")]
+    (doseq [[c u] (-> game :board :units)]
+      (draw-unit context (coord->canvas c) u)))
+  (callback canvas game))
+
 (defn test-drawing [canvas game]
   (prepare-canvas canvas game
                   (fn [canvas game] (draw-terrain canvas game
-                                                  #(logging/log "Drawing finished!")))))
+                                                  (fn [game canvas]
+                                                    (draw-units game canvas #(logging/log "Drawing finished!")))))))
