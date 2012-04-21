@@ -38,9 +38,10 @@
       (if-let [cached (get @cache map-name)]
         (callback cached)
         (let [image (js/Image.)]
-          (set! (.-onload image) #(callback image))
+          (set! (.-onload image) #(do
+                                    (swap! cache assoc map-name image)
+                                    (callback image)))
           (set! (.-src image) (str "api/render-map/" map-name))
-          (swap! cache assoc map-name image)
           nil)))))
 ;; (def load-terrain (memoize load-terrain*))
 
