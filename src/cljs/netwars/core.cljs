@@ -40,7 +40,8 @@
   (let [menu (action-menu/unit-action-menu game c {:wait #(unit-action-wait game c unit)})]
     (action-menu/display-menu menu (dom/get-element :mapBox) (game-drawer/coord->canvas c))
     (reset! current-action-menu menu))
-  game)
+  ;; Return nil to indicate no re-draw is needed
+  nil)
 
 (defn own-unit-clicked [game c unit]
   (cond
@@ -49,30 +50,34 @@
    true (aw-game/select-unit game c)))
 
 (defn enemy-unit-clicked [game c unit]
-  game)
+  nil)
 
 (defn unit-clicked [game c]
   (let [unit (-> game :board (game-board/get-unit c))]
     (if (= (:color unit) (:color (aw-game/current-player game)))
-     (own-unit-clicked game c unit)
-     (enemy-unit-clicked game c unit))))
+      (own-unit-clicked game c unit)
+      (enemy-unit-clicked game c unit))))
 
 (defn terrain-clicked [game c]
   (let [terrain (-> game :board (game-board/get-terrain c))]
     (logging/log (apply str (map name (seq terrain))))
-    game))
+    ;; Return nil to indicate no re-draw is needed
+    nil))
 
 (defn clicked-on [c]
   (when (and @current-game (not @current-action-menu))
-    (swap! current-game
-           (fn [game]
-             (let [board (:board game)
-                   terrain (game-board/get-terrain board c)
-                   unit (game-board/get-unit board c)]
-               (cond
-                unit    (unit-clicked    game c)
-                terrain (terrain-clicked game c)
-                true game))))))
+    (let [game @current-game
+          newgame (let [board (:board game)
+                        terrain (game-board/get-terrain board c)
+                        unit (game-board/get-unit board c)]
+                    (cond
+                     unit    (unit-clicked    game c)
+                     terrain (terrain-clicked game c)
+                     true game))]
+      ;; Don't redraw the game when the state hasn't changed
+      ;; TODO: This shouldn't be necessary when everything is opimized
+      (when newgame
+       (reset! current-game newgame)))))
 
 (defn register-handlers [canvas]
   (event/listen canvas :click
