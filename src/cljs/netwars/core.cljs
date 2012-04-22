@@ -10,7 +10,6 @@
             [netwars.net.otw :as otw]
 
             [clojure.browser.net :as net]
-            [goog.net :as gnet]
             [cljs.reader :as reader]
 
             [netwars.game-drawer :as game-drawer]

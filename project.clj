@@ -26,9 +26,7 @@
                         :compiler
                         {:output-to "resources/public/netwars.js"
                          :pretty-print true
-                         :optimizations :whitespace
-                         :foreign-libs [{:provides ["kinetic"]
-                                         :file "resources/public/kinetic.js"}]}}]}
+                         :optimizations :whitespace}}]}
   :profiles {:dev {:dependencies [[midje "1.3.1"]]
                    :plugins [[org.clojars.the-kenny/lein-midje "1.0.9"]]}}
   :plugins [[lein-cljsbuild "0.1.8"]])
