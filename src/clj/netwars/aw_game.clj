@@ -224,5 +224,5 @@ Returns path."
 
 ;;; TODO: Capture only works for selected-unit
 (defn capture-building [game c]
-  {:pre [(board/can-capture? (:board game) c)]}
+  {:pre [(board/capture-possible? (:board game) c)]}
   (update-in game [:board] board/capture-building c))
