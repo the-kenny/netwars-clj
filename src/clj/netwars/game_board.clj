@@ -119,24 +119,28 @@
         movement-type (:movement-type (meta unit))
         fuel (:fuel unit)]
     (assert (meta unit))
-    (let [helper (fn helper [c rest & {:keys [initial?]}]
+    (let [helper (fn helper [c rest acc & {:keys [initial?]}]
                    (let [t (get-terrain board c)
-                         costs (if initial? 0 (aw-map/movement-costs t movement-type))]
+                         costs (if initial? 0 (aw-map/movement-costs t movement-type))
+                         newacc (conj acc c)]
                      (cond
-                      (not (aw-map/in-bounds? (:terrain board) c)) #{}
-                      (not (aw-map/can-pass? t movement-type)) #{}
-                      (and (not initial?) (not (can-walk-on-field? board unit c))) #{}
-                      ;; TODO: (Performance) don't go back to the last field
+                      (not (aw-map/in-bounds? (:terrain board) c)) acc
+                      (not (aw-map/can-pass? t movement-type)) acc
+                      (and (not initial?) (not (can-walk-on-field? board unit c))) acc
                       (> rest costs) (let [{:keys [x y]} c
                                            right (aw-map/coord (inc x)     y)
                                            left  (aw-map/coord (dec x)     y)
                                            down  (aw-map/coord      x (inc y))
-                                           up    (aw-map/coord      x (dec y))]
+                                           up    (aw-map/coord      x (dec y))
+                                           restcosts (- rest costs)]
                                        (set/union
-                                       #{c}
-                                       (helper right (- rest costs))
-                                       (helper left  (- rest costs))
-                                       (helper down  (- rest costs))
-                                       (helper up    (- rest costs))))
-                      true #{c})))]
-      (helper c (min movement-range fuel) :initial? true))))
+                                        (when-not (contains? newacc right)
+                                          (helper right restcosts newacc))
+                                        (when-not (contains? newacc left)
+                                          (helper left  restcosts newacc))
+                                        (when-not (contains? newacc down)
+                                          (helper down  restcosts newacc))
+                                        (when-not (contains? newacc up)
+                                          (helper up    restcosts newacc))))
+                      true newacc)))]
+      (helper c (min movement-range fuel) #{c} :initial? true))))
