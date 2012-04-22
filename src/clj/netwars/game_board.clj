@@ -119,29 +119,24 @@
         movement-type (:movement-type (meta unit))
         fuel (:fuel unit)]
     (assert (meta unit))
-    ;; (println "movement-type:" movement-type)
-    ;; (println "movement-range:" movement-range)
-    ;; (println "fuel:" fuel)
-    ;; (println "unit:" unit)
     (let [helper (fn helper [c rest & {:keys [initial?]}]
                    (let [t (get-terrain board c)
                          costs (if initial? 0 (aw-map/movement-costs t movement-type))]
-                     ;; (println (str "[" (:x c) "," (:y c) "]") ";" t "costs:" costs)
                      (cond
-                      (nil? c) #{}
                       (not (aw-map/in-bounds? (:terrain board) c)) #{}
                       (not (aw-map/can-pass? t movement-type)) #{}
                       (and (not initial?) (not (can-walk-on-field? board unit c))) #{}
                       ;; TODO: (Performance) don't go back to the last field
-                      (> rest costs) (set/union
-                                      #{c}
-                                      (helper (aw-map/coord (inc (:x c)) (:y c))
-                                              (- rest costs))
-                                      (helper (aw-map/coord (dec (:x c)) (:y c))
-                                              (- rest costs))
-                                      (helper (aw-map/coord (:x c) (inc (:y c)))
-                                              (- rest costs))
-                                      (helper (aw-map/coord (:x c) (dec (:y c)))
-                                              (- rest costs)))
+                      (> rest costs) (let [{:keys [x y]} c
+                                           right (aw-map/coord (inc x)     y)
+                                           left  (aw-map/coord (dec x)     y)
+                                           down  (aw-map/coord      x (inc y))
+                                           up    (aw-map/coord      x (dec y))]
+                                       (set/union
+                                       #{c}
+                                       (helper right (- rest costs))
+                                       (helper left  (- rest costs))
+                                       (helper down  (- rest costs))
+                                       (helper up    (- rest costs))))
                       true #{c})))]
       (helper c (min movement-range fuel) :initial? true))))
