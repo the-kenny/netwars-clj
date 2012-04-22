@@ -22,7 +22,9 @@
     menu))
 
 (defn display-menu [menu parent position]
-  (.setPosition menu (:x position) (:y position))
+  (.setPosition menu
+                (+ (:x position) 20)
+                (+ (:y position) 20))
   (.render menu parent)
   menu)
 
