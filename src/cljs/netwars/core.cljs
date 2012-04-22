@@ -77,7 +77,7 @@
       ;; Don't redraw the game when the state hasn't changed
       ;; TODO: This shouldn't be necessary when everything is opimized
       (when newgame
-       (reset! current-game newgame)))))
+        (reset! current-game newgame)))))
 
 (defn register-handlers [canvas]
   (event/listen canvas :click
@@ -86,8 +86,8 @@
                                (aw-map/coord (.-offsetX event) (.-offsetY event))))))
   ;; We use add-watch to redraw the canvas every time the state changes
   (add-watch current-game :redrawer
-           (fn [key ref old new]
-             (game-drawer/draw-game canvas new))))
+             (fn [key ref old new]
+               (game-drawer/draw-game canvas new))))
 
 (register-handlers (dom/get-element :gameBoard))
 
@@ -109,4 +109,4 @@
                          (logging/log "Loaded game."))))
 
 (defn repl-connect []
- (repl/connect "http://localhost:9000/repl"))
+  (repl/connect "http://localhost:9000/repl"))
