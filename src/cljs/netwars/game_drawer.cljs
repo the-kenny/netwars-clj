@@ -54,6 +54,14 @@
                           [(:x cc) (:y cc)]
                           (fn [] nil))))
 
+(defn- highlight-squares [context cs color]
+  (.save context)
+  (set! (.-fillStyle context) color)
+  (doseq [c cs
+          :let [{:keys [x y]} (coord->canvas c)]]
+    (.fillRect context x y +field-width+ +field-height+))
+  (.restore context))
+
 (defn- prepare-canvas [canvas game callback]
   (let [width (aw-map/width (-> game :board :terrain))
         height (aw-map/height (-> game :board :terrain))]
@@ -78,16 +86,11 @@
 (defn draw-selected-unit [canvas game callback]
   (when-let [unit (aw-game/selected-unit game)]
     (let [context (.getContext canvas "2d")
-          selected-coord (coord->canvas (aw-game/selected-coordinate game))]
-      (.save context)
-      (set! (.-fillStyle context) "rgba(255, 0, 0, 0.4)")
-      (doseq [c (disj (aw-game/movement-range game) selected-coord)
-              :let [{:keys [x y]} (coord->canvas c)]]
-        (.fillRect context x y +field-width+ +field-height+))
-      (set! (.-fillStyle context) "rgba(0, 0, 0, 0.3)")
-      (let [{:keys [x y]} selected-coord]
-       (.fillRect context x y +field-width+ +field-height+))
-      (.restore context)))
+          selected-coord (aw-game/selected-coordinate game)]
+      (highlight-squares context
+                         (disj (aw-game/movement-range game) selected-coord)
+                         "rgba(255, 0, 0, 0.4)")
+      (highlight-squares context [selected-coord] "rgba(0, 0, 0, 0.3)")))
   (callback canvas game))
 
 (defn draw-game [canvas game]
