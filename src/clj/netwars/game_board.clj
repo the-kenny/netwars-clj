@@ -83,9 +83,16 @@
                           (aw-map/buildings (:terrain board)))]
     (reduce #(change-building-color %1 %2 :white) board (map first buildings))))
 
+(defn capture-possible? [board c]
+  (let [unit (get-unit board c)
+        terrain (get-terrain board c)]
+    (and (aw-map/is-building? terrain)
+         (unit/can-capture? unit)
+         (not= (:color unit)
+               (second terrain)))))
+
 (defn capture-building [board c]
-  {:pre [(get-unit board c)
-         (aw-map/is-building? (get-terrain board c))]}
+  {:pre [(capture-possible? board c)]}
   (let [terrain (:terrain board)]
    (assoc board :terrain
           (aw-map/update-board terrain c

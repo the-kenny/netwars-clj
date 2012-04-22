@@ -27,11 +27,25 @@
             [netwars.tile-drawer :as tile-drawer]))
 
 (def current-game (atom nil))
+(def current-action-menu (atom nil))
+
+(defn unit-action-wait [game c unit]
+  ;; TODO: Really make the unit wait
+  (logging/log "Waiting...")
+  (swap! current-game aw-game/deselect-unit)
+  ;; TODO: Dismissal shouldn't be done in every action-fn
+  (swap! current-action-menu action-menu/hide-menu))
+
+(defn show-unit-action-menu [game c unit]
+  (let [menu (action-menu/unit-action-menu game c {:wait #(unit-action-wait game c unit)})]
+    (action-menu/display-menu menu (dom/get-element :mapBox) (game-drawer/coord->canvas c))
+    (reset! current-action-menu menu))
+  game)
 
 (defn own-unit-clicked [game c unit]
   (cond
    ;; Bug: (= c null) => crash; (= null c) => false
-   (= (aw-game/selected-coordinate game) c) (aw-game/deselect-unit game)
+   (= (aw-game/selected-coordinate game) c) (show-unit-action-menu game c unit)
    true (aw-game/select-unit game c)))
 
 (defn enemy-unit-clicked [game c unit]
@@ -49,7 +63,7 @@
     game))
 
 (defn clicked-on [c]
-  (when @current-game
+  (when (and @current-game (not @current-action-menu))
     (swap! current-game
            (fn [game]
              (let [board (:board game)
