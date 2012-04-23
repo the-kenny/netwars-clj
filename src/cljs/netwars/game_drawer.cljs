@@ -45,14 +45,36 @@
           nil)))))
 ;; (def load-terrain (memoize load-terrain*))
 
+(defn- draw-unit-meta [context cc unit]
+  (assert (meta unit))
+  (when (< (:hp unit) (-> unit meta :hp))
+    (tile-drawer/draw-tile context
+                           tiles/+unit-meta-tiles+
+                           [(nth [:one :two :three :four :five
+                                  :six :seven :eight :nine]
+                                 (dec (:hp unit)))]
+                           [(:x cc) (:y cc)]))
+  (when (some aw-unit/low-ammo? (vals (aw-unit/available-weapons unit)))
+    (tile-drawer/draw-tile context
+                           tiles/+unit-meta-tiles+
+                           [:ammo]
+                           [(:x cc) (:y cc)]))
+  (when (and (aw-unit/can-transport? unit)
+             (not (empty? (-> unit :transport :freight))))
+    (tile-drawer/draw-tile context
+                           tiles/+unit-meta-tiles+
+                           [:loaded]
+                           [(:x cc) (:y cc)]))
+  ;; TODO: fuel, capture, hidden
+  )
+
 (defn- draw-unit [context c unit]
-  ;; TODO: Draw unit meta information
   (let [cc (coord->canvas c)]           ;canvas coordinate
    (tile-drawer/draw-tile context
                           tiles/+unit-tiles+
                           [(:color unit) (:internal-name unit)]
                           [(:x cc) (:y cc)]
-                          (fn [] nil))))
+                          (fn [] (draw-unit-meta context cc unit)))))
 
 (defn- highlight-squares [context cs color]
   (.save context)
