@@ -38,7 +38,7 @@
         unit (aw-game/selected-unit game)
         capture? (game-board/capture-possible? board pos)]
     (make-action-menu [["Capture" (:capture fns) (not capture?)]
-                       ["Attack"  (:attack fns)  :disabled]
+                       #_["Attack"  (:attack fns)  :disabled]
                        [:separator]
                        ["Wait"    (:wait fns)]])))
 
