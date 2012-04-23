@@ -1,13 +1,9 @@
-(ns netwars.action-menu
+(ns netwars.menus.generic
   (:require [goog.ui.Menu :as gmenu]
             [clojure.browser.dom :as dom]
             [goog.dom :as gdom]
             [clojure.browser.event :as event]
-            [netwars.logging :as logging]
-
-            [netwars.aw-game :as aw-game]
-            [netwars.game-board :as game-board]
-            [netwars.aw-map :as aw-map]))
+            [netwars.logging :as logging]))
 
 (defn make-action-menu [items]
   (let [menu (goog.ui.Menu.)]
@@ -33,14 +29,7 @@
   nil)
 
 
-(defn unit-action-menu [game pos fns]
-  (let [board (:board game)
-        unit (aw-game/selected-unit game)
-        capture? (game-board/capture-possible? board pos)]
-    (make-action-menu [["Capture" (:capture fns) (not capture?)]
-                       #_["Attack"  (:attack fns)  :disabled]
-                       [:separator]
-                       ["Wait"    (:wait fns)]])))
+
 
 ;; (defn test-display-menu []
 ;;   (display-menu (dom/get-element :mapBox) nil [["Foo" #(logging/log "Foo")]

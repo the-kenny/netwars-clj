@@ -14,7 +14,9 @@
 
             [netwars.game-drawer :as game-drawer]
             [netwars.test-games :as test-games]
-            [netwars.action-menu :as action-menu]
+
+            [netwars.menus.generic :as menu]
+            [netwars.menus.unit-menu :as unit-menu]
 
             ;; Load all crossovers prevent stripping
             [netwars.aw-game :as aw-game]
@@ -33,11 +35,11 @@
   (logging/log "Waiting...")
   (swap! current-game aw-game/deselect-unit)
   ;; TODO: Dismissal shouldn't be done in every action-fn
-  (swap! current-action-menu action-menu/hide-menu))
+  (swap! current-action-menu menu/hide-menu))
 
 (defn show-unit-action-menu [game c unit]
-  (let [menu (action-menu/unit-action-menu game c {:wait #(unit-action-wait game c unit)})]
-    (action-menu/display-menu menu (dom/get-element :mapBox) (game-drawer/coord->canvas c))
+  (let [menu (unit-menu/unit-action-menu game c {:wait #(unit-action-wait game c unit)})]
+    (menu/display-menu menu (dom/get-element :mapBox) (game-drawer/coord->canvas c))
     (reset! current-action-menu menu))
   ;; Return nil to indicate no re-draw is needed
   nil)
