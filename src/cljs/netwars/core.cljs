@@ -121,7 +121,7 @@
 
 (register-handlers (dom/get-element :gameBoard))
 
-(reset! current-game netwars.test-games/basic-game)
+#_(reset! current-game netwars.test-games/basic-game)
 
 ;;; Testing functions
 

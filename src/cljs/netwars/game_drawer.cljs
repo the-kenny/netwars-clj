@@ -144,7 +144,7 @@
   (let [cont (fn [canvas game]
                (.drawImage (.getContext canvas "2d") @hidden-background-canvas 0 0)
                (callback canvas game))]
-   (if-not @hidden-background-canvas
+   (if (nil? @hidden-background-canvas)
      (let [newcanvas (dom/element :canvas)]
        (prepare-canvas newcanvas game
                        (fn [newcanvas game]
