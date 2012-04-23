@@ -36,12 +36,12 @@
   (swap! current-game aw-game/deselect-unit)
   (swap! current-action-menu menu/hide-menu))
 
-(defn unit-action-wait [game c]
-  ;; TODO: Really make the unit wait
-  (logging/log "Waiting...")
-  (swap! current-game aw-game/deselect-unit)
-  ;; TODO: Dismissal shouldn't be done in every action-fn
-  (swap! current-action-menu menu/hide-menu))
+;; (defn unit-action-wait [game c]
+;;   ;; TODO: Really make the unit wait
+;;   (logging/log "Waiting...")
+;;   (swap! current-game #(aw-game/deselect-unit))
+;;   ;; TODO: Dismissal shouldn't be done in every action-fn
+;;   (swap! current-action-menu menu/hide-menu))
 
 (defn unit-action-capture [game c]
   {:pre (game-board/capture-possible? (:board game) c)}
@@ -51,7 +51,7 @@
   (swap! current-action-menu menu/hide-menu))
 
 (defn show-unit-action-menu [game c unit]
-  (let [menu (unit-menu/unit-action-menu game c {:wait #(unit-action-wait game c)
+  (let [menu (unit-menu/unit-action-menu game c {;; wait #(unit-action-wait game c)
                                                  :capture #(unit-action-capture game c)
                                                  :cancel #(action-cancel)})]
     (menu/display-menu menu (dom/get-element :mapBox) (game-drawer/coord->canvas c))
