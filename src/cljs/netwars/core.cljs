@@ -17,6 +17,7 @@
 
             [netwars.menus.generic :as menu]
             [netwars.menus.unit-menu :as unit-menu]
+            [netwars.menus.attack-menu :as attack-menu]
 
             ;; Load all crossovers prevent stripping
             [netwars.aw-game :as aw-game]
@@ -30,19 +31,29 @@
 (def current-game (atom nil))
 (def current-action-menu (atom nil))
 
-(defn unit-action-wait [game c unit]
+(defn unit-action-wait [game c]
   ;; TODO: Really make the unit wait
   (logging/log "Waiting...")
   (swap! current-game aw-game/deselect-unit)
   ;; TODO: Dismissal shouldn't be done in every action-fn
   (swap! current-action-menu menu/hide-menu))
 
+
 (defn show-unit-action-menu [game c unit]
-  (let [menu (unit-menu/unit-action-menu game c {:wait #(unit-action-wait game c unit)})]
+  (let [menu (unit-menu/unit-action-menu game c {:wait #(unit-action-wait game c)})]
     (menu/display-menu menu (dom/get-element :mapBox) (game-drawer/coord->canvas c))
     (reset! current-action-menu menu))
   ;; Return nil to indicate no re-draw is needed
   nil)
+
+(defn show-attack-menu [game c]
+  (let [menu (attack-menu/attack-menu game c {:attack #(unit-action-wait game c)
+                                              :cancel #(swap! current-action-menu menu/hide-menu)})]
+    (menu/display-menu menu (dom/get-element :mapBox) (game-drawer/coord->canvas c))
+    (reset! current-action-menu menu))
+  ;; Return nil to indicate no re-draw is needed
+  nil)
+
 
 (defn own-unit-clicked [game c unit]
   (cond
@@ -55,7 +66,7 @@
     (when (aw-game/attack-possible? game att-coord c)
       (logging/log "Attack!")
       ;; TODO: Show attack menu
-      )))
+      (show-attack-menu game c))))
 
 (defn unit-clicked [game c]
   (let [unit (-> game :board (game-board/get-unit c))]
