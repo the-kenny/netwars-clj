@@ -107,7 +107,8 @@
       ;; Don't redraw the game when the state hasn't changed
       ;; TODO: This shouldn't be necessary when everything is opimized
       (when newgame
-        (reset! current-game newgame)))))
+        (reset! current-game (assoc newgame
+                               :last-click-coord c))))))
 
 (defn register-handlers [canvas]
   (event/listen canvas :click
@@ -117,7 +118,10 @@
   ;; We use add-watch to redraw the canvas every time the state changes
   (add-watch current-game :redrawer
              (fn [key ref old new]
-               (game-drawer/draw-game canvas new))))
+               (let [last-click-coord (:last-click-coord new)]
+                 (game-drawer/draw-game canvas
+                                        (dissoc new :last-click-coord)
+                                        last-click-coord)))))
 
 (register-handlers (dom/get-element :gameBoard))
 

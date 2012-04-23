@@ -140,11 +140,13 @@
 
 (def hidden-background-canvas (atom nil))
 
-(defn- draw-terrain [canvas game callback]
+(defn- draw-terrain [canvas game callback & [last-clicked-coord]]
   (let [cont (fn [canvas game]
                (.drawImage (.getContext canvas "2d") @hidden-background-canvas 0 0)
                (callback canvas game))]
-   (if (nil? @hidden-background-canvas)
+
+    (cond
+     (nil? @hidden-background-canvas)
      (let [newcanvas (dom/element :canvas)]
        (prepare-canvas newcanvas game
                        (fn [newcanvas game]
@@ -153,6 +155,16 @@
                                               (fn []
                                                 (reset! hidden-background-canvas newcanvas)
                                                 (cont canvas game))))))
+     last-clicked-coord
+     (do
+       (logging/log "Redrawing on hidden canvas")
+       (render-background-for-coordinate (.getContext @hidden-background-canvas "2d")
+                                        (-> game :board :terrain)
+                                        last-clicked-coord
+                                        (fn []
+                                          (cont canvas game))))
+
+     true
      (cont canvas game))))
 
 (defn- draw-units [canvas game callback]
@@ -179,7 +191,7 @@
                          "rgba(50,50,50,0.6)")))
   (when (fn? callback) (callback canvas game)))
 
-(defn draw-game [canvas game]
+(defn draw-game [canvas game & [last-clicked-coord]]
   (prepare-canvas canvas game
                   (fn [canvas game]
                     (draw-terrain
@@ -193,4 +205,5 @@
                            (fn [canvas game]
                              (draw-attackable-units
                               canvas game
-                              #(logging/log "Drawing finished!")))))))))))
+                              #(logging/log "Drawing finished!")))))))
+                     last-clicked-coord))))
