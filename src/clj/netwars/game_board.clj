@@ -1,7 +1,8 @@
 (ns netwars.game-board
   (:require [netwars.aw-map :as aw-map]
             [netwars.aw-unit :as unit]
-            [clojure.set :as set]))
+            [clojure.set :as set]
+            [netwars.damagecalculator :as damage]))
 
 ;; This namespace contains definitions and functions for GameBoard.
 ;; GameBoard combines AwMap with information about the units on it.
@@ -104,7 +105,8 @@
 
 (defn attack-range [board att-coord]
   (let [att (get-unit board att-coord)
-        area (:range (unit/main-weapon att))
+        area (apply set/union
+                    (map :range (vals (unit/available-weapons att))))
         deltas (set (concat [0] area (map - area)))
         possibilities (for [x deltas, y deltas]
                         (aw-map/coord (+ (:x att-coord) x)
@@ -120,8 +122,8 @@
   (let [dist (aw-map/distance att-coord vic-coord)
         att (get-unit board att-coord)
         def (get-unit board vic-coord)]
-    (or (contains? (:range (unit/main-weapon att)) dist)
-        (contains? (:range (unit/alt-weapon att)) dist))))
+    (contains? (apply set/union (map :range (vals (unit/available-weapons att))))
+               (aw-map/distance att-coord vic-coord))))
 
 ;;; Movement Range
 
