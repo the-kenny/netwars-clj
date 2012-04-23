@@ -29,6 +29,6 @@
                                      width height
                                      dx dy
                                      width height)
-                         (callback image))))
+                         (when (fn? callback) (callback image)))))
     (do (logging/log "Tile not found:" tile-path)
         #_(callback nil))))

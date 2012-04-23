@@ -89,7 +89,7 @@
         height (aw-map/height (-> game :board :terrain))]
     (set! (.-width canvas) (* width +field-width+))
     (set! (.-height canvas) (* height +field-height+))
-    (callback canvas game)))
+    (when (fn? callback) (callback canvas game))))
 
 (defn- draw-terrain [canvas game callback]
   (load-terrain (-> game :info :map-name)
@@ -103,7 +103,7 @@
   (let [context (.getContext canvas "2d")]
     (doseq [[c u] (-> game :board :units)]
       (draw-unit context c u)))
-  (callback canvas game))
+  (when (fn? callback) (callback canvas game)))
 
 (defn draw-selected-unit [canvas game callback]
   (when-let [unit (aw-game/selected-unit game)]
@@ -113,7 +113,7 @@
                          (disj (aw-game/movement-range game) selected-coord)
                          "rgba(255, 0, 0, 0.4)")
       (highlight-squares context [selected-coord] "rgba(0, 0, 0, 0.3)")))
-  (callback canvas game))
+  (when (fn? callback) (callback canvas game)))
 
 (defn draw-attackable-units [canvas game callback]
   (when-let [selection (aw-game/selected-coordinate game)]
@@ -121,7 +121,7 @@
       (highlight-squares (.getContext canvas "2d")
                          targets
                          "rgba(50,50,50,0.6)")))
-  (callback canvas game))
+  (when (fn? callback) (callback canvas game)))
 
 (defn draw-game [canvas game]
   (prepare-canvas canvas game
