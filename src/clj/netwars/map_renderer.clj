@@ -169,6 +169,7 @@ For example: [:pipe :uldr] or [:seaside :corner :dr]"
 
 (defmethod draw-tile :water [_ nbs drawing-fn]
   (do
+    (drawing-fn [:water])
    (seaside nbs drawing-fn)
    (seaside-corners nbs drawing-fn)
    (river-mouth nbs drawing-fn)))
