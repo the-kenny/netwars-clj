@@ -71,7 +71,7 @@ Building-values have the structure [building color] whereas normal terrains are 
   (and (vector? t)
        (contains? #{:headquarter :city :base :airport :port :tower :lab :silo} (first t))))
 
-(def +building-capture-points+ 10)
+(def +building-capture-points+ 20)
 
 (defn capture-building [building points new-color]
   {:pre [(is-building? building)]
