@@ -47,8 +47,17 @@
   ;; Return nil to indicate no re-draw is needed
   nil)
 
+(defn attack-action-attack [game c]
+  (swap! current-game #(let [att (aw-game/selected-coordinate %)
+                             def c]
+                         (-> game
+                             (aw-game/perform-attack att def)
+                             (aw-game/deselect-unit))))
+  ;; TODO: Dismissal shouldn't be done in every action-fn
+  (swap! current-action-menu menu/hide-menu))
+
 (defn show-attack-menu [game c]
-  (let [menu (attack-menu/attack-menu game c {:attack #(unit-action-wait game c)
+  (let [menu (attack-menu/attack-menu game c {:attack #(attack-action-attack game c)
                                               :cancel #(swap! current-action-menu menu/hide-menu)})]
     (menu/display-menu menu (dom/get-element :mapBox) (game-drawer/coord->canvas c))
     (reset! current-action-menu menu))
