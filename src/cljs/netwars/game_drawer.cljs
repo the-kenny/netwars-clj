@@ -105,11 +105,15 @@
 (defn draw-game [canvas game]
   (prepare-canvas canvas game
                   (fn [canvas game]
-                    (draw-terrain canvas game
-                                  (fn [canvas game]
-                                    (draw-units canvas game
-                                                (fn [canvas game]
-                                                  (draw-selected-unit canvas game
-                                                                      (fn [canvas game]
-                                                                        (draw-attackable-units canvas game
-                                                                                               #(logging/log "Drawing finished!")))))))))))
+                    (draw-terrain
+                     canvas game
+                     (fn [canvas game]
+                       (draw-units
+                        canvas game
+                        (fn [canvas game]
+                          (draw-selected-unit
+                           canvas game
+                           (fn [canvas game]
+                             (draw-attackable-units
+                              canvas game
+                              #(logging/log "Drawing finished!")))))))))))
