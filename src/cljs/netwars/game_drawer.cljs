@@ -103,15 +103,6 @@
   ;; TODO: fuel, capture, hidden
   )
 
-(defn- draw-unit [context c unit]
-  (let [cc (coord->canvas c)]           ;canvas coordinate
-   (tile-drawer/draw-tile context
-                          tiles/+unit-tiles+
-                          [(:color unit) (:internal-name unit)]
-                          [+field-width+ +field-width+]
-                          [(:x cc) (:y cc)]
-                          (fn [] (draw-unit-meta context cc unit)))))
-
 (defn- highlight-squares [context cs color]
   (.save context)
   (set! (.-fillStyle context) color)
@@ -119,6 +110,32 @@
           :let [{:keys [x y]} (coord->canvas c)]]
     (.fillRect context x y +field-width+ +field-height+))
   (.restore context))
+
+(defn- draw-unit [context c unit]
+  (let [cc (coord->canvas c)            ;canvas coordinate
+        path [(:color unit) (:internal-name unit)]
+        cont (fn []
+               (when (:moved unit)
+                     (let [unit-canvas (dom/element :canvas)
+                           unit-context (.getContext unit-canvas "2d")
+                           unit-tile-area (tiles/tile-rect tiles/+unit-tiles+ path)]
+                       (set! (.-width unit-canvas) (:width unit-tile-area))
+                       (set! (.-height unit-canvas) (:width unit-tile-area))
+                       (tile-drawer/draw-tile unit-context
+                                              tiles/+unit-tiles+
+                                              path
+                                              [+field-width+ +field-width+]
+                                              [0 0]
+                                              nil)
+                       (set! (.-globalCompositeOperation unit-context) "source-in")
+                       (highlight-squares unit-context [(aw-map/coord 0 0)] "rgba(0,0,0,0.4)")
+                       (.drawImage context unit-canvas (:x cc) (:y cc)))))]
+    (tile-drawer/draw-tile context
+                           tiles/+unit-tiles+
+                           path
+                           [+field-width+ +field-width+]
+                           [(:x cc) (:y cc)]
+                           (fn [] (cont) (draw-unit-meta context cc unit)))))
 
 (defn- prepare-canvas [canvas game callback]
   (let [width (aw-map/width (-> game :board :terrain))
