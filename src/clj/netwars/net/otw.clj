@@ -28,7 +28,8 @@
     (decode (meta m))))
 
 (defn- encode-seq [o]
-  (with-meta (map encode o) (encode (meta o))))
+  (with-meta (map encode o)
+    (encode (meta o))))
 
 (defn- decode-seq [o]
   (with-meta
@@ -46,12 +47,9 @@
   clojure.lang.IRecord
   (encode [v] (encode-map v))
   (decode [v] (decode-map v))
-  clojure.lang.IPersistentVector
-  (encode [v] (vec (encode-seq v)))
-  (decode [v] (vec (decode-seq v)))
-  clojure.lang.IPersistentList
-  (encode [v] (encode-seq v))
-  (decode [v] (decode-seq v))
+  clojure.lang.ISeq
+  (encode [v] (into (empty v) (encode-seq v)))
+  (decode [v] (into (empty v) (decode-seq v)))
   clojure.lang.IPersistentMap
   (encode [m] (encode-map m))
   (decode [m] (decode-map m))
