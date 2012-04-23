@@ -4,15 +4,17 @@
             [clojure.browser.dom :as dom]))
 
 (let [cache (atom {})]
-  (defn- load-tile-image [tile callback]
-    (let [file (tiles/tile-filename tile)]
-     (if-let [cached (get @cache file)]
+  (defn load-image [url callback]
+    (if-let [cached (get @cache url)]
        (callback cached)
        (let [image (js/Image.)]
          (set! (.-onload image) #(callback image))
-         (set! (.-src image) file)
-         (swap! cache assoc file image)
-         image)))))
+         (set! (.-src image) url)
+         (swap! cache assoc url image)
+         image))))
+
+(defn- load-tile-image [tile callback]
+  (load-image (tiles/tile-filename tile) callback))
 
 (load-tile-image tiles/+terrain-tiles+   #(logging/log "tile loaded: terrain"))
 (load-tile-image tiles/+unit-tiles+      #(logging/log "tile loaded: unit"))
