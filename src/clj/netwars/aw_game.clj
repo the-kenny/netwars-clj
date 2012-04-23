@@ -98,6 +98,16 @@
 
 ;;; Attacking
 
+(defn attack-possible? [game att-coord vic-coord]
+  (let [board (:board game)
+        att (board/get-unit board att-coord)
+        def (board/get-unit board vic-coord)]
+    (and att
+         def
+         (board/in-attack-range? board att-coord vic-coord)
+         (not= (:color att) (:color def))
+         (not (nil? (damage/choose-weapon (:damagetable game) att def))))))
+
 (defn perform-attack [game att-coord vic-coord & {:keys [counterattack]}]
   {:pre [(board/in-attack-range? (:board game) att-coord vic-coord)]}
   (let [board (:board game)

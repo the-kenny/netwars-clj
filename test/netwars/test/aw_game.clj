@@ -106,6 +106,15 @@
               (range (player-count *game*)))
       (current-round)) => 2)
 
+(deftest test-attack-possible
+    (let [artillery (coord 1 11)
+          infantry (coord 1 13)]
+      (is (attack-possible? *game* artillery infantry))
+      (is (not (attack-possible? *game* infantry artillery)))
+
+      (is (attack-possible? *game* (coord 2 11) artillery))
+      (is (not (attack-possible? *game* artillery (coord 2 11))))))
+
 (defn check-attack-event [attack-event
                           from to
                           att-internal vic-internal]
