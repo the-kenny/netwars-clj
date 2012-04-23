@@ -49,7 +49,11 @@
    true (aw-game/select-unit game c)))
 
 (defn enemy-unit-clicked [game c unit]
-  nil)
+  (when-let [att-coord (aw-game/selected-coordinate game)]
+    (when (aw-game/attack-possible? game att-coord c)
+      (logging/log "Attack!")
+      ;; TODO: Show attack menu
+      )))
 
 (defn unit-clicked [game c]
   (let [unit (-> game :board (game-board/get-unit c))]
