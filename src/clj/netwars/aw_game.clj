@@ -108,6 +108,12 @@
          (not= (:color att) (:color def))
          (not (nil? (damage/choose-weapon (:damagetable game) att def))))))
 
+(defn attackable-targets [game]
+  (let [att-coord (selected-coordinate game)]
+    (assert att-coord)
+    (set (filter #(attack-possible? game att-coord %)
+                 (board/attack-range (:board game) att-coord)))))
+
 (defn perform-attack [game att-coord vic-coord & {:keys [counterattack]}]
   {:pre [(board/in-attack-range? (:board game) att-coord vic-coord)]}
   (let [board (:board game)

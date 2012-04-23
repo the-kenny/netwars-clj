@@ -115,6 +115,13 @@
       (is (attack-possible? *game* (coord 2 11) artillery))
       (is (not (attack-possible? *game* artillery (coord 2 11))))))
 
+(deftest test-attackable-targets
+  (let [artillery (coord 1 11)
+        targets (-> *game* (select-unit artillery) attackable-targets)]
+    (is (set? targets))
+    (is (= 3 (count targets)))
+    (is (= targets (set (map coord [[1 8] [1 13] [4 11]]))))))
+
 (defn check-attack-event [attack-event
                           from to
                           att-internal vic-internal]
