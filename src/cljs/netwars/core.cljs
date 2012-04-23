@@ -40,7 +40,8 @@
 
 
 (defn show-unit-action-menu [game c unit]
-  (let [menu (unit-menu/unit-action-menu game c {:wait #(unit-action-wait game c)})]
+  (let [menu (unit-menu/unit-action-menu game c {:wait #(unit-action-wait game c)
+                                                 :cancel #(swap! current-action-menu menu/hide-menu)})]
     (menu/display-menu menu (dom/get-element :mapBox) (game-drawer/coord->canvas c))
     (reset! current-action-menu menu))
   ;; Return nil to indicate no re-draw is needed

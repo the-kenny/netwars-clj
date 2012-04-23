@@ -14,4 +14,5 @@
      [["Capture" (:capture fns) (not capture?)]
       #_["Attack"  (:attack fns)  :disabled]
       [:separator]
-      ["Wait"    (:wait fns)]])))
+      ["Wait"    (:wait fns)]
+      ["Cancel"  (:cancel fns)]])))
