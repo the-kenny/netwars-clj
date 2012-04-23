@@ -33,7 +33,7 @@
 
 (defn action-cancel []
   ;; TODO: Should 'Cancel' deselect the unit?
-  #_(swap! current-game aw-game/deselect-unit)
+  (swap! current-game aw-game/deselect-unit)
   (swap! current-action-menu menu/hide-menu))
 
 (defn unit-action-wait [game c]
