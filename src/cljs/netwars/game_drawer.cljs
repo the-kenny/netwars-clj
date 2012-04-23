@@ -58,6 +58,7 @@
                            ;; TODO: Render the next tile using this callback
                            nil)))
 
+;;; TODO: [:city :white 10] is broken
 (defn render-background-for-coordinate [context terrain-board c callback]
   (when-let [terr (aw-map/at terrain-board c)]
     (map-renderer/draw-tile terr (map-utils/neighbours terrain-board c)

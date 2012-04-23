@@ -155,7 +155,8 @@
 `(last path)` must be in the current movement-range. Must be called in a transaction.
 Returns path."
   [game path]
-  {:pre [(path/path? path)]}
+  {:pre [(path/path? path)
+         (not (:moved (selected-unit game)))]}
   (assert (selected-unit game) "Tried to move unit without selected-unit")
   (assert (every? #(contains? (movement-range game) %) path)
           "Tried to move unit to non-reachable field")
@@ -198,8 +199,11 @@ Returns path."
 
 ;;; TODO: Capture only works for selected-unit
 (defn capture-building [game c]
-  {:pre [(board/capture-possible? (:board game) c)]}
-  (update-in game [:board] board/capture-building c))
+  {:pre [(board/capture-possible? (:board game) c)
+         (not (:moved (board/get-unit (:board game) c)))]}
+  (-> game
+      (update-in [:board] board/capture-building c)
+      (update-in [:board] board/update-unit c assoc :moved true)))
 
 ;;; Attacking
 
@@ -220,7 +224,8 @@ Returns path."
                  (board/attack-range (:board game) att-coord)))))
 
 (defn perform-attack [game att-coord vic-coord & {:keys [counterattack]}]
-  {:pre [(board/in-attack-range? (:board game) att-coord vic-coord)]}
+  {:pre [(attack-possible? game att-coord vic-coord)
+         (not (:moved (board/get-unit (:board game) att-coord)))]}
   (let [board (:board game)
         att (board/get-unit board att-coord)
         vic (board/get-unit board vic-coord)
@@ -235,12 +240,15 @@ Returns path."
                          (board/update-unit board vic-coord #(unit/apply-damage % dam))
                          (board/remove-unit board vic-coord))
                        (board/update-unit att-coord
-                                          #(unit/fire-weapon %
-                                                             (ffirst
-                                                              (damage/choose-weapon
-                                                               (:damagetable game)
-                                                               att
-                                                               vic)))))]
+                                          #(let [newu (unit/fire-weapon %
+                                                                        (ffirst
+                                                                         (damage/choose-weapon
+                                                                          (:damagetable game)
+                                                                          att
+                                                                          vic)))]
+                                             (if-not counterattack
+                                               (assoc newu :moved true)
+                                               newu))))]
       (let [newgame (-> game
                         (assoc :board newboard)
                         (check-capture-after-move vic-coord)

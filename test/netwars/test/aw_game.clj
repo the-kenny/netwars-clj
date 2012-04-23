@@ -139,6 +139,8 @@
     (let [*game* (perform-attack *game* artillery infantry)]
       (is (= 10  (:hp (board/get-unit (:board *game*) artillery))))
       (is (= 5.0 (:hp (board/get-unit (:board *game*) infantry))))
+      (is (:moved (board/get-unit (:board *game*) artillery)))
+      (is (not (:moved (board/get-unit (:board *game*) infantry))))
       (check-attack-event (first (filter #(= :attack (:type %))
                                          (game-events *game*)))
                           artillery infantry
@@ -244,7 +246,8 @@
                           [:internal-name :color])) "unit really moved to `to`")
       (is (nil? (board/get-unit (:board newgame) from)) "unit really moved from `from`")
       (let [new-unit (board/get-unit (:board newgame) to)]
-        (is (< (:fuel new-unit) (:fuel unit)) "the move used fuel"))
+        (is (< (:fuel new-unit) (:fuel unit)) "the move used fuel")
+        (is (:moved new-unit)))
       (is (= :unit-moved (:type (last (game-events newgame)))) "the move was logged"))))
 
 ;;; From here on, it's Midje

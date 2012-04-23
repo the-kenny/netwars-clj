@@ -67,10 +67,14 @@
        (aw-map/can-pass? (get-terrain board c) (:movement-type (meta unit)))))
 
 (defn move-unit [^GameBoard board c1 c2]
-  {:pre [(not (nil? (get-unit board c1))) (nil? (get-unit board c2))]
+  {:pre [(not (nil? (get-unit board c1)))
+         (nil? (get-unit board c2))
+         (not (:moved (get-unit board c1)))]
    :post [(nil? (get-unit % c1)) (not (nil? (get-unit % c2)))]}
   (let [u (get-unit board c1)]
-   (assoc board :units (-> (:units board) (assoc c2 u) (dissoc c1)))))
+    (assoc board :units (-> (:units board)
+                            (assoc c2 (assoc u :moved true))
+                            (dissoc c1)))))
 
 (defn change-building-color [^GameBoard board c color]
   {:pre [(aw-map/is-building? (get-terrain board c))]
