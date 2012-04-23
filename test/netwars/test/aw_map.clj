@@ -50,8 +50,8 @@
   (is-building? ...any...)         => false)
 
 (facts "about capture-building"
-  (capture-building [:city :white] 6 :red)   => [:city :white 4]
-  (capture-building [:city :white] 10 :red)   => [:city :red]
+  (capture-building [:city :white]   6 :red) => [:city :white 14]
+  (capture-building [:city :white]  20 :red) => [:city :red]
   (capture-building [:city :white 4] 5 :red) => [:city :red]
   (capture-building [:city :white 5] 3 :red) => [:city :white 2])
 

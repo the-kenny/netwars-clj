@@ -57,6 +57,7 @@
       game-events
       last)           => (contains {:type :turn-completed}))
 
+
 (facts "about get-player"
   (get-player *game* :red)   => player/is-player?
   (get-player *game* :red)   => (current-player *game*)
@@ -151,7 +152,8 @@
   (let [infantry (coord 1 13)
         infantry2 (coord 2 13)
         *game* (update-in *game* [:board] board/add-unit infantry2
-                          (board/get-unit (:board *game*) infantry))]
+                          (assoc (board/get-unit (:board *game*) infantry)
+                                 :color :black))]
     (is (= 10 (:hp (board/get-unit (:board *game*) infantry))))
     (is (= 10 (:hp (board/get-unit (:board *game*) infantry2))))
     (let [*game* (perform-attack *game* infantry infantry2)]
@@ -279,4 +281,4 @@
     (-> *game*
         (capture-building white-city)
         :board
-        (board/get-terrain white-city)) => [:city :red]))
+        (board/get-terrain white-city)) => [:city :white 10]))
