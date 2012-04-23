@@ -47,8 +47,6 @@
           nil)))))
 ;; (def load-terrain (memoize load-terrain*))
 
-;;; Functions to render maps
-
 ;;; TODO: Callback?
 (defn- drawing-fn [context c path]
   (let [cc (coord->canvas c)]
@@ -60,16 +58,19 @@
                            ;; TODO: Render the next tile using this callback
                            nil)))
 
+(defn render-background-for-coordinate [context terrain-board c callback]
+  (when-let [terr (aw-map/at terrain-board c)]
+    (map-renderer/draw-tile terr (map-utils/neighbours terrain-board c)
+                            #(drawing-fn context c %))
+    (when (fn? callback) (callback))))
+
 (defn- draw-map-background [context game callback]
   (let [terrain-board (-> game :board :terrain)]
     (doseq [x (range (aw-map/width terrain-board))
             y (range (aw-map/height terrain-board))
             :let [c (aw-map/coord x y)]]
-      (when-let [terr (aw-map/at terrain-board c)]
-        (map-renderer/draw-tile terr (map-utils/neighbours terrain-board c)
-                                #(drawing-fn context c %))))
-    (callback)))
-
+      (render-background-for-coordinate context terrain-board c nil))
+    (when (fn? callback) (callback))))
 
 ;;; General functions for drawing units, background etc.
 
@@ -126,15 +127,33 @@
     (set! (.-height canvas) (* height +field-height+))
     (when (fn? callback) (callback canvas game))))
 
+;;; Functions to render maps
+
+;;; Let's see:
+;;;
+;;; The rendering of the background isn't fast enouth. Let's do the
+;;; following: Initially render the map to a hidden canvas and render
+;;; it from there to the game canvas. Every time the user does
+;;; something (e.g. captures a building) this single coordinate is
+;;; re-rendered on the hidden canvas and the result is blitted on the
+;;; game canvas.
+
+(def hidden-background-canvas (atom nil))
+
 (defn- draw-terrain [canvas game callback]
-  (draw-map-background (.getContext canvas "2d") game #(callback canvas game))
-  ;; (load-terrain (-> game :info :map-name)
-  ;;               (fn [image]
-  ;;                 (.drawImage (.getContext canvas "2d")
-  ;;                             image
-  ;;                             0 0)
-  ;;                 (callback canvas game)))
-  )
+  (let [cont (fn [canvas game]
+               (.drawImage (.getContext canvas "2d") @hidden-background-canvas 0 0)
+               (callback canvas game))]
+   (if-not @hidden-background-canvas
+     (let [newcanvas (dom/element :canvas)]
+       (prepare-canvas newcanvas game
+                       (fn [newcanvas game]
+                         (draw-map-background (.getContext newcanvas "2d")
+                                              game
+                                              (fn []
+                                                (reset! hidden-background-canvas newcanvas)
+                                                (cont canvas game))))))
+     (cont canvas game))))
 
 (defn- draw-units [canvas game callback]
   (let [context (.getContext canvas "2d")]
