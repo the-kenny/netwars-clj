@@ -50,6 +50,7 @@
    :post [(nil? (get-unit % coord))]}
   (assoc board :units (dissoc (:units board) coord)))
 
+;;; TODO: Remove capture points
 (defn remove-units [board color]
   (let [units (filter (fn [[c u]]
                             (= (:color u) color))

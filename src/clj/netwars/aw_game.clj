@@ -203,7 +203,6 @@
   [game]
   (board/reachable-fields (:board game) (selected-coordinate game)))
 
-;;; TODO: Moving a capturing unit throws away the progress
 (defn move-unit
   "Moves the currently selected unit along `path`.
 `(last path)` must be in the current movement-range. Must be called in a transaction.
