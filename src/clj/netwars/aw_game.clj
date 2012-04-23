@@ -54,13 +54,16 @@
 
 (defn next-player [game]
   (let [newgame (-> game
-                    (log-event {:type :turn-completed
-                                :player (current-player game)})
                     (update-in [:current-player-index]
                                (fn [idx]
                                  (if (>= (inc idx) (player-count game))
                                    0
-                                   (inc idx)))))]
+                                   (inc idx))))
+                    (update-in [:board] (fn [board]
+                                          (reduce #(board/update-unit %1 %2 dissoc :moved)
+                                                  board (keys (:units board)))))
+                    (log-event {:type :turn-completed
+                                :player (current-player game)}))]
     (if (= 0 (:current-player-index newgame))
       (update-in newgame [:round-counter] inc)
       newgame)))

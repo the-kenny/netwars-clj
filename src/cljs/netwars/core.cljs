@@ -124,6 +124,11 @@
                 (fn [event]
                   (clicked-on (game-drawer/canvas->coord
                                (aw-map/coord (.-offsetX event) (.-offsetY event))))))
+  (event/listen (dom/get-element :end-turn-button) :click
+                (fn [event]
+                  (when @current-game
+                    (swap! current-game aw-game/next-player))))
+
   ;; We use add-watch to redraw the canvas every time the state changes
   (add-watch current-game :redrawer
              (fn [key ref old new]
