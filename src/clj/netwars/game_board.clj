@@ -107,14 +107,15 @@
   (let [att (get-unit board att-coord)
         area (apply set/union
                     (map :range (vals (unit/available-weapons att))))
-        deltas (set (concat [0] area (map - area)))
-        possibilities (for [x deltas, y deltas]
+        max-range (reduce max area)
+        r (range (- max-range) (inc max-range))
+        possibilities (for [x r, y r]
                         (aw-map/coord (+ (:x att-coord) x)
                                       (+ (:y att-coord) y)))]
     (-> (filter
-                #(and (contains? deltas (aw-map/distance att-coord %))
-                      (aw-map/in-bounds? (:terrain board) %))
-                possibilities)
+         #(and (contains? area (aw-map/distance att-coord %))
+               (aw-map/in-bounds? (:terrain board) %))
+         possibilities)
         set
         (disj att-coord))))
 

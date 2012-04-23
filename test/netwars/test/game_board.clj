@@ -59,9 +59,12 @@
   ;; Artillery
   (let [range (attack-range (make-testboard) (coord 1 11))]
     (is (set? range))
-    (is (= 6 (count range))) ;shoule be 8, but two are outside of the map
-    (is (= (set (map coord [[1 14] [1 13] [1 9] [3 11] [1 8] [4 11]]))
+    (is (= 16 (count range))) ;shoule be 8, but two are outside of the map
+    (is (= (set (map coord [[0 13] [1 14] [0 12] [1 13] [2 13] [0 10]
+                            [2 12] [0 9] [3 12] [1 9] [2 10] [3 11]
+                            [1 8] [2 9] [3 10] [4 11]]))
            range))))
+
 
 (deftest test-movement-range
   ;; Ugly... but correct
