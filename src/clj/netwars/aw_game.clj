@@ -100,63 +100,10 @@
 
 (defn- check-capture-after-move [game c]
   (let [board (:board game)]
-    (when-not (board/get-unit board)
-      (update-in game [:board]
-                 board/reset-capture c))))
-
-;;; Attacking
-
-(defn attack-possible? [game att-coord vic-coord]
-  (let [board (:board game)
-        att (board/get-unit board att-coord)
-        def (board/get-unit board vic-coord)]
-    (and att
-         def
-         (board/in-attack-range? board att-coord vic-coord)
-         (not= (:color att) (:color def))
-         (not (nil? (damage/choose-weapon (:damagetable game) att def))))))
-
-(defn attackable-targets [game]
-  (let [att-coord (selected-coordinate game)]
-    (assert att-coord)
-    (set (filter #(attack-possible? game att-coord %)
-                 (board/attack-range (:board game) att-coord)))))
-
-(defn perform-attack [game att-coord vic-coord & {:keys [counterattack]}]
-  {:pre [(board/in-attack-range? (:board game) att-coord vic-coord)]}
-  (let [board (:board game)
-        att (board/get-unit board att-coord)
-        vic (board/get-unit board vic-coord)
-        att-terr (board/get-terrain board att-coord)
-        vic-terr (board/get-terrain board vic-coord)]
-    (let [dam (damage/calculate-damage (:damagetable game)
-                                       [att att-terr]
-                                       [vic vic-terr])
-          newvic (unit/apply-damage vic dam)
-          board (:board game)
-          newboard (-> (if newvic
-                         (board/update-unit board vic-coord #(unit/apply-damage % dam))
-                         (board/remove-unit board vic-coord))
-                       (board/update-unit att-coord
-                                          #(unit/fire-weapon %
-                                                             (ffirst
-                                                              (damage/choose-weapon
-                                                               (:damagetable game)
-                                                               att
-                                                               vic)))))]
-      (let [newgame (-> game
-                        (assoc :board newboard)
-                        (check-capture-after-move vic-coord)
-                        (log-event {:type (if counterattack :counter-attack :attack)
-                                    :from att-coord, :to vic-coord
-                                    :attacker att, :victim newvic
-                                    :damage dam}))]
-        (if (and newvic
-                 (board/in-attack-range? (:board newgame) vic-coord att-coord)
-                 (not counterattack))
-          (perform-attack newgame vic-coord att-coord :counterattack true)
-          newgame)))))
-
+    (if (and (nil? (board/get-unit board c))
+             (aw-map/is-building? (board/get-terrain board c)))
+      (update-in game [:board] board/reset-capture c)
+      game)))
 
 ;;; Fuel Costs
 
@@ -253,3 +200,56 @@ Returns path."
 (defn capture-building [game c]
   {:pre [(board/capture-possible? (:board game) c)]}
   (update-in game [:board] board/capture-building c))
+
+;;; Attacking
+
+(defn attack-possible? [game att-coord vic-coord]
+  (let [board (:board game)
+        att (board/get-unit board att-coord)
+        def (board/get-unit board vic-coord)]
+    (and att
+         def
+         (board/in-attack-range? board att-coord vic-coord)
+         (not= (:color att) (:color def))
+         (not (nil? (damage/choose-weapon (:damagetable game) att def))))))
+
+(defn attackable-targets [game]
+  (let [att-coord (selected-coordinate game)]
+    (assert att-coord)
+    (set (filter #(attack-possible? game att-coord %)
+                 (board/attack-range (:board game) att-coord)))))
+
+(defn perform-attack [game att-coord vic-coord & {:keys [counterattack]}]
+  {:pre [(board/in-attack-range? (:board game) att-coord vic-coord)]}
+  (let [board (:board game)
+        att (board/get-unit board att-coord)
+        vic (board/get-unit board vic-coord)
+        att-terr (board/get-terrain board att-coord)
+        vic-terr (board/get-terrain board vic-coord)]
+    (let [dam (damage/calculate-damage (:damagetable game)
+                                       [att att-terr]
+                                       [vic vic-terr])
+          newvic (unit/apply-damage vic dam)
+          board (:board game)
+          newboard (-> (if newvic
+                         (board/update-unit board vic-coord #(unit/apply-damage % dam))
+                         (board/remove-unit board vic-coord))
+                       (board/update-unit att-coord
+                                          #(unit/fire-weapon %
+                                                             (ffirst
+                                                              (damage/choose-weapon
+                                                               (:damagetable game)
+                                                               att
+                                                               vic)))))]
+      (let [newgame (-> game
+                        (assoc :board newboard)
+                        (check-capture-after-move vic-coord)
+                        (log-event {:type (if counterattack :counter-attack :attack)
+                                    :from att-coord, :to vic-coord
+                                    :attacker att, :victim newvic
+                                    :damage dam}))]
+        (if (and newvic
+                 (board/in-attack-range? (:board newgame) vic-coord att-coord)
+                 (not counterattack))
+          (perform-attack newgame vic-coord att-coord :counterattack true)
+          newgame)))))

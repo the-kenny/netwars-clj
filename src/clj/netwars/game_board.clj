@@ -103,7 +103,7 @@
                                                         (:color (get-unit board c)))))))
 
 (defn reset-capture [board c]
-  {:pre [(capture-possible? board c)]}
+  {:pre [(aw-map/is-building? (get-terrain board c))]}
   (let [terrain (:terrain board)]
    (assoc board :terrain
           (aw-map/update-board terrain c
