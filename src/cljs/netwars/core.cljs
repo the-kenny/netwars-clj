@@ -120,11 +120,11 @@
                                :last-click-coord c))))))
 
 (defn register-handlers [canvas]
-  (event/listen canvas :click
+  (event/listen canvas "click"
                 (fn [event]
                   (clicked-on (game-drawer/canvas->coord
                                (aw-map/coord (.-offsetX event) (.-offsetY event))))))
-  (event/listen (dom/get-element :end-turn-button) :click
+  (event/listen (dom/get-element :end-turn-button) "click"
                 (fn [event]
                   (when @current-game
                     (swap! current-game aw-game/next-player))))
@@ -137,7 +137,7 @@
                                         (dissoc new :last-click-coord)
                                         last-click-coord)))))
 
-(register-handlers (dom/get-element :gameBoard))
+#_(register-handlers (dom/get-element :gameBoard))
 
 #_(reset! current-game netwars.test-games/basic-game)
 
@@ -155,6 +155,10 @@
                                         aw-game/map->AwGame)]
                            (reset! current-game game))
                          (logging/log "Loaded game."))))
+
+(defn ^:export start-game [game]
+  (register-handlers (dom/get-element :gameBoard))
+  (reset! current-game game))
 
 (defn repl-connect []
   (repl/connect "http://localhost:9000/repl"))
