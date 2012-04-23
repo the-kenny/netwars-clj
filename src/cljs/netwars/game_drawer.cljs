@@ -95,9 +95,11 @@
 
 (defn draw-attackable-units [canvas game callback]
   (when-let [selection (aw-game/selected-coordinate game)]
-    (highlight-squares (.getContext canvas "2d")
-                       (game-board/attack-range (:board game) selection)
-                       "rgba(255,0,0,0.6)"))
+    (let [targets (filter #(aw-game/attack-possible? game selection %)
+                          (game-board/attack-range (:board game) selection))]
+      (highlight-squares (.getContext canvas "2d")
+                         targets
+                         "rgba(50,50,50,0.6)")))
   (callback canvas game))
 
 (defn draw-game [canvas game]
