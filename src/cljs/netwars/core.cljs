@@ -31,6 +31,11 @@
 (def current-game (atom nil))
 (def current-action-menu (atom nil))
 
+(defn action-cancel []
+  ;; TODO: Should 'Cancel' deselect the unit?
+  #_(swap! current-game aw-game/deselect-unit)
+  (swap! current-action-menu menu/hide-menu))
+
 (defn unit-action-wait [game c]
   ;; TODO: Really make the unit wait
   (logging/log "Waiting...")
@@ -38,10 +43,9 @@
   ;; TODO: Dismissal shouldn't be done in every action-fn
   (swap! current-action-menu menu/hide-menu))
 
-
 (defn show-unit-action-menu [game c unit]
   (let [menu (unit-menu/unit-action-menu game c {:wait #(unit-action-wait game c)
-                                                 :cancel #(swap! current-action-menu menu/hide-menu)})]
+                                                 :cancel #(action-cancel)})]
     (menu/display-menu menu (dom/get-element :mapBox) (game-drawer/coord->canvas c))
     (reset! current-action-menu menu))
   ;; Return nil to indicate no re-draw is needed
@@ -58,7 +62,7 @@
 
 (defn show-attack-menu [game c]
   (let [menu (attack-menu/attack-menu game c {:attack #(attack-action-attack game c)
-                                              :cancel #(swap! current-action-menu menu/hide-menu)})]
+                                              :cancel #(action-cancel)})]
     (menu/display-menu menu (dom/get-element :mapBox) (game-drawer/coord->canvas c))
     (reset! current-action-menu menu))
   ;; Return nil to indicate no re-draw is needed
