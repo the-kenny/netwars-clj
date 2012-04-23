@@ -102,6 +102,20 @@
 
 ;;; Attacking
 
+(defn attack-range [board att-coord]
+  (let [att (get-unit board att-coord)
+        area (:range (unit/main-weapon att))
+        deltas (set (concat [0] area (map - area)))
+        possibilities (for [x deltas, y deltas]
+                        (aw-map/coord (+ (:x att-coord) x)
+                                      (+ (:y att-coord) y)))]
+    (-> (filter
+                #(and (contains? deltas (aw-map/distance att-coord %))
+                      (aw-map/in-bounds? (:terrain board) %))
+                possibilities)
+        set
+        (disj att-coord))))
+
 (defn in-attack-range? [board att-coord vic-coord]
   (let [dist (aw-map/distance att-coord vic-coord)
         att (get-unit board att-coord)

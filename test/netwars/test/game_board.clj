@@ -1,6 +1,6 @@
 (ns netwars.test.game-board
   (:use netwars.game-board
-        [netwars.aw-map :only [coord buildings]]
+        [netwars.aw-map :only [coord buildings distance]]
         clojure.test
         midje.sweet
         [clojure.set :as set]
@@ -48,6 +48,20 @@
      (is (in-attack-range? board (coord 4 13) (coord 3 14)))
      ;; Non-Range unit vs. unit right next to it
      (is (in-attack-range? board (coord 15 14) (coord 15 13))))))
+
+(deftest test-attack-range
+  (let [c (coord 1 8)                   ;Infantry
+        range (attack-range (make-testboard) c)]
+    (is (set? range))
+    (is (= 4 (count range)))
+    (is (every? #(= (distance c %) 1) range)))
+
+  ;; Artillery
+  (let [range (attack-range (make-testboard) (coord 1 11))]
+    (is (set? range))
+    (is (= 6 (count range))) ;shoule be 8, but two are outside of the map
+    (is (= (set (map coord [[1 14] [1 13] [1 9] [3 11] [1 8] [4 11]]))
+           range))))
 
 (deftest test-movement-range
   ;; Ugly... but correct
