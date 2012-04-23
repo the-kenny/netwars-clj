@@ -9,7 +9,7 @@
      (if-let [cached (get @cache file)]
        (callback cached)
        (let [image (js/Image.)]
-         (set! (.-onload image) callback)
+         (set! (.-onload image) #(callback image))
          (set! (.-src image) file)
          (swap! cache assoc file image)
          image)))))
@@ -18,7 +18,12 @@
 (load-tile-image tiles/+unit-tiles+      #(logging/log "tile loaded: unit"))
 (load-tile-image tiles/+unit-meta-tiles+ #(logging/log "tile loaded: unit-meta"))
 
-(defn draw-tile [context tile tile-path [dx dy] callback]
+(defn draw-tile [context
+                 tile
+                 tile-path
+                 [field-width field-height]
+                 [dx dy]
+                 callback]
   (if-let [rect (tiles/tile-rect tile tile-path)]
     (let [{sx :x, sy :y, width :width, height :height} rect]
       (load-tile-image tile
@@ -27,8 +32,11 @@
                                      image
                                      sx sy
                                      width height
-                                     dx dy
+                                     (- dx (- width field-width))
+                                     (- dy (- height field-height))
                                      width height)
-                         (when (fn? callback) (callback image)))))
-    (do (logging/log "Tile not found:" tile-path)
-        #_(callback nil))))
+                         (when (fn? callback) (callback)))))
+    (do (logging/log "Tile not found: " (if (sequential? tile-path)
+                                          (apply str (map str tile-path))
+                                          tile-path))
+        (when (fn? callback) (callback)))))

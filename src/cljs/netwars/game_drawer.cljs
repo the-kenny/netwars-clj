@@ -6,6 +6,8 @@
             [netwars.tile_drawer :as tile-drawer]
             [netwars.tiles :as tiles]
             [netwars.logging :as logging]
+            [netwars.map-renderer :as map-renderer]
+            [netwars.map-utils :as map-utils]
             [clojure.browser.dom :as dom]))
 
 (def +field-width+  16)
@@ -45,6 +47,32 @@
           nil)))))
 ;; (def load-terrain (memoize load-terrain*))
 
+;;; Functions to render maps
+
+;;; TODO: Callback?
+(defn- drawing-fn [context c path]
+  (let [cc (coord->canvas c)]
+    (tile-drawer/draw-tile context
+                           tiles/+terrain-tiles+
+                           path
+                           [+field-width+ +field-width+]
+                           [(:x cc) (:y cc)]
+                           ;; TODO: Render the next tile using this callback
+                           nil)))
+
+(defn- draw-map-background [context game callback]
+  (let [terrain-board (-> game :board :terrain)]
+    (doseq [x (range (aw-map/width terrain-board))
+            y (range (aw-map/height terrain-board))
+            :let [c (aw-map/coord x y)]]
+      (when-let [terr (aw-map/at terrain-board c)]
+        (map-renderer/draw-tile terr (map-utils/neighbours terrain-board c)
+                                #(drawing-fn context c %))))
+    (callback)))
+
+
+;;; General functions for drawing units, background etc.
+
 (defn- draw-unit-meta [context cc unit]
   (assert (meta unit))
   (when (< (:hp unit) (-> unit meta :hp))
@@ -53,18 +81,24 @@
                            [(nth [:one :two :three :four :five
                                   :six :seven :eight :nine]
                                  (dec (:hp unit)))]
-                           [(:x cc) (:y cc)]))
+                           [+field-width+ +field-width+]
+                           [(:x cc) (:y cc)]
+                           nil))
   (when (some aw-unit/low-ammo? (vals (aw-unit/available-weapons unit)))
     (tile-drawer/draw-tile context
                            tiles/+unit-meta-tiles+
                            [:ammo]
-                           [(:x cc) (:y cc)]))
+                           [+field-width+ +field-width+]
+                           [(:x cc) (:y cc)]
+                           nil))
   (when (and (aw-unit/can-transport? unit)
              (not (empty? (-> unit :transport :freight))))
     (tile-drawer/draw-tile context
                            tiles/+unit-meta-tiles+
                            [:loaded]
-                           [(:x cc) (:y cc)]))
+                           [+field-width+ +field-width+]
+                           [(:x cc) (:y cc)]
+                           nil))
   ;; TODO: fuel, capture, hidden
   )
 
@@ -73,6 +107,7 @@
    (tile-drawer/draw-tile context
                           tiles/+unit-tiles+
                           [(:color unit) (:internal-name unit)]
+                          [+field-width+ +field-width+]
                           [(:x cc) (:y cc)]
                           (fn [] (draw-unit-meta context cc unit)))))
 
@@ -92,12 +127,14 @@
     (when (fn? callback) (callback canvas game))))
 
 (defn- draw-terrain [canvas game callback]
-  (load-terrain (-> game :info :map-name)
-                (fn [image]
-                  (.drawImage (.getContext canvas "2d")
-                              image
-                              0 0)
-                  (callback canvas game))))
+  (draw-map-background (.getContext canvas "2d") game #(callback canvas game))
+  ;; (load-terrain (-> game :info :map-name)
+  ;;               (fn [image]
+  ;;                 (.drawImage (.getContext canvas "2d")
+  ;;                             image
+  ;;                             0 0)
+  ;;                 (callback canvas game)))
+  )
 
 (defn- draw-units [canvas game callback]
   (let [context (.getContext canvas "2d")]

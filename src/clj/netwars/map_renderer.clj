@@ -1,24 +1,24 @@
 (ns netwars.map-renderer
-  (:use netwars.aw-map
-        netwars.map-utils
-        netwars.map-loader
-        [clojure.java.io :only [resource]]))
+  (:require [netwars.aw-map :as aw-map]
+            [netwars.map-utils :as map-utils])
+  (:require;*CLJSBUILD-REMOVE*;-macros
+   [netwars.map-renderer-macro-hack :as macros]))
 
 (defmulti connectable? (fn [t1 _] t1))
 
-(defmacro defconnectable [t1 ts]
-  `(defmethod connectable? ~t1 [_# t2#]
-     (boolean (#{~@ts} t2#))))
+;; (defmacro defconnectable [t1 ts]
+;;   `(defmethod connectable? ~t1 [_# t2#]
+;;      (boolean (#{~@ts} t2#))))
 
-(defconnectable :street [:street :bridge])
-(defconnectable :pipe [:pipe :segment-pipe :wreckage :base])
-(defconnectable :segment-pipe [:pipe :segment-pipe :wreckage :base])
-(defconnectable :wreckage [:pipe :segment-pipe])
-(defconnectable :river [:river :bridge])
+(macros/defconnectable :street [:street :bridge])
+(macros/defconnectable :pipe [:pipe :segment-pipe :wreckage :base])
+(macros/defconnectable :segment-pipe [:pipe :segment-pipe :wreckage :base])
+(macros/defconnectable :wreckage [:pipe :segment-pipe])
+(macros/defconnectable :river [:river :bridge])
 
 ;;; Handle bridges, which are special in case of rivers
 (defmethod connectable? :bridge [_ t2]
-  (or (= t2 :bridge) (and (is-ground? t2) (not= t2 :river))))
+  (or (= t2 :bridge) (and (aw-map/is-ground? t2) (not= t2 :river))))
 
 ;; (defmethod connectable? :street [_ t2]
 ;;   (boolean (#{:street :bridge} t2)))
@@ -70,14 +70,14 @@ For example: [:pipe :uldr] or [:seaside :corner :dr]"
 
 ;;; Begin of section for orienting tiles
 
-(defmacro def-orientation-method
-  "An orientation method should return a list consisting of :u :l :d :r,
-  according to the applicable directions where this tile can be connected to."
-  [type [neighbours] & body]
-  `(defmethod draw-tile ~type [~'_ ~neighbours drawing-fn#]
-     (when-let [dirs# (do ~@body)]
-       (drawing-fn#
-        [~type (stringify-directions dirs#)]))))
+;; (defmacro def-orientation-method
+;;   "An orientation method should return a list consisting of :u :l :d :r,
+;;   according to the applicable directions where this tile can be connected to."
+;;   [type [neighbours] & body]
+;;   `(defmethod draw-tile ~type [~'_ ~neighbours drawing-fn#]
+;;      (when-let [dirs# (do ~@body)]
+;;        (drawing-fn#
+;;         [~type (stringify-directions dirs#)]))))
 
 (defn get-connectables-directions
   "Returns an vector of directions ([:north :south etc.]) to where the
@@ -88,22 +88,22 @@ For example: [:pipe :uldr] or [:seaside :corner :dr]"
               (conj acc o) acc))
           [] [:north :east :south :west]))
 
-(defmacro def-straighten-orientation-method [type]
-  `(def-orientation-method ~type [nbs#]
-     (let [dirseq# (get-connectables-directions connectable? ~type nbs#)]
-       ;; Streets have at least two endpoints (Special handling for :u and :d)
-       (cond
-        (or (= dirseq# [:north])
-            (= dirseq# [:south])) [:north :south]
-        (or (= dirseq# [:east])
-            (= dirseq# [:west])
-            (empty? dirseq#)) [:east :west]
-        true dirseq#))))
+;; (defmacro def-straighten-orientation-method [type]
+;;   `(def-orientation-method ~type [nbs#]
+;;      (let [dirseq# (get-connectables-directions connectable? ~type nbs#)]
+;;        ;; Streets have at least two endpoints (Special handling for :u and :d)
+;;        (cond
+;;         (or (= dirseq# [:north])
+;;             (= dirseq# [:south])) [:north :south]
+;;         (or (= dirseq# [:east])
+;;             (= dirseq# [:west])
+;;             (empty? dirseq#)) [:east :west]
+;;         true dirseq#))))
 
-(def-straighten-orientation-method :street)
-(def-straighten-orientation-method :river)
+(macros/def-straighten-orientation-method :street)
+(macros/def-straighten-orientation-method :river)
 
-(def-orientation-method :bridge [nbs]
+(macros/def-orientation-method :bridge [nbs]
   (if (or (connectable? :bridge (:north nbs))
           (connectable? :bridge (:south nbs)))
     [:north :south]
@@ -124,35 +124,35 @@ For example: [:pipe :uldr] or [:seaside :corner :dr]"
                                     :big
                                     :small)]))
 
-(def-straighten-orientation-method :pipe)
-(def-straighten-orientation-method :segment-pipe)
+(macros/def-straighten-orientation-method :pipe)
+(macros/def-straighten-orientation-method :segment-pipe)
 
-(def-orientation-method :beach [nbs]
-  (get-connectables-directions (fn [_ t] (is-ground? t)) :beach nbs))
+(macros/def-orientation-method :beach [nbs]
+  (get-connectables-directions (fn [_ t] (aw-map/is-ground? t)) :beach nbs))
 
-(defmacro river-mouth-cond [dir nbs]
-  `(and (= :river (~dir ~nbs))
-        (every? is-water?
-                (vals (select-keys ~nbs (rectangular-direction ~dir))))))
+;; (defmacro river-mouth-cond [dir nbs]
+;;   `(and (= :river (~dir ~nbs))
+;;         (every? aw-map/is-water?
+;;                 (vals (select-keys ~nbs (map-utils/rectangular-direction ~dir))))))
 
-(defmacro river-mouth-cond [dir nbs]
-  `(and (= :river (~dir ~nbs))
-        (every? is-water?
-                (vals  (drop-neighbours-behind
-                        (direction-complement ~dir)
-                        ~nbs)))))
+;; (defmacro river-mouth-cond [dir nbs]
+;;   `(and (= :river (~dir ~nbs))
+;;         (every? aw-map/is-water?
+;;                 (vals  (map-utils/drop-neighbours-behind
+;;                         (direction-complement ~dir)
+;;                         ~nbs)))))
 
 (defn- river-mouth [nbs drawing-fn]
   (when-let [dir (cond
-                  (river-mouth-cond :north nbs) :north
-                  (river-mouth-cond :south nbs) :south
-                  (river-mouth-cond :east nbs) :east
-                  (river-mouth-cond :west nbs) :west)]
+                  (macros/river-mouth-cond :north nbs) :north
+                  (macros/river-mouth-cond :south nbs) :south
+                  (macros/river-mouth-cond :east nbs) :east
+                  (macros/river-mouth-cond :west nbs) :west)]
         (drawing-fn [:river :mouth (stringify-directions [dir])])))
 
 (defn- seaside [nbs drawing-fn]
   (when-let [grounds (seq (get-connectables-directions
-                           (fn [_ t] (is-ground? t))
+                           (fn [_ t] (aw-map/is-ground? t))
                            :water nbs))]
     (drawing-fn [:seaside (stringify-directions grounds)])))
 
@@ -162,8 +162,8 @@ For example: [:pipe :uldr] or [:seaside :corner :dr]"
 (defn- seaside-corners [nbs drawing-fn]
   (doseq [inter-dir [:north-east :south-east :north-west :south-west]]
     (let [dirs (split-intercardinal-direction inter-dir)]
-      (when (and (is-ground? (get nbs inter-dir))
-                 (every? #(or (is-water? %)
+      (when (and (aw-map/is-ground? (get nbs inter-dir))
+                 (every? #(or (aw-map/is-water? %)
                               (= % :beach)) (map #(get nbs %) dirs)))
         (drawing-fn [:seaside :corner (stringify-directions dirs)])))))
 

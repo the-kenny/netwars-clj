@@ -20,6 +20,8 @@
                            netwars.damagecalculator
                            netwars.game-board
                            netwars.map-utils
+                           netwars.map-renderer
+                           netwars.map-renderer-macro-hack
                            netwars.path
                            netwars.tiles]
               :builds [{:source-path "src/cljs/"
