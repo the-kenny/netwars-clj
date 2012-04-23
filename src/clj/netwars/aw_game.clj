@@ -96,6 +96,14 @@
   [game]
   (:round-counter game))
 
+;;; Utility function to run when a unit is moved/removed
+
+(defn- check-capture-after-move [game c]
+  (let [board (:board game)]
+    (when-not (board/get-unit board)
+      (update-in game [:board]
+                 board/reset-capture c))))
+
 ;;; Attacking
 
 (defn attack-possible? [game att-coord vic-coord]
@@ -138,6 +146,7 @@
                                                                vic)))))]
       (let [newgame (-> game
                         (assoc :board newboard)
+                        (check-capture-after-move vic-coord)
                         (log-event {:type (if counterattack :counter-attack :attack)
                                     :from att-coord, :to vic-coord
                                     :attacker att, :victim newvic
@@ -147,6 +156,7 @@
                  (not counterattack))
           (perform-attack newgame vic-coord att-coord :counterattack true)
           newgame)))))
+
 
 ;;; Fuel Costs
 
@@ -193,6 +203,7 @@
   [game]
   (board/reachable-fields (:board game) (selected-coordinate game)))
 
+;;; TODO: Moving a capturing unit throws away the progress
 (defn move-unit
   "Moves the currently selected unit along `path`.
 `(last path)` must be in the current movement-range. Must be called in a transaction.
@@ -212,6 +223,7 @@ Returns path."
        (update-in [:board] board/update-unit from
                   update-in [:fuel] - fuel-costs)
        (update-in [:board] board/move-unit from to) ;Important: First use fuel, then move
+       (check-capture-after-move from)
        (log-event {:type :unit-moved
                    :from from
                    :to to

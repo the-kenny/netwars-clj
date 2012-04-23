@@ -3,9 +3,10 @@
         [netwars.aw-map :only [coord buildings distance]]
         clojure.test
         midje.sweet
-        [clojure.set :as set]
         [netwars.map-loader :only [load-map]]
-        [netwars.unit-loader :only [load-units]]))
+        [netwars.unit-loader :only [load-units]])
+  (:require [netwars.aw-unit :as unit]
+            [clojure.set :as set]))
 
 (defn make-testboard []
   (let [loaded-map (load-map "maps/7330.aws")
@@ -27,6 +28,18 @@
                             :terrain
                             (buildings)
                             ))))))
+
+(facts "about capture-possible?"
+  (let [board (make-testboard)
+        city-white (coord 1 1)
+        forest (coord 0 0)
+        infantry (get-unit board (coord 1 8))
+        newboard (-> board
+                     (add-unit city-white infantry)
+                     (add-unit forest infantry))]
+    (capture-possible? newboard city-white)         => true
+    (capture-possible? newboard forest)             => false
+    (capture-possible? (make-testboard) city-white) => false))
 
 (deftest test-remove-units
   (let [color :black]

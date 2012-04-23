@@ -55,6 +55,14 @@
   (capture-building [:city :white 4] 5 :red) => [:city :red]
   (capture-building [:city :white 5] 3 :red) => [:city :white 2])
 
+(facts "about capture-points"
+  (capture-points [:city :white 5]) => 5
+  (capture-points [:city :white])   => +building-capture-points+)
+
+(facts "about reset-capture-points"
+  (reset-capture-points [:city :white])   => [:city :white]
+  (reset-capture-points [:city :white 4]) => [:city :white])
+
 (facts "about is-terrain?"
   (doseq [t #{:plain :street :bridge :segment-pipe :river :beach :wreckage :pipe :mountain :forest :water :reef}]
     (is-terrain? t) => true))

@@ -101,6 +101,13 @@
                                                         (:hp (get-unit board c))
                                                         (:color (get-unit board c)))))))
 
+(defn reset-capture [board c]
+  {:pre [(capture-possible? board c)]}
+  (let [terrain (:terrain board)]
+   (assoc board :terrain
+          (aw-map/update-board terrain c
+                               (aw-map/reset-capture-points (get-terrain board c))))))
+
 ;;; Attacking
 
 (defn attack-range [board att-coord]
