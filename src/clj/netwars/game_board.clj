@@ -80,8 +80,11 @@
   {:pre [(aw-map/is-building? (get-terrain board c))]
    :post [(= color (second (get-terrain % c)))]}
   (let [terrain (:terrain board)]
-   (assoc board :terrain (aw-map/update-board terrain c
-                                                (assoc (get-terrain board c) 1 color)))))
+    (assoc board :terrain (aw-map/update-board terrain c
+                                               (let [[t c] (get-terrain board c)]
+                                                 (if (= [:headquarter :white] [t color])
+                                                   [:silo :white]
+                                                   [t color]))))))
 
 (defn neutralize-buildings [board color]
   (let [buildings (filter (fn [[c [typ col]]]

@@ -161,16 +161,12 @@ Mostly useful for drawing of maps."
    :port 3
    :lab 3
    :headquarter 4
-   :mountain 3})
+   :mountain 3
+   :silo 3})
 
-;;; TODO: Get rid of this silly [headquarter white] = missile thingy
 (defn defense-value [terrain]
   (let [[t c] (cond
                (keyword? terrain) [terrain]
                (is-building? terrain) terrain
                true [])]
-    (let [base (get +defense-values+ t 0)]
-      (if (and (= c :white)
-               (= t :headquarter))
-        (dec base)
-        base))))
+    (get +defense-values+ t 0)))

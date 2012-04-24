@@ -100,5 +100,5 @@
 
 (fact "about defense-value"
   (defense-value ...terrain...)           => integer?
-  (defense-value [:headquarter :white])   => 3
+  (defense-value [:silo :white])          => 3
   (defense-value [:headquarter anything]) => 4)
