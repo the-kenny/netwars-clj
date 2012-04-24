@@ -118,7 +118,10 @@
 
 (deftest test-attackable-targets
   (let [artillery (coord 1 11)
-        targets (-> *game* (select-unit artillery) attackable-targets)]
+        targets (-> *game*
+                    (next-player)       ;Artillery is blue
+                    (select-unit artillery)
+                    attackable-targets)]
     (is (set? targets))
     (is (= 3 (count targets)))
     (is (= targets (set (map coord [[1 8] [1 13] [4 11]]))))))
@@ -204,8 +207,14 @@
   (testing "on a clean game"
     (is (nil? (selected-unit *game*)) ":current-unit should be nil for a clean game"))
   (testing "after select-unit"
-    (is (not (nil? (-> *game* (select-unit (coord 1 11)) selected-unit)))
-        ":current-unit should be non-nil after select-unit")))
+    (is (not (nil? (-> *game*
+                       (select-unit (coord 2 11))
+                       selected-unit)))
+        ":current-unit should be non-nil after select-unit"))
+  (testing "when selecting a non-owned unit"
+    (is (thrown? java.lang.Error
+                 (select-unit *game* (coord 1 11)))
+        "an assertion should fail")))
 
 (deftest test-deselect-unit
   (is (thrown? java.lang.Error
