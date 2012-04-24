@@ -8,15 +8,26 @@
   </head>
 
   <body>
-    <div id="connectionIndicator" class="disconnected">
-      Disconnected...
-    </div>
+    <!-- <div id="connectionIndicator" class="disconnected">
+           Disconnected...
+         </div> -->
 
     <div id="normal">
-      <div id="mapBox">
-        <canvas id="gameBoard"></canvas>
-        <input type="button" id="end-turn-button" value="End Turn"/>
-      </div>
+      <table id="mapBox">
+        <tr>
+          <td rowspan="2">
+            <canvas id="gameBoard"></canvas>
+          </td>
+          <td id="controls">
+            Bla
+          </td>
+        </tr>
+        <tr>
+          <td valign="bottom">
+            <input type="button" id="end-turn-button" value="End Turn"/>
+          </td>
+        </tr>
+      </table>
 
 <!--
       <div id="sidebar">

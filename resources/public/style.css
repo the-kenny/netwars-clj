@@ -1,60 +1,71 @@
-#connectionIndicator {
-    z-index: 100;
-    width: 100pt;
-    position: fixed;
-    bottom: 0.3em;
-    right: 0.3em;
-    float: left;
-    text-align: right;
-    /* background-color: gray; */
-    border: 2pt solid black;
-}
-
-.disconnected {
-    background-color: red;
-}
-
-.connected {
-    background-color: #00ff00;
-}
-
 #normal {
     display: block;
     min-width: 560pt;
-}
-
-
-#sidebar {
-    right: 10pt;
-    vertical-align: top;
-    height: 200pt;
-    display: inline;
-    float: right;
-    background-color: #ff0000;
-    margin-bottom: 10pt;
-    border: 1pt solid black;
-    overflow: auto;
-}
-
-ul .gameLink {
-    font-size: small;
 }
 
 #gameBoard {
     background-color: #f00fff;
     border: 1pt solid black;
     float: left;
-    margin-bottom: 10pt;
+    /* margin-bottom: 10pt; */
 }
 
-#messageLog {
-    background-color: red;
-    width: 100%;
-    height: 100pt;
-    /* margin-top: 10pt; */
-    min-height 80pt;
-    /* position: absolute; */
-    overflow: auto;
-    border: 1pt solid black;
-    float: bottom;
+#controls {
+    height: 100%;
+    padding: 0;
 }
+
+#controls #end-turn-button {
+}
+
+/* #connectionIndicator { */
+/*     z-index: 100; */
+/*     width: 100pt; */
+/*     position: fixed; */
+/*     bottom: 0.3em; */
+/*     right: 0.3em; */
+/*     float: left; */
+/*     text-align: right; */
+/*     /\* background-color: gray; *\/ */
+/*     border: 2pt solid black; */
+/* } */
+
+/* .disconnected { */
+/*     background-color: red; */
+/* } */
+
+/* .connected { */
+/*     background-color: #00ff00; */
+/* } */
+
+
+
+/* #sidebar { */
+/*     right: 10pt; */
+/*     vertical-align: top; */
+/*     height: 200pt; */
+/*     display: inline; */
+/*     float: right; */
+/*     background-color: #ff0000; */
+/*     margin-bottom: 10pt; */
+/*     border: 1pt solid black; */
+/*     overflow: auto; */
+/* } */
+
+/* ul .gameLink { */
+/*     font-size: small; */
+/* } */
+
+
+
+/* #messageLog { */
+/*     background-color: red; */
+/*     width: 100%; */
+/*     height: 100pt; */
+/*     /\* margin-top: 10pt; *\/ */
+/*     min-height 80pt; */
+/*     /\* position: absolute; *\/ */
+/*     overflow: auto; */
+/*     border: 1pt solid black; */
+/*     float: bottom; */
+/* } */
