@@ -255,6 +255,7 @@ Returns path."
       (let [newgame (-> game
                         (assoc :board newboard)
                         (check-capture-after-move vic-coord)
+                        ;; TODO: Handle special case when vic is destroyed
                         (log-event {:type (if counterattack :counter-attack :attack)
                                     :from att-coord, :to vic-coord
                                     :attacker att, :victim newvic

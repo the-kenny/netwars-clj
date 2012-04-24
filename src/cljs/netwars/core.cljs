@@ -3,7 +3,7 @@
             [clojure.browser.dom :as dom]
             [clojure.browser.repl :as repl]
             [goog.dom.classes :as classes]
-            [goog.Timer :as Timer]
+            [goog.events :as gevents]
 
             [netwars.logging :as logging]
             [netwars.tiles :as tiles]
@@ -119,7 +119,15 @@
         (reset! current-game (assoc newgame
                                :last-click-coord c))))))
 
+(defn unregister-handlers [canvas]
+  (gevents/removeAll canvas)
+  (gevents/removeAll (dom/get-element :end-turn-button))
+  (remove-watch current-game :redrawer))
+
 (defn register-handlers [canvas]
+  ;; remove all handlers prior adding new
+  (unregister-handlers canvas)
+
   (event/listen canvas "click"
                 (fn [event]
                   (clicked-on (game-drawer/canvas->coord
