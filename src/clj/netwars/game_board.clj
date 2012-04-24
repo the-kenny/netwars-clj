@@ -96,6 +96,7 @@
   (let [unit (get-unit board c)
         terrain (get-terrain board c)]
     (and (aw-map/is-building? terrain)
+         (not= :silo (first terrain))
          (unit/can-capture? unit)
          (not= (:color unit)
                (second terrain)))))
