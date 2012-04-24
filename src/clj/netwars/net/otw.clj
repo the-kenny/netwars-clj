@@ -54,8 +54,8 @@
   (encode [m] (encode-map m))
   (decode [m] (decode-map m))
   clojure.lang.IPersistentSet
-  (encode [s] (with-meta (into #{} (map encode s)) (encode (meta s))))
-  (decode [s] (with-meta (into #{} (map decode s)) (decode (meta s))))
+  (encode [s] (with-meta (into (empty s) (map encode s)) (encode (meta s))))
+  (decode [s] (with-meta (into (empty s) (map decode s)) (decode (meta s))))
   UUID
   (encode [u] (str u))
   (decode [u] (assert nil "unimplemented"))

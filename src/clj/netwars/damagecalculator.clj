@@ -37,7 +37,7 @@
 
 ;;; TODO: Values in Advance Wars look more random
 (defn round-damage [damage]
-  (if (> (rem (Math/floor damage) 10) 0)
+  (if (pos? (rem (Math/floor damage) 10))
     (let [i (rem (Math/floor damage) 10)]
       (cond
        (> i 5) (* (Math/ceil (/ damage 10)) 10)

@@ -13,7 +13,7 @@
     (java.nio.ByteBuffer/wrap (.toByteArray bos))))
 
 (defn read-n-string [buf len]
-  (if (> len 0)
+  (if (pos? len)
    (let [arr (make-array Byte/TYPE len)]
      (.get buf arr)
      (apply str (map char  arr)))

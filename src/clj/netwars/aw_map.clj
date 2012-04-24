@@ -81,8 +81,8 @@ Building-values have the structure [building color] whereas normal terrains are 
      (nil? val) (if (= points +building-capture-points+)
                   [t new-color]
                   [t c (- +building-capture-points+ points)])
-     (<= (- val points) 0) [t new-color]
-     (>  (- val points) 0) [t c (- val points)])))
+     (<=    (- val points) 0) [t new-color]
+     (pos?  (- val points))   [t c (- val points)])))
 
 (defn capture-points [building]
   {:pre [(is-building? building)]}

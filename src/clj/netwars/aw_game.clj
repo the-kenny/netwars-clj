@@ -64,7 +64,7 @@
                                                   board (keys (:units board)))))
                     (log-event {:type :turn-completed
                                 :player (current-player game)}))]
-    (if (= 0 (:current-player-index newgame))
+    (if (zero? (:current-player-index newgame))
       (update-in newgame [:round-counter] inc)
       newgame)))
 

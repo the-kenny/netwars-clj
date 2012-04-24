@@ -66,7 +66,7 @@
 
 (defn apply-damage [u d]
   (let [newu (update-in u [:hp] - d)]
-    (when (> (:hp newu) 0)
+    (when (pos? (:hp newu))
       newu)))
 
 ;;; Transport Functions
