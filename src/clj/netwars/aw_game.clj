@@ -133,12 +133,14 @@
   [game]
   (board/get-unit (:board game) (:current-unit game)))
 
-;;; TODO: Make sure that only the current player can select units
 (defn select-unit
   "Sets the selected unit to unit at coordinate c."
   [game unit-coordinate]
   {:pre  [(-> game :board (board/get-unit unit-coordinate))]
    :post [(= unit-coordinate (:current-unit %))]}
+  (assert (= (:color (current-player game)
+                     (-> game :board (board/get-unit unit-coordinate) :color)))
+          "Players can only select their own units")
   (assoc game :current-unit unit-coordinate))
 
 (defn deselect-unit
@@ -192,7 +194,6 @@ Returns path."
     (-> game
         (update-in [:board] board/add-unit c unit)
         (update-player (:color player) player/spend-funds price)
-        ;; TODO: Logging
         (log-event {:type :bought-unit
                     :unit unit
                     :price price

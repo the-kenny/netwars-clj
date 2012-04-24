@@ -62,17 +62,6 @@
 (defn tile-filename [tile]
   (:tile-filename tile))
 
-;;; TODO: Find a better way to do this in ClojureScript
-
-;; (require '[clojure.java.io :as io])
-;; (import 'java.awt.image.BufferedImage
-;;         'java.awt.Graphics2D
-;;         'javax.imageio.ImageIO)
-;; (defn tile-path [tile]
-;;   (-> tile :tile-path io/resource io/file))
-;; (defn tile-image [tile]
-;;   (ImageIO/read (tile-path tile)))
-
 (defn tile-rect [tile path]
   (when-let [c (get-in tile [:tile-spec (vec path)])]
     (let [[width height] (:tile-size tile)]

@@ -32,7 +32,6 @@
 (def current-action-menu (atom nil))
 
 (defn action-cancel []
-  ;; TODO: Should 'Cancel' deselect the unit?
   (swap! current-game aw-game/deselect-unit)
   (swap! current-action-menu menu/hide-menu))
 
@@ -40,7 +39,6 @@
 ;;   ;; TODO: Really make the unit wait
 ;;   (logging/log "Waiting...")
 ;;   (swap! current-game #(aw-game/deselect-unit))
-;;   ;; TODO: Dismissal shouldn't be done in every action-fn
 ;;   (swap! current-action-menu menu/hide-menu))
 
 (defn unit-action-capture [game c]
@@ -48,6 +46,7 @@
   (swap! current-game #(-> %
                            (aw-game/capture-building c)
                            aw-game/deselect-unit))
+  ;; TODO: Dismissal shouldn't be done in every action-fn
   (swap! current-action-menu menu/hide-menu))
 
 (defn show-unit-action-menu [game c unit]
@@ -88,7 +87,6 @@
   (when-let [att-coord (aw-game/selected-coordinate game)]
     (when (aw-game/attack-possible? game att-coord c)
       (logging/log "Attack!")
-      ;; TODO: Show attack menu
       (show-attack-menu game c))))
 
 (defn unit-clicked [game c]
