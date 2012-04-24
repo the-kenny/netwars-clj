@@ -81,7 +81,8 @@
    (cond
     ;; Bug: (= c null) => crash; (= null c) => false
     (= (aw-game/selected-coordinate game) c) (show-unit-action-menu game c unit)
-    (not (:moved unit))                      (aw-game/select-unit   game c))))
+    (and (nil? (aw-game/selected-unit game))
+         (not (:moved unit)))                (aw-game/select-unit   game c))))
 
 (defn enemy-unit-clicked [game c unit]
   (when-let [att-coord (aw-game/selected-coordinate game)]
