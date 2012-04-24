@@ -75,7 +75,7 @@
 
 ;;; General functions for drawing units, background etc.
 
-(defn- draw-unit-meta [context cc unit]
+(defn- draw-unit-meta [context cc unit terrain]
   (assert (meta unit))
   (when (< (:hp unit) (-> unit meta :hp))
     (tile-drawer/draw-tile context
@@ -101,8 +101,16 @@
                            [+field-width+ +field-width+]
                            [(:x cc) (:y cc)]
                            nil))
-  ;; TODO: fuel, capture, hidden
-  )
+  ;; TODO: fuel, hidden
+  (when (and (aw-map/is-building? terrain)
+             (not= (aw-map/capture-points terrain)
+                   aw-map/+building-capture-points+))
+    (tile-drawer/draw-tile context
+                           tiles/+unit-meta-tiles+
+                           [:minus]
+                           [+field-width+ +field-height+]
+                           [(:x cc) (:y cc)]
+                           nil)))
 
 (defn- highlight-squares [context cs color]
   (.save context)
@@ -112,9 +120,10 @@
     (.fillRect context x y +field-width+ +field-height+))
   (.restore context))
 
-(defn- draw-unit [context c unit]
+(defn- draw-unit [context game c unit]
   (let [cc (coord->canvas c)            ;canvas coordinate
         path [(:color unit) (:internal-name unit)]
+        terrain (game-board/get-terrain (:board game) c)
         cont (fn []
                (when (:moved unit)
                      (let [unit-canvas (dom/element :canvas)
@@ -136,7 +145,7 @@
                            path
                            [+field-width+ +field-width+]
                            [(:x cc) (:y cc)]
-                           (fn [] (cont) (draw-unit-meta context cc unit)))))
+                           (fn [] (cont) (draw-unit-meta context cc unit terrain)))))
 
 (defn- prepare-canvas [canvas game callback]
   (let [width (aw-map/width (-> game :board :terrain))
@@ -188,7 +197,7 @@
 (defn- draw-units [canvas game callback]
   (let [context (.getContext canvas "2d")]
     (doseq [[c u] (-> game :board :units)]
-      (draw-unit context c u)))
+      (draw-unit context game c u)))
   (when (fn? callback) (callback canvas game)))
 
 (defn draw-selected-unit [canvas game callback]
