@@ -138,8 +138,8 @@
   [game unit-coordinate]
   {:pre  [(-> game :board (board/get-unit unit-coordinate))]
    :post [(= unit-coordinate (:current-unit %))]}
-  (assert (= (:color (current-player game)
-                     (-> game :board (board/get-unit unit-coordinate) :color)))
+  (assert (= (:color (current-player game))
+             (-> game :board (board/get-unit unit-coordinate) :color))
           "Players can only select their own units")
   (assoc game :current-unit unit-coordinate))
 
