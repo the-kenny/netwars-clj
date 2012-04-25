@@ -28,9 +28,6 @@
     (decode (meta o))))
 
 (extend-protocol Sendable
-  aw-map/Coordinate
-  (encode [c] (with-meta (list 'coord (:x c) (:y c)) (encode (meta c))))
-  (decode [o] o)
   List
   (encode [s] (encode-seq s))
   (decode [s] (decode-seq s))
@@ -39,7 +36,9 @@
   (decode [s] (decode-seq s))
   EmptyList
   (encode [s] (encode-seq s))
-  (decode [s] (decode-seq s))
+  (decode [s] (decode-seq s)))
+
+(extend-protocol Sendable
   PersistentHashMap
   (encode [m] (encode-map m))
   (decode [m] (decode-map m))
@@ -51,10 +50,19 @@
   (decode [m] (decode-map m))
   ObjMap
   (encode [m] (encode-map m))
-  (decode [m] (decode-map m))
+  (decode [m] (decode-map m)))
+
+(extend-protocol Sendable
   Set
   (encode [s] (with-meta (into #{} (map encode s)) (encode (meta s))))
-  (decode [o] (with-meta (into #{} (map decode o)) (decode (meta o))))
+  (decode [o] (with-meta (into #{} (map decode o)) (decode (meta o)))))
+
+(extend-protocol Sendable
+  aw-map/Coordinate
+  (encode [c] (with-meta (list 'coord (:x c) (:y c)) (encode (meta c))))
+  (decode [o] o))
+
+(extend-protocol Sendable
   boolean
   (encode [o] o)
   (decode [o] o)
