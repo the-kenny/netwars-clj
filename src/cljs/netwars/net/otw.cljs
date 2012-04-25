@@ -40,7 +40,12 @@
   EmptyList
   (encode [s] (encode-seq s))
   (decode [s] (decode-seq s))
-
+  PersistentHashMap
+  (encode [m] (encode-map m))
+  (decode [m] (decode-map m))
+  PersistentTreeMap
+  (encode [m] (encode-map m))
+  (decode [m] (decode-map m))
   HashMap
   (encode [m] (encode-map m))
   (decode [m] (decode-map m))

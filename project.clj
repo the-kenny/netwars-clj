@@ -11,7 +11,9 @@
   :exclusions [org.clojure/clojure
                swank-clojure/swank-clojure]
   :extra-files-to-clean ["resoures/public/netwars.js"]
-  :source-paths ["src/clj/"]
+  :source-paths ["src/clj/"
+                 "checkouts/clojurescript/src/clj"
+                 "checkouts/clojurescript/src/cljs"]
   ;; :main netwars.core
   :cljsbuild {:crossovers [netwars.aw-game
                            netwars.aw-map
@@ -30,5 +32,6 @@
                          :pretty-print true
                          :optimizations :whitespace}}]}
   :profiles {:dev {:dependencies [[midje "1.3.1"]]
-                   :plugins [[org.clojars.the-kenny/lein-midje "1.0.9"]]}}
+                   :plugins [[org.clojars.the-kenny/lein-midje "1.0.9"]]}
+             :no-cljs-head {:source-paths ["src/clj/"]}}
   :plugins [[lein-cljsbuild "0.1.8"]])
