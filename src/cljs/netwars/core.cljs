@@ -75,14 +75,24 @@
   ;; Return nil to indicate no re-draw is needed
   nil)
 
+(defn show-unit-info [unit]
+  (dom/set-text (dom/get-element :unit-hp)   (str (:hp unit)
+                                                  "/"
+                                                  (:hp (meta unit))))
+  (dom/set-text (dom/get-element :unit-fuel) (str (:fuel unit)
+                                                  "/"
+                                                  (:max-fuel-level (meta unit))))
+  (dom/set-properties (dom/get-element :unit-details) {"style" "visibility:visible;"}))
+
+(defn hide-unit-info []
+  (dom/set-properties (dom/get-element :unit-details) {"style" "visibility:hidden;"}))
 
 (defn own-unit-clicked [game c unit]
-  (let [unit (game-board/get-unit (:board game) c)]
-   (cond
-    ;; Bug: (= c null) => crash; (= null c) => false
-    (= (aw-game/selected-coordinate game) c) (show-unit-action-menu game c unit)
-    (and (nil? (aw-game/selected-unit game))
-         (not (:moved unit)))                (aw-game/select-unit   game c))))
+  (cond
+   ;; Bug: (= c null) => crash; (= null c) => false
+   (= (aw-game/selected-coordinate game) c) (show-unit-action-menu game c unit)
+   (and (nil? (aw-game/selected-unit game))
+        (not (:moved unit)))                (aw-game/select-unit   game c)))
 
 (defn enemy-unit-clicked [game c unit]
   (when-let [att-coord (aw-game/selected-coordinate game)]
@@ -142,7 +152,10 @@
                (let [last-click-coord (:last-click-coord new)]
                  (game-drawer/draw-game canvas
                                         (dissoc new :last-click-coord)
-                                        last-click-coord)))))
+                                        last-click-coord)
+                 (if-let [unit (aw-game/selected-unit new)]
+                   (show-unit-info unit)
+                   (hide-unit-info))))))
 
 #_(register-handlers (dom/get-element :gameBoard))
 
