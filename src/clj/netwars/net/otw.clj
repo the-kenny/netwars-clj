@@ -32,23 +32,22 @@
     (encode (meta o))))
 
 (defn- decode-seq [o]
-  (with-meta
-    (if (and (sequential? o)
-             (= 3 (count o))
-             (= 'coord (first o)))
-      (coord (rest o))
-      (map decode o))
+  (with-meta (map decode o)
     (decode (meta o))))
 
 (extend-protocol Sendable
   Coordinate
-  (encode [c] (with-meta (list 'coord (:x c) (:y c)) (encode (meta c))))
+  (encode [c] (list 'coord (:x c) (:y c)))
   (decode [o] o)
   clojure.lang.IRecord
   (encode [v] (encode-map v))
   (decode [v] (decode-map v))
   clojure.lang.ISeq
-  (encode [v] (into (empty v) (encode-seq v)))
+  (encode [v] (if (and (sequential? v)
+                       (= 3 (count v))
+                       (= 'coord (first v)))
+                (coord (rest v))
+                (into (empty v) (encode-seq v))))
   (decode [v] (into (empty v) (decode-seq v)))
   clojure.lang.IPersistentMap
   (encode [m] (encode-map m))

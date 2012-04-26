@@ -20,12 +20,11 @@
   (with-meta (map encode v) (encode (meta v))))
 
 (defn- decode-seq [o]
-  (with-meta
-    (if (and (= 3 (count o))
-             (= 'coord (first o)))
-      (aw-map/coord (rest o))
-      (into (empty o) (map decode o)))
-    (decode (meta o))))
+  (if (and (= 3 (count o))
+           (= 'coord (first o)))
+    (aw-map/coord (rest o))
+    (with-meta (into (empty o) (map decode o))
+      (decode (meta o)))))
 
 (extend-protocol Sendable
   List
@@ -59,7 +58,7 @@
 
 (extend-protocol Sendable
   aw-map/Coordinate
-  (encode [c] (with-meta (list 'coord (:x c) (:y c)) (encode (meta c))))
+  (encode [c] (list 'coord (:x c) (:y c)))
   (decode [o] o))
 
 (extend-protocol Sendable

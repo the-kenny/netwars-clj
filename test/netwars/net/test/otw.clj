@@ -19,7 +19,8 @@
   (let [m {:foo 42
            :string "str"}
         encoded-m (encode m)
-        data  {:coord (netwars.aw-map/coord 1 2)
+        data  {;; :coord (netwars.aw-map/coord 1 2)
+               :map {:foo 42 :bar 23}
                :vec [23 42 1337]
                :set #{1 2 3}}]
     (doseq [d (vals data) :let [dwm (with-meta d m)]]
