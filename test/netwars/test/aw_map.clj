@@ -6,8 +6,13 @@
 
 (deftest Coordinate
   (let [c (coord 2 3)]
-    (is (= (:x c) 2) "has an x component of 2")
-    (is (= (:y c) 3) "has an y component of 3")))
+    (testing "property access"
+      (is (= (:x c) 2) "has an x component of 2")
+      (is (= (:y c) 3) "has an y component of 3"))
+    (testing "destructuring"
+      (let [[x y] c]
+        (is (= x 2) "has an x component of 2")
+        (is (= y 3) "has an y component of 3")))))
 
 (deftest test-coordinate?
   (is (coord? (coord 1 2)) "returns true for a Coordinate")

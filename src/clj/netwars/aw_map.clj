@@ -8,7 +8,28 @@
 ;; The rest of this namespace contains various functions for storing terrain data.
 
 
-(defrecord Coordinate [x y])
+(deftype Coordinate [x y]
+  clojure.lang.Indexed
+  (nth [s i not-found]
+    (case i
+      0 x
+      1 y
+      not-found))
+  (nth [s i]
+    (nth s i nil))
+
+  clojure.lang.ILookup
+  (valAt [s k not-found]
+    (case k
+      :x x, :y y
+      not-found))
+  (valAt [s k]
+    (case k
+      :x x, :y y
+      nil))
+
+  Object
+  (toString [[x y]] (str "(coord " x " " y ")")))
 
 (defn coord
   "Creates a coordinate from a x and a y value. x and y are coerced to int"
@@ -21,14 +42,14 @@
   (instance? Coordinate c))
 
 (when clojure.core/print-method
-  (defmethod clojure.core/print-method ::Coordinate [c ^java.io.Writer writer]
-    (.write writer (str "[" (:x c) "," (:y c) "]"))))
+  (defmethod clojure.core/print-method ::Coordinate [[x y] ^java.io.Writer writer]
+    (.write writer (str "[" y "," x "]"))))
 
 (defn distance
   "Manhattan metric distance between coordinates"
-  [c1 c2]
-  (+ (Math/abs (- (:x c2) (:x c1)))
-     (Math/abs (- (:y c2) (:y c1)))))
+  [[x1 y1] [x2 y2]]
+  (+ (Math/abs (- x2 x1))
+     (Math/abs (- y2 y1))))
 
 ;; (defn distance
 ;;  "Euclidean distance between 2 points"
@@ -44,16 +65,16 @@
 
 (defn in-bounds?
   "Checks if a coordinate are in the bounds of b. b must implement the Board protocol."
-  [b ^Coordinate c]
-  (and (< -1 (:x c) (width b))
-       (< -1 (:y c) (height b))))
+  [b ^Coordinate [x y]]
+  (and (< -1 x (width b))
+       (< -1 y (height b))))
 
 (defrecord TerrainBoard [width height data]
   Board
   (width [t] (:width t))
   (height [t] (:height t))
-  (at [t c] (get-in t [:data (:x c) (:y c)]))
-  (update-board [t c v] (assoc-in t [:data (:x c) (:y c)] v)))
+  (at [t [x y]] (get-in t [:data x y]))
+  (update-board [t ^Coordinate [x y] v] (assoc-in t [:data x y] v)))
 
 ;;; TODO: Specify `data`
 (defn make-terrain-board
