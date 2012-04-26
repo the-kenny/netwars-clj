@@ -4,7 +4,7 @@
 ;;; TODO: Simplify
 (defn neighbours [terrain c]
   (let [msta #(aw-map/at terrain (aw-map/coord %1 %2))
-        x (:x c) y (:y c)]
+        [x y] c]
    (hash-map
     :north (msta x (dec y))
     :east (msta (inc x) y)

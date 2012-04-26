@@ -52,11 +52,11 @@
 (defrecord TileRect [x y width height])
 
 (defn coord->TileRect
-  ([c width height]
-     (TileRect. (:x c) (:y c) width height))
+  ([[x y] width height]
+     (TileRect. x y width height))
   ([c] (coord->TileRect c 0 0)))
 
-(defn origin [ta]
+(defn origin [^TileRect ta]
   (coord (:x ta) (:y ta)))
 
 (defn tile-filename [tile]

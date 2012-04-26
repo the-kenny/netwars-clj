@@ -20,6 +20,19 @@
 (deftest test-game-board
   (is (instance? netwars.game_board.GameBoard (make-testboard))))
 
+(def artillery-coord (coord 1 11))
+(def infantry-coord (coord 1 13))
+(def empty-coord (coord 0 0))
+
+(facts "about get-unit"
+  (get-unit (make-testboard) infantry-coord)  => unit/is-unit?
+  (get-unit (make-testboard) artillery-coord) => unit/is-unit?
+  (get-unit (make-testboard) empty-coord)     => nil)
+
+(facts "about get-terrain"
+  (get-terrain (make-testboard) (coord 0 0)) => :forest
+  (get-terrain (make-testboard) (coord 1 1)) => [:city :white])
+
 (deftest test-neutralize-buildings
   (let [color :black]
     (is (empty? (filter (fn [[_ [t c]]] (= c color))
@@ -47,9 +60,6 @@
                         (-> (make-testboard)
                             (remove-units color)
                             :units))))))
-
-(def artillery-coord (coord 1 11))
-(def infantry-coord (coord 1 13))
 
 (deftest test-attack-functions
   (let [board (make-testboard)]

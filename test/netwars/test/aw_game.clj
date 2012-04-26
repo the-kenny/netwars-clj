@@ -109,7 +109,7 @@
 
 (deftest test-attack-possible
     (let [artillery (coord 1 11)
-          infantry (coord 1 13)]
+          infantry  (coord 1 13)]
       (is (attack-possible? *game* artillery infantry))
       (is (not (attack-possible? *game* infantry artillery)))
 
@@ -137,7 +137,7 @@
 
 (deftest test-perform-attack
   (let [artillery (coord 1 11)
-        infantry (coord 1 13)]
+        infantry  (coord 1 13)]
     (is (= 10 (:hp (board/get-unit (:board *game*) artillery))))
     (is (= 10 (:hp (board/get-unit (:board *game*) infantry))))
     (let [*game* (perform-attack *game* artillery infantry)]

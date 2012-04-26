@@ -125,9 +125,10 @@
                     (map :range (vals (unit/available-weapons att))))
         max-range (reduce max area)
         r (range (- max-range) (inc max-range))
+        [att-x att-y] att-coord
         possibilities (for [x r, y r]
-                        (aw-map/coord (+ (:x att-coord) x)
-                                      (+ (:y att-coord) y)))]
+                        (aw-map/coord (+ att-x x)
+                                      (+ att-y y)))]
     (-> (filter
          #(and (contains? area (aw-map/distance att-coord %))
                (aw-map/in-bounds? (:terrain board) %))

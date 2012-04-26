@@ -15,17 +15,17 @@
 
 (defn canvas->coord
   "Converts canvas coordinates to netwars coordinates"
-  [c]
-  (aw-map/coord (Math/floor (/ (:x c)
+  [[x y]]
+  (aw-map/coord (Math/floor (/ x
                                +field-width+))
-                (Math/floor (/ (:y c)
+                (Math/floor (/ y
                                +field-height+))))
 
 (defn coord->canvas
   "Converts netwars coordinates to canvas coordinates"
-  ([c center?]
-     (let [x (:x c)
-           y (:y c)
+  ([[x y] center?]
+     (let [x x
+           y y
            xn (* x +field-width+)
            yn (* y +field-height+)]
        (apply aw-map/coord
@@ -54,7 +54,7 @@
                            tiles/+terrain-tiles+
                            path
                            [+field-width+ +field-width+]
-                           [(:x cc) (:y cc)]
+                           cc
                            ;; TODO: Render the next tile using this callback
                            nil)))
 
@@ -86,14 +86,14 @@
                                   :six :seven :eight :nine]
                                  (dec (:hp unit)))]
                            [+field-width+ +field-width+]
-                           [(:x cc) (:y cc)]
+                           cc
                            nil))
   (when (some aw-unit/low-ammo? (vals (aw-unit/available-weapons unit)))
     (tile-drawer/draw-tile context
                            tiles/+unit-meta-tiles+
                            [:ammo]
                            [+field-width+ +field-width+]
-                           [(:x cc) (:y cc)]
+                           cc
                            nil))
   (when (and (aw-unit/can-transport? unit)
              (not (empty? (-> unit :transport :freight))))
@@ -101,7 +101,7 @@
                            tiles/+unit-meta-tiles+
                            [:loaded]
                            [+field-width+ +field-width+]
-                           [(:x cc) (:y cc)]
+                           cc
                            nil))
   ;; TODO: fuel, hidden
   (when (and (aw-map/is-building? terrain)
@@ -111,7 +111,7 @@
                            tiles/+unit-meta-tiles+
                            [:minus]
                            [+field-width+ +field-height+]
-                           [(:x cc) (:y cc)]
+                           cc
                            nil)))
 
 (defn- highlight-squares [context cs color]
@@ -130,7 +130,8 @@
                (when (:moved unit)
                      (let [unit-canvas (dom/element :canvas)
                            unit-context (.getContext unit-canvas "2d")
-                           unit-tile-area (tiles/tile-rect tiles/+unit-tiles+ path)]
+                           unit-tile-area (tiles/tile-rect tiles/+unit-tiles+ path)
+                           [cx cy] cc]
                        (set! (.-width unit-canvas) (:width unit-tile-area))
                        (set! (.-height unit-canvas) (:width unit-tile-area))
                        (tile-drawer/draw-tile unit-context
@@ -141,12 +142,12 @@
                                               nil)
                        (set! (.-globalCompositeOperation unit-context) "source-in")
                        (highlight-squares unit-context [(aw-map/coord 0 0)] "rgba(0,0,0,0.4)")
-                       (.drawImage context unit-canvas (:x cc) (:y cc)))))]
+                       (.drawImage context unit-canvas cx cy))))]
     (tile-drawer/draw-tile context
                            tiles/+unit-tiles+
                            path
                            [+field-width+ +field-width+]
-                           [(:x cc) (:y cc)]
+                           cc
                            (fn [] (cont) (draw-unit-meta context cc unit terrain)))))
 
 (defn- prepare-canvas [canvas game callback]

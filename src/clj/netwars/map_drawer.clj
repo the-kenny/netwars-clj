@@ -27,7 +27,7 @@
   (if-let [area (tiles/tile-rect tiles/+terrain-tiles+
                                  path)]
     (let [{sx :x, sy :y, width :width, height :height} area
-          {dx :x, dy :y} c
+          [dx dy] c
           image (terrain-tile-image)]
       (.drawImage graphics
                   image
