@@ -29,7 +29,13 @@
       nil))
 
   Object
-  (toString [[x y]] (str "(coord " x " " y ")")))
+  (toString [[x y]] (str "(coord " x " " y ")"))
+  (hashCode [s] (* (+ (* 17 (hash x)) (hash y)) 54))
+  (equals [s o]
+    (and
+     (instance? Coordinate o)
+     (= x (:x o))
+     (= y (:y o)))))
 
 (defn coord
   "Creates a coordinate from a x and a y value. x and y are coerced to int"
