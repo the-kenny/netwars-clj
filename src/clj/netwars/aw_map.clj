@@ -8,25 +8,35 @@
 ;; The rest of this namespace contains various functions for storing terrain data.
 
 
+;;; TODO: Replace condp with case when Clojurescript supports it
 (deftype Coordinate [x y]
   clojure.lang.Indexed
   (nth [s i not-found]
-    (case i
-      0 x
-      1 y
-      not-found))
+    (condp = i
+      0 x, 1 y
+      not-found)
+    ;; (case i
+    ;;   0 x
+    ;;   1 y
+    ;;   not-found)
+    )
   (nth [s i]
     (nth s i nil))
 
   clojure.lang.ILookup
   (valAt [s k not-found]
-    (case k
+    ;; (case k
+    ;;   :x x, :y y
+    ;;   not-found)
+    (condp = k
       :x x, :y y
       not-found))
   (valAt [s k]
-    (case k
-      :x x, :y y
-      nil))
+    ;; (case k
+    ;;   :x x, :y y
+    ;;   nil)
+    (condp = k
+      :x x, :y y))
 
   Object
   (toString [[x y]] (str "(coord " x " " y ")"))
