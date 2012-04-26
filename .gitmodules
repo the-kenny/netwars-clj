@@ -1,3 +1,0 @@
-[submodule "checkouts/clojurescript"]
-	path = checkouts/clojurescript
-	url = https://github.com/clojure/clojurescript.git

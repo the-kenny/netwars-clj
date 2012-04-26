@@ -39,12 +39,12 @@
   (decode [s] (decode-seq s)))
 
 (extend-protocol Sendable
-  PersistentHashMap
-  (encode [m] (encode-map m))
-  (decode [m] (decode-map m))
-  PersistentTreeMap
-  (encode [m] (encode-map m))
-  (decode [m] (decode-map m))
+  ;; PersistentHashMap
+  ;; (encode [m] (encode-map m))
+  ;; (decode [m] (decode-map m))
+  ;; PersistentTreeMap
+  ;; (encode [m] (encode-map m))
+  ;; (decode [m] (decode-map m))
   HashMap
   (encode [m] (encode-map m))
   (decode [m] (decode-map m))
