@@ -39,7 +39,7 @@
       :x x, :y y))
 
   Object
-  (toString [[x y]] (str "(coord " x " " y ")"))
+  (toString [s] (str "(coord " x " " y ")"))
   (hashCode [s] (* (+ (* 17 (hash x)) (hash y)) 54))
   (equals [s o]
     (and
