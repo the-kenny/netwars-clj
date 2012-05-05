@@ -7,7 +7,8 @@
                  [log4j/log4j "1.2.16"]
                  [clj-logging-config "1.9.6"]
                  [compojure "1.0.1"]
-                 [ring/ring-devel "1.0.1"]]
+                 [hiccup "1.0.0"]
+                 [ring/ring-devel "1.1.0"]]
   :exclusions [org.clojure/clojure
                swank-clojure/swank-clojure]
   :extra-files-to-clean ["resoures/public/netwars.js"]
