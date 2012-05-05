@@ -149,7 +149,7 @@
   (.log js/console game)
   (cond
    (and (:current-path game)
-        (nil? (aw-game/selected-coordinate game))) (recur (dissoc game :current-path))
+        (:moved (aw-game/selected-unit game))) (recur (dissoc game :current-path))
    true game))
 
 (defn clicked-on

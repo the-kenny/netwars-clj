@@ -206,10 +206,12 @@
 (defn draw-selected-unit [canvas game callback]
   (when-let [unit (aw-game/selected-unit game)]
     (let [context (.getContext canvas "2d")
-          selected-coord (aw-game/selected-coordinate game)]
-      (highlight-squares context
-                         (disj (aw-game/movement-range game) selected-coord)
-                         "rgba(255, 0, 0, 0.4)")
+          selected-coord (aw-game/selected-coordinate game)
+          selected-unit  (aw-game/selected-unit game)]
+      (when-not (:moved selected-unit)
+       (highlight-squares context
+                          (disj (aw-game/movement-range game) selected-coord)
+                          "rgba(255, 0, 0, 0.4)"))
       (highlight-squares context [selected-coord] "rgba(0, 0, 0, 0.3)")))
   (when (fn? callback) (callback canvas game)))
 
