@@ -3,6 +3,7 @@
             [netwars.aw-map :as aw-map]
             [netwars.aw-unit :as aw-unit]
             [netwars.game-board :as game-board]
+            [netwars.pathfinding :as pathfinding]
             [netwars.tile_drawer :as tile-drawer]
             [netwars.tiles :as tiles]
             [netwars.logging :as logging]
@@ -220,6 +221,30 @@
                          "rgba(50,50,50,0.6)")))
   (when (fn? callback) (callback canvas game)))
 
+(defn draw-path [canvas game callback]
+  (when-let [path (:current-path game)]
+    (let [context (.getContext canvas "2d")
+          canvas-path (map #(coord->canvas % true) (pathfinding/elements path))]
+      (.beginPath context)
+      (set! (.-strokeStyle context) "rgba(0,0,0,0.5)")
+      (set! (.-lineWidth context) 4)
+      (set! (.-lineCap  context) "round")
+      (set! (.-lineJoin context) "round")
+      (let [c (first canvas-path)]
+        (.moveTo context (:x c) (:y c)))
+      (doseq [c (rest canvas-path)]
+        (.lineTo context (:x c) (:y c)))
+      (.stroke context)
+      (.beginPath context)
+      (let [end (last canvas-path)]
+        (.arc context
+              (:x end) (:y end)
+              2.0
+              0
+              (* 2 Math/PI)))
+      (.stroke context)))
+  (when (fn? callback) (callback canvas game)))
+
 (defn draw-game [canvas game & [last-clicked-coord]]
   (prepare-canvas canvas game
                   (fn [canvas game]
@@ -232,7 +257,10 @@
                           (draw-selected-unit
                            canvas game
                            (fn [canvas game]
-                             (draw-attackable-units
+                             (draw-path
                               canvas game
-                              #(logging/log "Drawing finished!")))))))
+                              (fn [canvas game]
+                                (draw-attackable-units
+                                 canvas game
+                                 #(logging/log "Drawing finished!")))))))))
                      last-clicked-coord))))

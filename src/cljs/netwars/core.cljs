@@ -164,11 +164,13 @@
         current-path (:current-path game)]
     ;; TODO: We need movement-range here
     (when (and game current-unit current-path)
-      (pathfinding/update-path! current-path
-                                (aw-game/movement-range game)
-                                c
-                                (-> game :board :terrain)
-                                current-unit))))
+      (when (pathfinding/update-path! current-path
+                                      (aw-game/movement-range game)
+                                      c
+                                      (-> game :board :terrain)
+                                      current-unit)
+        ;; Hack: Redraw the game (there should be a fn for this)
+        (reset! current-game game)))))
 
 (let [last-coord (atom nil)]
  (defn ^:private mouse-moved-internal [event]
