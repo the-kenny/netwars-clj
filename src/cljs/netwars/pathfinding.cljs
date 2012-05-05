@@ -1,6 +1,7 @@
 (ns netwars.pathfinding
   (:require [netwars.logging :as logging]
             [netwars.aw-map :as aw-map]
+            [netwars.path :as aw-path]
             [clojure.set :as set]
             [clojure.string :as string]
             [netwars.logging :as logging]
@@ -15,19 +16,19 @@
 (defn make-path [start]
   (atom [start]))
 
-(defn append! [path c]
+(defn- append! [path c]
   (swap! path conj c))
 
-(defn copy-path! [path source]
+(defn- copy-path! [path source]
   (reset! path (vec (elements source))))
 
 (defn elements [path]
   @path)
 
-(defn start [path]
+(defn- start [path]
   (first (elements path)))
 
-(defn end [path]
+(defn- end [path]
   (peek (elements path))                ;peek is faster than last on vectors
   )
 
@@ -38,6 +39,10 @@
   (some #{c} (elements path)))
 
 (declare shortest-path)
+
+;;; TODO: Use netwars.path here
+(defn path->aw-path [p]
+  (aw-path/make-path (elements p)))
 
 (defn update-path!
   "This function should be called when the mouse touches a new field while pathfinding.
@@ -122,7 +127,7 @@ It destructively updates the path according to some magic rules which implement 
   (clj->js (into {} (for [c movement-range :let [nbs (neighbours movement-range c)]]
                       [c (zipmap nbs (map #(cost-fn c %) nbs))]))) )
 
-(defn dijkstra-wrapper [start end movement-range cost-fn]
+(defn- dijkstra-wrapper [start end movement-range cost-fn]
   (logging/log "Searching path from [" (:x start) " " (:y start) "] to [" (:x end) " " (:y end) "]")
   (let [graph (build-graph movement-range cost-fn)
         path (dijkstra/find-path graph (coord->str start) (coord->str end))]

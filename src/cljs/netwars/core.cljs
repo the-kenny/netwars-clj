@@ -133,9 +133,11 @@
   handling buildings."
   [game c]
   (let [terrain (-> game :board (game-board/get-terrain c))]
-    (logging/log (apply str (map name (seq terrain))))
-    ;; Return nil to indicate no re-draw is needed
-    nil))
+    (cond
+     (and (aw-game/selected-unit game)
+          (> (-> game :current-path pathfinding/elements count) 1)
+          (not (game-board/get-unit (:board game) c)))
+     (aw-game/move-unit game (pathfinding/path->aw-path (:current-path game))))))
 
 (defn clicked-on
   "Generic function ran when the player clicks on the game
