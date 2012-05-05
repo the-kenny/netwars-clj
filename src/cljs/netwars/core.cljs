@@ -8,6 +8,7 @@
             [netwars.logging :as logging]
             [netwars.tiles :as tiles]
             [netwars.net.otw :as otw]
+            [netwars.pathfinding :as pathfinding]
 
             [clojure.browser.net :as net]
             [cljs.reader :as reader]
@@ -101,9 +102,14 @@
   [game c unit]
   (cond
    ;; Bug: (= c null) => crash; (= null c) => false
-   (= (aw-game/selected-coordinate game) c) (show-unit-action-menu game c unit)
+   (= (aw-game/selected-coordinate game) c)
+   (show-unit-action-menu game c unit)
+
    (and (nil? (aw-game/selected-unit game))
-        (not (:moved unit)))                (aw-game/select-unit   game c)))
+        (not (:moved unit)))
+   (-> game
+       (aw-game/select-unit c)
+       (assoc :current-path (pathfinding/make-path c)))))
 
 (defn enemy-unit-clicked
   "Function ran when the player clicks an enemy unit."
@@ -153,7 +159,16 @@
   "Function called when the mouse entered a new field on the game
   board."
   [c]
-  (.log js/console c))
+  (let [game @current-game
+        current-unit (aw-game/selected-unit game)
+        current-path (:current-path game)]
+    ;; TODO: We need movement-range here
+    (when (and game current-unit current-path)
+      (pathfinding/update-path! current-path
+                                (aw-game/movement-range game)
+                                c
+                                (-> game :board :terrain)
+                                current-unit))))
 
 (let [last-coord (atom nil)]
  (defn ^:private mouse-moved-internal [event]
