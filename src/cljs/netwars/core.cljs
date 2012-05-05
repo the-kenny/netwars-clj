@@ -149,6 +149,21 @@
         (reset! current-game (assoc newgame
                                :last-click-coord c))))))
 
+(defn mouse-moved
+  "Function called when the mouse entered a new field on the game
+  board."
+  [c]
+  (.log js/console c))
+
+(let [last-coord (atom nil)]
+ (defn ^:private mouse-moved-internal [event]
+   (let [c (game-drawer/canvas->coord (aw-map/coord (.-offsetX event)
+                                                    (.-offsetY event)))]
+     (when-let [game @current-game]
+       (when (and (aw-map/in-bounds? (-> game :board :terrain) c)
+                  ;; CLJS-BUG: (= nil c) => Error (fixed in master)
+                  (not= @last-coord c))
+         (mouse-moved (reset! last-coord c)))))))
 
 ;;; Functions for setting up games in the DOM
 
@@ -165,6 +180,9 @@
                 (fn [event]
                   (clicked-on (game-drawer/canvas->coord
                                (aw-map/coord (.-offsetX event) (.-offsetY event))))))
+  (event/listen canvas "mousemove" mouse-moved-internal)
+
+
   (event/listen (dom/get-element :end-turn-button) "click"
                 (fn [event]
                   (when @current-game
