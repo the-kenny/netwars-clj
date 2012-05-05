@@ -139,6 +139,19 @@
           (not (game-board/get-unit (:board game) c)))
      (aw-game/move-unit game (pathfinding/path->aw-path (:current-path game))))))
 
+(defn ^:private sanitize-game
+  "Function to remove dirty state the client code left. Examples
+  are :current-path which isn't removed."
+  [game]
+  ;; All conditions in this cond MUST NOT match after their changes
+  ;; were applied! Madness and terror awaits you when this isn't
+  ;; provided.
+  (.log js/console game)
+  (cond
+   (and (:current-path game)
+        (nil? (aw-game/selected-coordinate game))) (recur (dissoc game :current-path))
+   true game))
+
 (defn clicked-on
   "Generic function ran when the player clicks on the game
   board. Dispatches between units and buildings."  [c]
@@ -154,8 +167,9 @@
       ;; Don't redraw the game when the state hasn't changed
       ;; TODO: This shouldn't be necessary when everything is opimized
       (when newgame
-        (reset! current-game (assoc newgame
-                               :last-click-coord c))))))
+        (reset! current-game (-> newgame
+                                 (sanitize-game)
+                                 (assoc :last-click-coord c)))))))
 
 (defn mouse-moved
   "Function called when the mouse entered a new field on the game

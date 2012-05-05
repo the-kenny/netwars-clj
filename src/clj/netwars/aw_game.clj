@@ -148,11 +148,7 @@
   [game]
   {:pre [(:current-unit game)]
    :post [(nil? (:current-unit %))]}
-  (assoc game
-    :current-unit nil
-    ;; TODO: This belongs to the CLJS-Side. It only belongs here if we
-    ;; have generic pathfinding implemented in Clojure.
-    :current-path nil))
+  (assoc game :current-unit nil))
 
 (def movement-range-cache (atom {}))
 
