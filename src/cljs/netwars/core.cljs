@@ -31,17 +31,20 @@
 (def current-game (atom nil))
 (def current-action-menu (atom nil))
 
-(defn action-cancel []
+
+;;; Unit Actions (Attack, Wait, Capture, ...)
+
+(defn action-cancel
+  "Generic action for canceling actions.
+   Deselects current unit and hides the action menu."
+  []
   (swap! current-game aw-game/deselect-unit)
   (swap! current-action-menu menu/hide-menu))
 
-;; (defn unit-action-wait [game c]
-;;   ;; TODO: Really make the unit wait
-;;   (logging/log "Waiting...")
-;;   (swap! current-game #(aw-game/deselect-unit))
-;;   (swap! current-action-menu menu/hide-menu))
-
-(defn unit-action-capture [game c]
+(defn unit-action-capture
+  "Action to capture buildings.
+   Deselects current unit and hides action menu."
+  [game c]
   {:pre (game-board/capture-possible? (:board game) c)}
   (swap! current-game #(-> %
                            (aw-game/capture-building c)
@@ -75,6 +78,9 @@
   ;; Return nil to indicate no re-draw is needed
   nil)
 
+
+;;; Unit info functions
+
 (defn show-unit-info [unit]
   (dom/set-text (dom/get-element :unit-hp)   (str (:hp unit)
                                                   "/"
@@ -87,32 +93,47 @@
 (defn hide-unit-info []
   (dom/set-properties (dom/get-element :unit-details) {"style" "visibility:hidden;"}))
 
-(defn own-unit-clicked [game c unit]
+
+;;; Functions to handle user actions
+
+(defn own-unit-clicked
+  "Function ran when the players clicks on his own units."
+  [game c unit]
   (cond
    ;; Bug: (= c null) => crash; (= null c) => false
    (= (aw-game/selected-coordinate game) c) (show-unit-action-menu game c unit)
    (and (nil? (aw-game/selected-unit game))
         (not (:moved unit)))                (aw-game/select-unit   game c)))
 
-(defn enemy-unit-clicked [game c unit]
+(defn enemy-unit-clicked
+  "Function ran when the player clicks an enemy unit."
+  [game c unit]
   (when-let [att-coord (aw-game/selected-coordinate game)]
     (when (aw-game/attack-possible? game att-coord c)
       (logging/log "Attack!")
       (show-attack-menu game c))))
 
-(defn unit-clicked [game c]
+(defn unit-clicked
+  "Function ran when the player clicks on any unit. Dispatches to
+  `own-unit-clicked' or `enemy-unit-clicked'."
+  [game c]
   (let [unit (-> game :board (game-board/get-unit c))]
     (if (= (:color unit) (:color (aw-game/current-player game)))
       (own-unit-clicked game c unit)
       (enemy-unit-clicked game c unit))))
 
-(defn terrain-clicked [game c]
+(defn terrain-clicked
+  "Ran when the player clicks any terrain. Dispatches to functions
+  handling buildings."
+  [game c]
   (let [terrain (-> game :board (game-board/get-terrain c))]
     (logging/log (apply str (map name (seq terrain))))
     ;; Return nil to indicate no re-draw is needed
     nil))
 
-(defn clicked-on [c]
+(defn clicked-on
+  "Generic function ran when the player clicks on the game
+  board. Dispatches between units and buildings."  [c]
   (when (and @current-game (not @current-action-menu))
     (let [game @current-game
           newgame (let [board (:board game)
@@ -127,6 +148,9 @@
       (when newgame
         (reset! current-game (assoc newgame
                                :last-click-coord c))))))
+
+
+;;; Functions for setting up games in the DOM
 
 (defn unregister-handlers [canvas]
   (gevents/removeAll canvas)
