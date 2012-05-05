@@ -235,6 +235,11 @@
     (is (= r (board/reachable-fields (-> *game* :board)
                                      (selected-coordinate *game*))))))
 
+(deftest test-wait-unit
+  (let [uc (coord 1 13)
+        newgame (wait-unit (select-unit *game* uc))]
+    (is (:moved (board/get-unit (:board newgame) uc)))))
+
 (deftest test-move-unit
   (let [from (coord 1 13)
         to   (coord 1 14)

@@ -166,6 +166,15 @@
                                          (selected-unit game)] r)
       r)))
 
+(defn wait-unit
+  "Makes the unit 'miss' the turn. Actually assoc :moved to the
+  currently selected unit and then deselects it."
+  [game]
+  {:pre [(selected-unit game)
+         (not (:moved (selected-unit game)))]}
+  (-> (update-in game [:board] board/update-unit (selected-coordinate game) assoc :moved true)
+      (deselect-unit)))
+
 (defn move-unit
   "Moves the currently selected unit along `path`.
 `(last path)` must be in the current movement-range. Must be called in a transaction.
