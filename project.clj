@@ -28,6 +28,8 @@
               :builds [{:source-path "src/cljs/"
                         :compiler
                         {:output-to "resources/public/netwars.js"
+                         :foreign-libs [{:file "resources/public/dijkstra.js"
+                                         :provides ["dijkstra"]}]
                          :pretty-print true
                          :optimizations :whitespace}}]}
   :profiles {:dev {:dependencies [[midje "1.3.1"]]
