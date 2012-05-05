@@ -148,7 +148,11 @@
   [game]
   {:pre [(:current-unit game)]
    :post [(nil? (:current-unit %))]}
-  (assoc game :current-unit nil))
+  (assoc game
+    :current-unit nil
+    ;; TODO: This belongs to the CLJS-Side. It only belongs here if we
+    ;; have generic pathfinding implemented in Clojure.
+    :current-path nil))
 
 (defn movement-range
   "Returns a set of all reachable fields for the currently selected unit."
