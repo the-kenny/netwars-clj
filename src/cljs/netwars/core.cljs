@@ -29,9 +29,28 @@
             [netwars.map-utils :as map-utils]
             [netwars.tile-drawer :as tile-drawer]))
 
+;;; TODO: Function for changing game-state instead of
+;;; (reset current-game ...)
 (def current-game (atom nil))
 (def current-action-menu (atom nil))
 
+(defn draw-game
+  "Generic game-drawing function. Strips non-important data used for
+  drawing."
+  [canvas game]
+  (let [clean-game (-> game
+                       (sanitize-game)
+                       (dissoc :last-click-coord))
+        last-click-coord (:last-click-coord game)]
+    (if-let [unit (aw-game/selected-unit clean-game)]
+      (show-unit-info unit)
+      (hide-unit-info))
+
+    (game-drawer/draw-game canvas
+                           clean-game
+                           last-click-coord)
+
+    clean-game))
 
 ;;; Unit Actions (Attack, Wait, Capture, ...)
 
@@ -42,21 +61,28 @@
   (swap! current-game aw-game/deselect-unit)
   (swap! current-action-menu menu/hide-menu))
 
+(defn unit-action-wait
+  "Deselects and 'Waits' the current unit."
+  [game c]
+  (reset! current-game (aw-game/wait-unit game))
+  ;; TODO: Dismissal shouldn't be done in every action-fn
+  (swap! current-action-menu menu/hide-menu))
+
 (defn unit-action-capture
   "Action to capture buildings.
    Deselects current unit and hides action menu."
   [game c]
   {:pre (game-board/capture-possible? (:board game) c)}
-  (swap! current-game #(-> %
+  (swap! current-game #(-> game
                            (aw-game/capture-building c)
                            aw-game/deselect-unit))
   ;; TODO: Dismissal shouldn't be done in every action-fn
   (swap! current-action-menu menu/hide-menu))
 
 (defn show-unit-action-menu [game c unit]
-  (let [menu (unit-menu/unit-action-menu game c {;; wait #(unit-action-wait game c)
+  (let [menu (unit-menu/unit-action-menu game c {:wait    #(unit-action-wait game c)
                                                  :capture #(unit-action-capture game c)
-                                                 :cancel #(action-cancel)})]
+                                                 :cancel  #(action-cancel)})]
     (menu/display-menu menu (dom/get-element :mapBox) (game-drawer/coord->canvas c))
     (reset! current-action-menu menu))
   ;; Return nil to indicate no re-draw is needed
@@ -137,7 +163,16 @@
      (and (aw-game/selected-unit game)
           (> (-> game :current-path pathfinding/elements count) 1)
           (not (game-board/get-unit (:board game) c)))
-     (aw-game/move-unit game (pathfinding/path->aw-path (:current-path game))))))
+     ;; Okay. We do awesome stuff here: An action menu is shown after
+     ;; a unit is moved. The problem is: There's the 'Cancel' option
+     ;; which also reverts the move. The solution is kind of hacky: We
+     ;; don't actually change the state of `current-game', we just
+     ;; draw it. The global state is only changed AFTER the user
+     ;; selected a continuing action (Wait, Capture, Attack, ...)
+     (let [game-moved (aw-game/move-unit game (pathfinding/path->aw-path (:current-path game)))]
+       (draw-game (dom/get-element "gameBoard") game-moved)
+       (show-unit-action-menu game-moved c (game-board/get-unit (:board game-moved) c))
+       nil))))
 
 (defn ^:private sanitize-game
   "Function to remove dirty state the client code left. Examples
@@ -149,7 +184,8 @@
   (.log js/console game)
   (cond
    (and (:current-path game)
-        (:moved (aw-game/selected-unit game))) (recur (dissoc game :current-path))
+        (or (:moved (aw-game/selected-unit game))
+            (nil? (aw-game/selected-unit game)))) (recur (dissoc game :current-path))
    true game))
 
 (defn clicked-on
@@ -224,13 +260,7 @@
   ;; We use add-watch to redraw the canvas every time the state changes
   (add-watch current-game :redrawer
              (fn [key ref old new]
-               (let [last-click-coord (:last-click-coord new)]
-                 (game-drawer/draw-game canvas
-                                        (dissoc new :last-click-coord)
-                                        last-click-coord)
-                 (if-let [unit (aw-game/selected-unit new)]
-                   (show-unit-info unit)
-                   (hide-unit-info))))))
+               (draw-game canvas new))))
 
 #_(register-handlers (dom/get-element :gameBoard))
 

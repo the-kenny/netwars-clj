@@ -12,7 +12,7 @@
         capture? (game-board/capture-possible? board pos)]
     (generic/make-action-menu
      [["Capture" (:capture fns) (not capture?)]
-      #_["Attack"  (:attack fns)  :disabled]
+      ;; ["Attack"  (:attack fns)  :disabled]
       [:separator]
-      #_["Wait"    (:wait fns)]
+      ["Wait"    (:wait fns)]
       ["Cancel"  (:cancel fns)]])))
