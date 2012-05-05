@@ -154,10 +154,21 @@
     ;; have generic pathfinding implemented in Clojure.
     :current-path nil))
 
+(def movement-range-cache (atom {}))
+
 (defn movement-range
   "Returns a set of all reachable fields for the currently selected unit."
   [game]
-  (board/reachable-fields (:board game) (selected-coordinate game)))
+  (if (> (count @movement-range-cache) 50)
+    (reset! movement-range-cache nil))
+
+  (if-let [cached (get @movement-range-cache [(selected-coordinate game)
+                                             (selected-unit game)])]
+    cached
+    (let [r (board/reachable-fields (:board game) (selected-coordinate game))]
+      (swap! movement-range-cache assoc [(selected-coordinate game)
+                                         (selected-unit game)] r)
+      r)))
 
 (defn move-unit
   "Moves the currently selected unit along `path`.
