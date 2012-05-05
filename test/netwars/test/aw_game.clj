@@ -256,6 +256,8 @@
                           ;; Test for name and color as fuel changes...
                           [:internal-name :color])) "unit really moved to `to`")
       (is (nil? (board/get-unit (:board newgame) from)) "unit really moved from `from`")
+      (is (nil? (selected-unit newgame)) "Unit was deselected")
+      (is (nil? (selected-coordinate newgame)) "Unit was deselected")
       (let [new-unit (board/get-unit (:board newgame) to)]
         (is (< (:fuel new-unit) (:fuel unit)) "the move used fuel")
         (is (:moved new-unit)))

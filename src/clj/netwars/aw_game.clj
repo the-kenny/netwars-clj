@@ -189,6 +189,8 @@ Returns path."
    (-> game
        (update-in [:board] board/update-unit from
                   update-in [:fuel] - fuel-costs)
+       ;; TODO: Deselection is wrong here; just update `current-unit'
+       (deselect-unit)
        (update-in [:board] board/move-unit from to) ;Important: First use fuel, then move
        (check-capture-after-move from)
        (log-event {:type :unit-moved
