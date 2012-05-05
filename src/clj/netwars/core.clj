@@ -20,8 +20,8 @@
 (def webapp-port 8080)
 
 (defroutes main-routes
-  (GET "/" [] (redirect "/netwars.html"))
-  (GET "/netwars.html" [] (game-page/page))
+  (GET "/" [] (redirect "/game"))
+  (GET "/game" [] (game-page/page))
   (route/resources "/")
   (GET "/socket" [] (wrap-aleph-handler connection/websocket-handler))
   ;; Api
