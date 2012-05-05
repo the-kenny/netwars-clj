@@ -260,8 +260,7 @@
       ;; (is (nil? (selected-coordinate newgame)) "Unit was deselected")
       (is (= to (selected-coordinate newgame)) "`current-unit' was updated")
       (let [new-unit (board/get-unit (:board newgame) to)]
-        (is (< (:fuel new-unit) (:fuel unit)) "the move used fuel")
-        (is (:moved new-unit)))
+        (is (< (:fuel new-unit) (:fuel unit)) "the move used fuel"))
       (is (= :unit-moved (:type (last (game-events newgame)))) "the move was logged"))))
 
 ;;; From here on, it's Midje

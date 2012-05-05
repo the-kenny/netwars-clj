@@ -73,7 +73,7 @@
    :post [(nil? (get-unit % c1)) (not (nil? (get-unit % c2)))]}
   (let [u (get-unit board c1)]
     (assoc board :units (-> (:units board)
-                            (assoc c2 (assoc u :moved true))
+                            (assoc c2 u)
                             (dissoc c1)))))
 
 (defn change-building-color [^GameBoard board c color]
