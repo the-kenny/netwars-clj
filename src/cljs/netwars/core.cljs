@@ -68,6 +68,14 @@
   ;; TODO: Dismissal shouldn't be done in every action-fn
   (swap! current-action-menu menu/hide-menu))
 
+(defn unit-action-attack
+  "Functionally just hides the action menu. In the background this
+  function applies the game-state given as argument because it after
+  moving the current state is just drawn, not applied."
+  [game c]
+  (reset! current-game game)
+  (swap! current-action-menu menu/hide-menu))
+
 (defn unit-action-capture
   "Action to capture buildings.
    Deselects current unit and hides action menu."
@@ -81,6 +89,7 @@
 
 (defn show-unit-action-menu [game c unit]
   (let [menu (unit-menu/unit-action-menu game c {:wait    #(unit-action-wait game c)
+                                                 :attack  #(unit-action-attack game c)
                                                  :capture #(unit-action-capture game c)
                                                  :cancel  #(action-cancel)})]
     (menu/display-menu menu (dom/get-element :mapBox) (game-drawer/coord->canvas c))
