@@ -9,7 +9,7 @@
            :style "visibility: hidden"}
    [:tr
     [:td {:colspan 2}
-     [:canvas {:id "unit-canvas" :style "display: none"}]]]
+     [:canvas {:id "unit-canvas"}]]]
    [:tr
     [:td "HP:"] [:td {:id "unit-hp"}]]
    [:tr
