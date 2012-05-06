@@ -34,24 +34,6 @@
 (def current-game (atom nil))
 (def current-action-menu (atom nil))
 
-(defn draw-game
-  "Generic game-drawing function. Strips non-important data used for
-  drawing."
-  [canvas game]
-  (let [clean-game (-> game
-                       (sanitize-game)
-                       (dissoc :last-click-coord))
-        last-click-coord (:last-click-coord game)]
-    (if-let [unit (aw-game/selected-unit clean-game)]
-      (show-unit-info unit)
-      (hide-unit-info))
-
-    (game-drawer/draw-game canvas
-                           clean-game
-                           last-click-coord)
-
-    clean-game))
-
 ;;; Unit Actions (Attack, Wait, Capture, ...)
 
 (defn action-cancel
@@ -131,6 +113,43 @@
   (dom/set-properties (dom/get-element :unit-details) {"style" "visibility:hidden;"}))
 
 
+;;; Internal utility functions
+
+(defn ^:private sanitize-game
+  "Function to remove dirty state the client code left. Examples
+  are :current-path which isn't removed."
+  [game]
+  ;; All conditions in this cond MUST NOT match after their changes
+  ;; were applied! Madness and terror awaits you when this isn't
+  ;; provided.
+  (.log js/console game)
+  (cond
+   (and (:current-path game)
+        (or (:moved (aw-game/selected-unit game))
+            (nil? (aw-game/selected-unit game)))) (recur (dissoc game :current-path))
+   true game))
+
+
+;;; Game drawing!
+
+(defn draw-game
+  "Generic game-drawing function. Strips non-important data used for
+  drawing."
+  [canvas game]
+  (let [clean-game (-> game
+                       (sanitize-game)
+                       (dissoc :last-click-coord))
+        last-click-coord (:last-click-coord game)]
+    (if-let [unit (aw-game/selected-unit clean-game)]
+      (show-unit-info unit)
+      (hide-unit-info))
+
+    (game-drawer/draw-game canvas
+                           clean-game
+                           last-click-coord)
+
+    clean-game))
+
 ;;; Functions to handle user actions
 
 (defn own-unit-clicked
@@ -183,20 +202,6 @@
        (draw-game (dom/get-element "gameBoard") (dissoc game-moved :current-path))
        (show-unit-action-menu game-moved c (game-board/get-unit (:board game-moved) c))
        nil))))
-
-(defn ^:private sanitize-game
-  "Function to remove dirty state the client code left. Examples
-  are :current-path which isn't removed."
-  [game]
-  ;; All conditions in this cond MUST NOT match after their changes
-  ;; were applied! Madness and terror awaits you when this isn't
-  ;; provided.
-  (.log js/console game)
-  (cond
-   (and (:current-path game)
-        (or (:moved (aw-game/selected-unit game))
-            (nil? (aw-game/selected-unit game)))) (recur (dissoc game :current-path))
-   true game))
 
 (defn clicked-on
   "Generic function ran when the player clicks on the game

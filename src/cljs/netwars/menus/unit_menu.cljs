@@ -13,8 +13,8 @@
         attack? (not (empty? (aw-game/attackable-targets game)))]
     ;; TODO: Unit with ranged weapons can't fire right after moving
     (generic/make-action-menu
-     [["Capture" (:capture fns) (not capture?)]
-      ["Attack"  (:attack  fns) (not attack?)]
+     [["Attack"  (:attack  fns) (not attack?)]
+      ["Capture" (:capture fns) (not capture?)]
       [:separator]
       ["Wait"    (:wait    fns)]
       ["Cancel"  (:cancel  fns)]])))

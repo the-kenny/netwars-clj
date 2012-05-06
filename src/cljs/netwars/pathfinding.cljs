@@ -19,11 +19,11 @@
 (defn- append! [path c]
   (swap! path conj c))
 
-(defn- copy-path! [path source]
-  (reset! path (vec (elements source))))
-
 (defn elements [path]
   @path)
+
+(defn- copy-path! [path source]
+  (reset! path (vec (elements source))))
 
 (defn- start [path]
   (first (elements path)))
