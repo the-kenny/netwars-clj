@@ -18,6 +18,11 @@
 #controls #end-turn-button {
 }
 
+#unit-details {
+    font-size: 9pt;
+    font-family: tahoma;
+}
+
 /* #connectionIndicator { */
 /*     z-index: 100; */
 /*     width: 100pt; */

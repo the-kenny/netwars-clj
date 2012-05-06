@@ -107,7 +107,16 @@
   (dom/set-text (dom/get-element :unit-fuel) (str (:fuel unit)
                                                   "/"
                                                   (:max-fuel-level (meta unit))))
-  (dom/set-properties (dom/get-element :unit-details) {"style" "visibility:visible;"}))
+  (dom/set-properties (dom/get-element :unit-details) {"style" "visibility:visible;"})
+
+
+  (let [canvas (dom/get-element "unit-canvas")]
+    (set! (.-width  canvas) game-drawer/+field-width+)
+    (set! (.-height canvas) game-drawer/+field-height+)
+    (game-drawer/draw-unit (.getContext canvas "2d")
+                           @current-game
+                           (aw-map/coord 0 0)
+                           unit)))
 
 (defn hide-unit-info []
   (dom/set-properties (dom/get-element :unit-details) {"style" "visibility:hidden;"}))
