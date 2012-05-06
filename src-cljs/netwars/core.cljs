@@ -238,6 +238,7 @@
     (cond
      (and (aw-game/selected-unit game)
           (> (-> game :current-path pathfinding/elements count) 1)
+          (= c (-> game :current-path pathfinding/elements last))
           (not (game-board/get-unit (:board game) c)))
      ;; Okay. We do awesome stuff here: An action menu is shown after
      ;; a unit is moved. The problem is: There's the 'Cancel' option
@@ -333,7 +334,8 @@
   (event/listen canvas "click"
                 (fn [event]
                   (clicked-on (game-drawer/canvas->coord
-                               (aw-map/coord (.-offsetX event) (.-offsetY event))))))
+                               (aw-map/coord (.-offsetX event) (.-offsetY event)))))
+                true)
   (event/listen canvas "mousemove" mouse-moved-internal)
 
 

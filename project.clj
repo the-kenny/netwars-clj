@@ -12,7 +12,6 @@
   :exclusions [org.clojure/clojure
                swank-clojure/swank-clojure]
   :extra-files-to-clean ["resoures/public/netwars.js"]
-  :source-paths ["src/clj/"]
   ;; :main netwars.core
   :cljsbuild {:crossovers [netwars.aw-game
                            netwars.aw-map
@@ -25,7 +24,7 @@
                            netwars.map-renderer-macro-hack
                            netwars.path
                            netwars.tiles]
-              :builds [{:source-path "src/cljs/"
+              :builds [{:source-path "src-cljs/"
                         :compiler
                         {:output-to "resources/public/netwars.js"
                          :foreign-libs [{:file "resources/public/dijkstra.js"
