@@ -16,7 +16,9 @@
    [:tr
     [:th "HP:"] [:td {:id "unit-hp"}]]
    [:tr
-    [:th "Fuel:"] [:td {:id "unit-fuel"}]]])
+    [:th "Fuel:"] [:td {:id "unit-fuel"}]]
+   [:tr
+    [:th "Movement:"] [:td {:id "unit-movement-type"}]]])
 
 (defn ^:private terrain-info-table []
   [:table {:id "terrain-details"}

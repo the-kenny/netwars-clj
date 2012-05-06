@@ -102,12 +102,17 @@
 ;;; Unit info functions
 
 (defn show-unit-info [unit]
-  (dom/set-text (dom/get-element :unit-hp)   (str (:hp unit)
-                                                  "/"
-                                                  (:hp (meta unit))))
-  (dom/set-text (dom/get-element :unit-fuel) (str (:fuel unit)
-                                                  "/"
-                                                  (:max-fuel-level (meta unit))))
+  (dom/set-text (dom/get-element :unit-hp)
+                (str (:hp unit)
+                     "/"
+                     (:hp (meta unit))))
+  (dom/set-text (dom/get-element :unit-fuel)
+                (str (:fuel unit)
+                     "/"
+                     (:max-fuel-level (meta unit))))
+  (dom/set-text (dom/get-element :unit-movement-type)
+                (name (:movement-type (meta unit))))
+
   (dom/set-properties (dom/get-element :unit-details) {"style" "visibility:visible;"})
 
 
