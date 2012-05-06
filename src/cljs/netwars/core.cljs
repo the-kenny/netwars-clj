@@ -180,7 +180,7 @@
      ;; draw it. The global state is only changed AFTER the user
      ;; selected a continuing action (Wait, Capture, Attack, ...)
      (let [game-moved (aw-game/move-unit game (pathfinding/path->aw-path (:current-path game)))]
-       (draw-game (dom/get-element "gameBoard") game-moved)
+       (draw-game (dom/get-element "gameBoard") (dissoc game-moved :current-path))
        (show-unit-action-menu game-moved c (game-board/get-unit (:board game-moved) c))
        nil))))
 
