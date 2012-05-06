@@ -122,7 +122,6 @@
   ;; All conditions in this cond MUST NOT match after their changes
   ;; were applied! Madness and terror awaits you when this isn't
   ;; provided.
-  (.log js/console game)
   (cond
    (and (:current-path game)
         (or (:moved (aw-game/selected-unit game))
