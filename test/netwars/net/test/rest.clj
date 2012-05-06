@@ -7,18 +7,19 @@
 
 (background (before :contents (do
                                 (core/start)
-                                (game-server/start-new-game {:map-name "7330.aws"})))
+                                ;; (game-server/start-new-game {:map-name "7330.aws"})
+                                ))
             (after  :contents (core/stop)))
 
 (fact
-  (json/read-json (main)) => {:api-version 1.0})
+  (json/read-json (main)) => {:api-version 0.1})
 
-(fact
-  (json/read-json (games)) =>  (contains {:count integer? :ids sequential?}))
+;; (fact
+;;   (json/read-json (games)) =>  (contains {:count integer? :ids sequential?}))
 
-(fact
-  (when-let [id (first (:ids (json/read-json (games))))]
-    (json/read-json (game id)) => (contains {:info map?
-                                             :players sequential?
-                                             :moves sequential?
-                                             :current-player-index integer?})))
+;; (fact
+;;   (when-let [id (first (:ids (json/read-json (games))))]
+;;     (json/read-json (game id)) => (contains {:info map?
+;;                                              :players sequential?
+;;                                              :moves sequential?
+;;                                              :current-player-index integer?})))

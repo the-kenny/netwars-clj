@@ -17,7 +17,7 @@
 
 (deftest test-meta-encoding
   (let [m {:foo 42
-           :uuid (java.util.UUID/randomUUID)}
+           :string "str"}
         encoded-m (encode m)
         data  {:coord (netwars.aw-map/coord 1 2)
                :vec [23 42 1337]

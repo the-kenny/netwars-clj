@@ -3,7 +3,7 @@
 (defrecord AwPlayer [name color funds])
 
 (defn make-player [name color funds]
-  {:pre [(pos? funds)]}
+  {:pre [(integer? funds)]}
   (AwPlayer. name color funds))
 
 (defn is-player? [p]

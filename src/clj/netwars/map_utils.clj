@@ -1,11 +1,9 @@
 (ns netwars.map-utils
-  (:use netwars.map-loader
-        [netwars.aw-map :only [at coord]])
-  (:require clojure.inspector))
+  (:require [netwars.aw-map :as aw-map]))
 
 ;;; TODO: Simplify
 (defn neighbours [terrain c]
-  (let [msta #(at terrain (coord %1 %2))
+  (let [msta #(aw-map/at terrain (aw-map/coord %1 %2))
         x (:x c) y (:y c)]
    (hash-map
     :north (msta x (dec y))
@@ -29,16 +27,16 @@
 (defn drop-neighbours-behind
   "Drops the cardinal and intercardinal directions from `nbs` opposite to `direction`"
   [direction nbs]
-  (select-keys nbs (case direction
-                     :north [:north
-                             :north-west :north-east
-                             :east :west]
-                     :east [:east
-                            :north-east :south-east
-                            :north :south]
-                     :west [:west
-                            :north-west :north-west
-                            :north :south]
-                     :south [:south
-                             :south-west :south-east
-                             :east :west])))
+  (select-keys nbs (get {:north [:north
+                                 :north-west :north-east
+                                 :east :west]
+                         :east [:east
+                                :north-east :south-east
+                                :north :south]
+                         :west [:west
+                                :north-west :north-west
+                                :north :south]
+                         :south [:south
+                                 :south-west :south-east
+                                 :east :west]}
+                        direction)))

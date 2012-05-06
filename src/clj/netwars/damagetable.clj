@@ -1,9 +1,9 @@
 (ns netwars.damagetable
-  (:require [clojure.xml :as xml])
-  (:use [clojure.set :only [rename-keys]]))
+  (:require [clojure.xml :as xml]
+            [clojure.set :as set]))
 
 (defn- mapvals
-  "Maps f over the values in a map" 
+  "Maps f over the values in a map"
   [f m]
   (zipmap (keys m) (map f (vals m))))
 
@@ -18,7 +18,7 @@
   {(keyword (:name attrs))
    (into {} (remove (fn [[_ v]] (= v -1))
             (mapvals #(when % (read-string %))
-                     (rename-keys
+                     (set/rename-keys
                       (select-keys attrs [:damage :alt_damage])
                       {:alt_damage :alt-damage}))))})
 
@@ -28,6 +28,3 @@
 
 (defn load-damagetable [source]
   (parse-damagetable (xml/parse source)))
-
-(defn get-damage [table attacker defender]
-  (get-in table [attacker defender]))

@@ -8,12 +8,12 @@
 ;; The rest of this namespace contains various functions for storing terrain data.
 
 
-(defrecord Coordinate [^long x ^long y])
+(defrecord Coordinate [x y])
 
 (defn coord
   "Creates a coordinate from a x and a y value. x and y are coerced to int"
-  ([^long x ^long y] (Coordinate. x y))
-  ([[^long x ^long y]] (Coordinate. x y)))
+  ([x y] (Coordinate. x y))
+  ([[x y]] (Coordinate. x y)))
 
 (defn coord?
   "Predicate to check if an object is an coordinate"
@@ -27,8 +27,8 @@
 (defn distance
   "Manhattan metric distance between coordinates"
   [c1 c2]
-  (+ (Math/abs (long (- (:x c2) (:x c1))))
-     (Math/abs (long (- (:y c2) (:y c1))))))
+  (+ (Math/abs (- (:x c2) (:x c1)))
+     (Math/abs (- (:y c2) (:y c1)))))
 
 ;; (defn distance
 ;;  "Euclidean distance between 2 points"
@@ -70,6 +70,29 @@ Building-values have the structure [building color] whereas normal terrains are 
   [t]
   (and (vector? t)
        (contains? #{:headquarter :city :base :airport :port :tower :lab :silo} (first t))))
+
+(def +building-capture-points+ 20)
+
+(defn capture-building [building points new-color]
+  {:pre [(is-building? building)]
+   :post [(is-building? %)]}
+  (let [[t c val] building]
+    (cond
+     (nil? val) (if (= points +building-capture-points+)
+                  [t new-color]
+                  [t c (- +building-capture-points+ points)])
+     (<=    (- val points) 0) [t new-color]
+     (pos?  (- val points))   [t c (- val points)])))
+
+(defn capture-points [building]
+  {:pre [(is-building? building)]}
+  (let [[t c p] building]
+    (or p +building-capture-points+)))
+
+(defn reset-capture-points [building]
+  {:pre [(is-building? building)]}
+  (let [[t c p] building]
+    [t c]))
 
 (defn is-terrain?
   "Predicate to check if a terrain-value is normal terrain and not a building.
@@ -128,14 +151,22 @@ Mostly useful for drawing of maps."
 (defn can-produce-units? [t]
   (and (sequential? t) (is-building? t) (contains? #{:port :base :airport} (first t))))
 
+(def ^:private +defense-values+
+  {:plain 1
+   :reef  1
+   :forest 2
+   :city 3
+   :base 3
+   :airport 3
+   :port 3
+   :lab 3
+   :headquarter 4
+   :mountain 3
+   :silo 3})
+
 (defn defense-value [terrain]
   (let [[t c] (cond
                (keyword? terrain) [terrain]
                (is-building? terrain) terrain
                true [])]
-    (case t
-      (:plain :reef) 1
-      :forest 2
-      (:city :base :airport :port :lab) 3
-      (:headquarter :mountain) (if (= c :white) 3 4)
-      0)))
+    (get +defense-values+ t 0)))

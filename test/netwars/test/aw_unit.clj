@@ -114,3 +114,8 @@
     => (just {})
     (-> megatank (deplete-ammo :alt-weapon) available-weapons)
     => (just {:main-weapon anything})))
+
+(facts "about can-capture?"
+  (can-capture? (make-unit *spec* 0  :red)) => true ;Infantry
+  (can-capture? (make-unit *spec* 20 :red)) => true ;Mech
+  (can-capture? (make-unit *spec* 22 :red)) => false)

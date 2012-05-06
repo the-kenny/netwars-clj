@@ -2,6 +2,9 @@
   (:use [netwars.net.connection :as connection]
         [netwars.net.game-server :as game-server]
         [netwars.net.rest :as rest]
+
+        [netwars.net.page.game :as game-page]
+
         [aleph.http :only [start-http-server
                            wrap-aleph-handler
                            wrap-ring-handler]]
@@ -16,36 +19,37 @@
 (def webapp-url "http://localhost")
 (def webapp-port 8080)
 
-(set-loggers!
- "netwars.net"
- {:level :info
-  :pattern "%d %p: %m%n"
-  :out #_(java.io.File. "netwars.log") :console})
-
-
 (defroutes main-routes
-  (GET "/" [] (redirect "/netwars.html"))
+  (GET "/" [] (redirect "/game"))
+  (GET "/game" [] (game-page/page))
   (route/resources "/")
   (GET "/socket" [] (wrap-aleph-handler connection/websocket-handler))
   ;; Api
   (context "/api" [] rest/api-routes)
   (route/not-found "<p>aww... this doesn't exist</p>"))
 
-(let [server (atom nil)]
-  (defn start [& open-browser]
-   (reset! server (start-http-server (-> #'main-routes
-                                         ringtrace/wrap-stacktrace
-                                         wrap-ring-handler)
-                                     {:port webapp-port :websocket true}))
-   (info "server started")
-   (when open-browser
-     (browse-url (str webapp-url ":" webapp-port))))
+(def ^:dynamic *server* (atom nil))
 
-  (defn stop []
-    (when @server
-      (@server)
-      (reset! server nil)
-      (info "Server stopped"))))
+
+(defn start [& open-browser]
+  (set-loggers!
+   "netwars.net"
+   {:level :info
+    :pattern "%d %p: %m%n"
+    :out #_(java.io.File. "netwars.log") :console})
+  (reset! *server* (start-http-server (-> #'main-routes
+                                        ringtrace/wrap-stacktrace
+                                        wrap-ring-handler)
+                                    {:port webapp-port :websocket true}))
+  (info "server started")
+  (when open-browser
+    (browse-url (str webapp-url ":" webapp-port))))
+
+(defn stop []
+  (when @*server*
+    (@*server*)
+    (reset! *server* nil)
+    (info "Server stopped")))
 
 (defn -main []
   (set-loggers!

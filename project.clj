@@ -7,22 +7,31 @@
                  [log4j/log4j "1.2.16"]
                  [clj-logging-config "1.9.6"]
                  [compojure "1.0.1"]
-                 [ring/ring-devel "1.0.1"]]
+                 [hiccup "1.0.0"]
+                 [ring/ring-devel "1.1.0"]]
   :exclusions [org.clojure/clojure
                swank-clojure/swank-clojure]
   :extra-files-to-clean ["resoures/public/netwars.js"]
   :source-paths ["src/clj/"]
   ;; :main netwars.core
-  :cljsbuild {:crossovers [netwars.aw-map
+  :cljsbuild {:crossovers [netwars.aw-game
+                           netwars.aw-map
+                           netwars.aw-player
                            netwars.aw-unit
-                           netwars.game-board]
+                           netwars.damagecalculator
+                           netwars.game-board
+                           netwars.map-utils
+                           netwars.map-renderer
+                           netwars.map-renderer-macro-hack
+                           netwars.path
+                           netwars.tiles]
               :builds [{:source-path "src/cljs/"
                         :compiler
                         {:output-to "resources/public/netwars.js"
+                         :foreign-libs [{:file "resources/public/dijkstra.js"
+                                         :provides ["dijkstra"]}]
                          :pretty-print true
-                         :optimizations :whitespace
-                         :foreign-libs [{:provides ["kinetic"]
-                                         :file "resources/public/kinetic.js"}]}}]}
+                         :optimizations :whitespace}}]}
   :profiles {:dev {:dependencies [[midje "1.3.1"]]
                    :plugins [[org.clojars.the-kenny/lein-midje "1.0.9"]]}}
-  :plugins [[lein-cljsbuild "0.1.4"]])
+  :plugins [[lein-cljsbuild "0.1.8"]])

@@ -1,8 +1,7 @@
 (ns netwars.net.otw
   (:require netwars.aw-map)             ;import fails w.o. this
   (:use [netwars.aw-map :only [coord]])
-  (:import [clojure.lang IPersistentMap IPersistentSet Keyword]
-           [java.awt Image]
+  (:import [java.awt Image]
            [java.util List UUID]
            [netwars.aw_map Coordinate]
            [org.apache.commons.codec.binary Base64]))
@@ -29,7 +28,8 @@
     (decode (meta m))))
 
 (defn- encode-seq [o]
-  (with-meta (map encode o) (encode (meta o))))
+  (with-meta (map encode o)
+    (encode (meta o))))
 
 (defn- decode-seq [o]
   (with-meta
@@ -44,15 +44,18 @@
   Coordinate
   (encode [c] (with-meta (list 'coord (:x c) (:y c)) (encode (meta c))))
   (decode [o] o)
-  List
-  (encode [v] (encode-seq v))
-  (decode [v] (decode-seq v))
-  IPersistentMap
+  clojure.lang.IRecord
+  (encode [v] (encode-map v))
+  (decode [v] (decode-map v))
+  clojure.lang.ISeq
+  (encode [v] (into (empty v) (encode-seq v)))
+  (decode [v] (into (empty v) (decode-seq v)))
+  clojure.lang.IPersistentMap
   (encode [m] (encode-map m))
   (decode [m] (decode-map m))
-  IPersistentSet
-  (encode [s] (with-meta (into #{} (map encode s)) (encode (meta s))))
-  (decode [s] (with-meta (into #{} (map decode s)) (decode (meta s))))
+  clojure.lang.IPersistentSet
+  (encode [s] (with-meta (into (empty s) (map encode s)) (encode (meta s))))
+  (decode [s] (with-meta (into (empty s) (map decode s)) (decode (meta s))))
   UUID
   (encode [u] (str u))
   (decode [u] (assert nil "unimplemented"))

@@ -66,7 +66,7 @@
 
 (defn apply-damage [u d]
   (let [newu (update-in u [:hp] - d)]
-    (when (> (:hp newu) 0)
+    (when (pos? (:hp newu))
       newu)))
 
 ;;; Transport Functions
@@ -112,7 +112,7 @@
   (not= 0 (:ammo weapon)))
 
 (defn available-weapons [u]
-  (into {} (filter #(weapon-available? (val %)) (weapons u))))
+  (into {} (filter (fn [[k v]] (weapon-available? v)) (weapons u))))
 
 (defn fire-weapon
   "'Fires' a weapon (:alt-weapon or :main-weapon). Mainly uses ammo."
@@ -126,3 +126,6 @@
   (if (= (:ammo weapon) :infinity)
     false
     (< (:ammo weapon) (/ (:ammo (meta weapon)) 2))))
+
+(defn can-capture? [unit]
+  (contains? #{:infantry :mech} (:internal-name unit)))
