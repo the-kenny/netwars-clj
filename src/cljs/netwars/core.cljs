@@ -123,6 +123,23 @@
   (dom/set-properties (dom/get-element :unit-details) {"style" "visibility:hidden;"}))
 
 
+;;; Terrain Info
+
+(defn show-terrain-info [terrain]
+  ;; TODO: Draw terrain
+  (dom/set-text (dom/get-element :terrain-name) (if (aw-map/is-building? terrain)
+                                                  (let [[t c] terrain]
+                                                    (str (name c) " " (name t)))
+                                                  (name terrain))))
+
+
+;;; Player info
+
+(defn show-player-info [player]
+  (dom/set-text (dom/get-element :player-name) (name (:color player)))
+  (dom/set-text (dom/get-element :player-funds) (str (:funds player))))
+
+
 ;;; Internal utility functions
 
 (defn ^:private sanitize-game
@@ -152,6 +169,8 @@
     (if-let [unit (aw-game/selected-unit clean-game)]
       (show-unit-info unit)
       (hide-unit-info))
+
+    (show-player-info (aw-game/current-player clean-game))
 
     (game-drawer/draw-game canvas
                            clean-game
@@ -240,8 +259,12 @@
   [c]
   (when-let [game @current-game]
     (let [unit (game-board/get-unit (:board game) c)
+          terrain (game-board/get-terrain (:board game) c)
           current-unit (aw-game/selected-unit game)
           current-path (:current-path game)]
+
+      (show-terrain-info terrain)
+
       ;; TODO: We need movement-range here
       (cond
        (and game

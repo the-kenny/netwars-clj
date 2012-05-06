@@ -12,16 +12,36 @@
 
 #controls {
     height: 100%;
+    width: 130pt;
     padding: 0;
 }
 
 #controls #end-turn-button {
 }
 
-#unit-details {
+#controls {
     font-size: 9pt;
     font-family: tahoma;
 }
+
+#controls table {
+    width: 100%;
+    text-align: right;
+}
+
+#controls table th {
+    text-align: left;
+}
+
+#controls canvas {
+    margin-left: 50%;
+    margin-right: 50%;
+}
+
+#controls #end-turn-button {
+    width: 100%;
+}
+
 
 /* #connectionIndicator { */
 /*     z-index: 100; */

@@ -6,14 +6,38 @@
 
 (defn ^:private unit-info-table []
   [:table {:id "unit-details"
-           :style "visibility: hidden"}
+           ;; :style "visibility: hidden"
+           }
    [:tr
     [:td {:colspan 2}
-     [:canvas {:id "unit-canvas"}]]]
+     [:canvas {:id "unit-canvas"
+               :width  16
+               :height 16}]]]
    [:tr
-    [:td "HP:"] [:td {:id "unit-hp"}]]
+    [:th "HP:"] [:td {:id "unit-hp"}]]
    [:tr
-    [:td "Fuel:"] [:td {:id "unit-fuel"}]]])
+    [:th "Fuel:"] [:td {:id "unit-fuel"}]]])
+
+(defn ^:private terrain-info-table []
+  [:table {:id "terrain-details"}
+   [:tr
+    [:td {:colspan 2}
+     [:canvas {:id "terrain-canvas"
+               :width  16
+               :height 32}]]]
+   [:tr
+    [:th "Terrain:"] [:td {:id "terrain-name"}]]
+   ;; TODO: Defense values
+   ;; [:tr
+   ;;  [:td "Defense Value:"] [:td {:id "terrain-defense-value"}]]
+   ])
+
+(defn ^:private player-info-table []
+  [:table {:id "player-details"}
+   [:tr
+    [:th "Player:"] [:td {:id "player-name"}]]
+   [:tr
+    [:th "Funds:"] [:td {:id "player-funds"}]]])
 
 (defn page []
   (html5
@@ -29,12 +53,15 @@
     [:div {:id "normal"}
      [:table {:id "mapBox"}
       [:tr
-       [:td {:rowspan 2}
+       [:td
         [:canvas {:id "gameBoard"}]]
        [:td {:id "controls"}
-        (unit-info-table)
-        [:div {:id "terrain-details"}]]]
-      [:tr
-       [:td {:valign "bottom"}
-        (submit-button {:id "end-turn-button"} "End Turn")]]]]
+        [:table {:height "100%"}
+         [:tr [:td (unit-info-table)]]
+         [:tr [:td (terrain-info-table)]]
+         [:tr [:td (player-info-table)]]
+         [:tr
+          [:th {:colspan 2
+                :valign "bottom"}
+           (submit-button {:id "end-turn-button"} "End Turn")]]]]]]]
     (include-js "netwars.js")]))
