@@ -132,13 +132,14 @@
     (set! (.-width canvas) tile-width)
     (set! (.-height canvas) tile-height)
     (when (aw-map/is-building? terrain)
-      (tile-drawer/draw-tile context
-                             tiles/+terrain-tiles+
-                             (cons :buildings terrain)
-                             [game-drawer/+field-width+
-                              (* 2 game-drawer/+field-height+)]
-                             [0 0]
-                             nil)))
+      (let [[terr color] terrain]
+       (tile-drawer/draw-tile context
+                              tiles/+terrain-tiles+
+                              [:buildings terr color]
+                              [game-drawer/+field-width+
+                               (* 2 game-drawer/+field-height+)]
+                              [0 0]
+                              nil))))
 
   (dom/set-text (dom/get-element :terrain-name) (if (aw-map/is-building? terrain)
                                                   (let [[t c] terrain]
