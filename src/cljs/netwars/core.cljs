@@ -225,21 +225,34 @@
   "Function called when the mouse entered a new field on the game
   board."
   [c]
-  (let [game @current-game
-        current-unit (aw-game/selected-unit game)
-        current-path (:current-path game)]
-    ;; TODO: We need movement-range here
-    (when (and game
-               current-unit
-               current-path
-               (not @current-action-menu))
-      (when (pathfinding/update-path! current-path
-                                      (aw-game/movement-range game)
-                                      c
-                                      (-> game :board :terrain)
-                                      current-unit)
-        ;; Hack: Redraw the game (there should be a fn for this)
-        (reset! current-game game)))))
+  (when-let [game @current-game]
+    (let [unit (game-board/get-unit (:board game) c)
+          current-unit (aw-game/selected-unit game)
+          current-path (:current-path game)]
+      ;; TODO: We need movement-range here
+      (cond
+       (and game
+            current-unit
+            current-path
+            (not @current-action-menu))
+       (when (pathfinding/update-path! current-path
+                                       (aw-game/movement-range game)
+                                       c
+                                       (-> game :board :terrain)
+                                       current-unit)
+         ;; Hack: Redraw the game (there should be a fn for this)
+         (reset! current-game game))
+
+       ;; When we're on a field with an unit, show info about it
+       unit (show-unit-info unit)
+
+       ;; If there's no unit on the field, show info for selected unit
+       current-unit (show-unit-info current-unit)
+
+       ;; If there's neither a selected unit or an unit on the field,
+       ;; hide the info
+       (and (not unit)
+            (not current-unit)) (hide-unit-info)))))
 
 (let [last-coord (atom nil)]
  (defn ^:private mouse-moved-internal [event]
