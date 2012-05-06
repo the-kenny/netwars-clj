@@ -114,6 +114,9 @@
 (defn available-weapons [u]
   (into {} (filter (fn [[k v]] (weapon-available? v)) (weapons u))))
 
+(defn ranged-weapon? [weapon]
+  (not= 1 (reduce min (:range weapon))))
+
 (defn fire-weapon
   "'Fires' a weapon (:alt-weapon or :main-weapon). Mainly uses ammo."
   [u main-or-alt]

@@ -73,7 +73,8 @@
   (let [menu (unit-menu/unit-action-menu game c {:wait    #(unit-action-wait game c)
                                                  :attack  #(unit-action-attack game c)
                                                  :capture #(unit-action-capture game c)
-                                                 :cancel  #(action-cancel)})]
+                                                 :cancel  #(action-cancel)}
+                                         unit)]
     (menu/display-menu menu (dom/get-element :mapBox) (game-drawer/coord->canvas c))
     (reset! current-action-menu menu))
   ;; Return nil to indicate no re-draw is needed
@@ -208,7 +209,8 @@
      ;; selected a continuing action (Wait, Capture, Attack, ...)
      (let [game-moved (aw-game/move-unit game (pathfinding/path->aw-path (:current-path game)))]
        (draw-game (dom/get-element "gameBoard") (dissoc game-moved :current-path))
-       (show-unit-action-menu game-moved c (game-board/get-unit (:board game-moved) c))
+       (show-unit-action-menu game-moved c (assoc (game-board/get-unit (:board game-moved) c)
+                                             :moved true))
        nil))))
 
 (defn clicked-on

@@ -85,6 +85,12 @@
     (is (not (has-weapons? apc)) "An APC doesn't have weapons")
     (is (empty? (weapons apc)) "weapons returns an empty seq")))
 
+(fact "about ranged-weapon?"
+  (let [infantry (main-weapon (make-unit *spec* :infantry ...color...))
+        artillery (main-weapon (make-unit *spec* :artillery ...color...))]
+    (ranged-weapon? infantry)  => false
+    (ranged-weapon? artillery) => true))
+
 (fact "about fire-weapon"
   (let [infantry (make-unit *spec* :infantry ...color...)
         tank (make-unit *spec* :tank ...color...)]
