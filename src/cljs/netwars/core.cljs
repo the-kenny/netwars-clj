@@ -225,7 +225,10 @@
         current-unit (aw-game/selected-unit game)
         current-path (:current-path game)]
     ;; TODO: We need movement-range here
-    (when (and game current-unit current-path)
+    (when (and game
+               current-unit
+               current-path
+               (not @current-action-menu))
       (when (pathfinding/update-path! current-path
                                       (aw-game/movement-range game)
                                       c
