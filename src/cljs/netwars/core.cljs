@@ -214,7 +214,9 @@
 (defn clicked-on
   "Generic function ran when the player clicks on the game
   board. Dispatches between units and buildings."  [c]
-  (when (and @current-game (not @current-action-menu))
+  (when (and @current-game
+             (not @current-action-menu)
+             (aw-map/in-bounds? (-> @current-game :board :terrain) c))
     (let [game @current-game
           newgame (let [board (:board game)
                         terrain (game-board/get-terrain board c)
