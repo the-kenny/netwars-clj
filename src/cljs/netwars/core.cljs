@@ -73,7 +73,7 @@
   function applies the game-state given as argument because it after
   moving the current state is just drawn, not applied."
   [game c]
-  (reset! current-game game)
+  (reset! current-game (dissoc game :current-path))
   (swap! current-action-menu menu/hide-menu))
 
 (defn unit-action-capture
@@ -101,6 +101,7 @@
   (swap! current-game #(let [att (aw-game/selected-coordinate %)
                              def c]
                          (-> game
+                             (dissoc :moving-disabled)
                              (aw-game/perform-attack att def)
                              (aw-game/deselect-unit))))
   ;; TODO: Dismissal shouldn't be done in every action-fn

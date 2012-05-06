@@ -208,7 +208,13 @@
     (let [context (.getContext canvas "2d")
           selected-coord (aw-game/selected-coordinate game)
           selected-unit  (aw-game/selected-unit game)]
-      (when-not (:moved selected-unit)
+      (when (and (not (:moved selected-unit))
+                 ;; Check for the current path because the movement
+                 ;; range should just get drawn when the unit can
+                 ;; move. When the player clicks on 'Attack' the unit
+                 ;; can't move anymore, therefore we dissoc the
+                 ;; :current-path from the selected unit.
+                 (:current-path game))
        (highlight-squares context
                           (disj (aw-game/movement-range game) selected-coord)
                           "rgba(255, 0, 0, 0.4)"))
