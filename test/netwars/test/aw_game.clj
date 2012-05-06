@@ -276,7 +276,8 @@
          *game* (buy-unit *game* base-coord :infantry)]
      (let [u (board/get-unit (:board *game*) base-coord)]
        u                                              => is-unit?
-       (:internal-name u)                             => :infantry)
+       (:internal-name u)                             => :infantry
+       (:moved u)                                     => true)
      (< (:funds (current-player *game*)) old-funds)   => true
      (-> *game* game-events last)                     => (contains {:type :bought-unit})))
 

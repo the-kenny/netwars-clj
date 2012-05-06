@@ -214,7 +214,7 @@ Returns path."
     (assert (<= price (:funds player))
             (str "Not enough funds to buy " (name (:internal-name unit))))
     (-> game
-        (update-in [:board] board/add-unit c unit)
+        (update-in [:board] board/add-unit c (assoc unit :moved true))
         (update-player (:color player) player/spend-funds price)
         (log-event {:type :bought-unit
                     :unit unit
