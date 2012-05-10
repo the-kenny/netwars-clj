@@ -39,12 +39,12 @@
   (decode [s] (decode-seq s)))
 
 (extend-protocol Sendable
-  ;; PersistentHashMap
-  ;; (encode [m] (encode-map m))
-  ;; (decode [m] (decode-map m))
-  ;; PersistentTreeMap
-  ;; (encode [m] (encode-map m))
-  ;; (decode [m] (decode-map m))
+  PersistentHashMap
+  (encode [m] (encode-map m))
+  (decode [m] (decode-map m))
+  PersistentTreeMap
+  (encode [m] (encode-map m))
+  (decode [m] (decode-map m))
   HashMap
   (encode [m] (encode-map m))
   (decode [m] (decode-map m))
@@ -53,7 +53,10 @@
   (decode [m] (decode-map m)))
 
 (extend-protocol Sendable
-  Set
+  PersistentTreeSet
+  (encode [s] (with-meta (into #{} (map encode s)) (encode (meta s))))
+  (decode [o] (with-meta (into #{} (map decode o)) (decode (meta o))))
+  PersistentHashSet
   (encode [s] (with-meta (into #{} (map encode s)) (encode (meta s))))
   (decode [o] (with-meta (into #{} (map decode o)) (decode (meta o)))))
 

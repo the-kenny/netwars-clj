@@ -8,7 +8,11 @@
                  [clj-logging-config "1.9.6"]
                  [compojure "1.0.1"]
                  [hiccup "1.0.0"]
-                 [ring/ring-devel "1.1.0"]]
+                 [ring/ring-devel "1.1.0"]
+                 [org.clojure/clojurescript "0.0-1211"]]
+   :repositories {"java.net" "http://download.java.net/maven/2"
+                 "sonatype"
+                 {:url "http://oss.sonatype.org/content/repositories/releases"}}
   :exclusions [org.clojure/clojure
                swank-clojure/swank-clojure]
   :extra-files-to-clean ["resoures/public/netwars.js"]
