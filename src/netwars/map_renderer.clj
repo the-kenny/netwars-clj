@@ -40,21 +40,19 @@ For example: [:pipe :uldr] or [:seaside :corner :dr]"
 ;;; Utility Functions
 
 (defn- uldr-sorter [k]
-  (condp = k
+  (case k
     :u 0
     :l 1
     :d 2
     :r 3
     4))
 
-(def +dir-mappings+
-  {:north :u,
-   :east :r
-   :south :d
-   :west :l})
-
 (defn rename-direction [dir]
-  (get +dir-mappings+ dir))
+  (case dir
+    :north :u
+    :east  :r
+    :south :d
+    :west  :l))
 
 (defn stringify-directions [dirs]
   (keyword (apply str
@@ -62,11 +60,11 @@ For example: [:pipe :uldr] or [:seaside :corner :dr]"
                                      (map rename-direction dirs))))))
 
 (defn- direction-complement [dir]
-  (get {:north :south,
-        :south :north,
-        :east :west,
-        :west :east}
-       dir))
+  (case dir
+    :north :south
+    :south :north
+    :east  :west
+    :west  :east))
 
 ;;; Begin of section for orienting tiles
 
