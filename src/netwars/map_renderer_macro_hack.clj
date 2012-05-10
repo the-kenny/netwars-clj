@@ -1,6 +1,8 @@
 (ns netwars.map-renderer-macro-hack
   (:require [netwars.map-utils :as map-utils]))
 
+;*CLJSBUILD-MACRO-FILE*;
+
 (defmacro defconnectable [t1 ts]
   `(defmethod ~'connectable? ~t1 [_# t2#]
      (boolean (#{~@ts} t2#))))
