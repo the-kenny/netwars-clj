@@ -147,36 +147,34 @@
 (defn reachable-fields
   "Returns a set of all coordinates reachable by unit on coordinate c"
   [board c]
-  (assert (get-unit board c))
-  (assert (meta (get-unit board c)))
   (let [unit (get-unit board c)
         movement-range (:movement-range (meta unit))
         movement-type (:movement-type (meta unit))
-        fuel (:fuel unit)
-        terrain (:terrain board)
-        acc (atom #{})]
-    (let [helper (fn helper [c rest initial?]
+        fuel (:fuel unit)]
+    (assert (meta unit))
+    (let [helper (fn helper [c rest acc & {:keys [initial?]}]
                    (let [t (get-terrain board c)
                          costs (if initial? 0 (aw-map/movement-costs t movement-type))]
-                     (when (and
-                            (aw-map/can-pass? t movement-type)
-                            (or initial? (can-walk-on-field? board unit c))
-                            (>= rest costs))
-                       (let [newacc (swap! acc conj c)]
-                        (when (> rest costs)
-                          (let [{:keys [x y]} c
-                                right (aw-map/coord (inc x)     y)
-                                left  (aw-map/coord (dec x)     y)
-                                down  (aw-map/coord      x (inc y))
-                                up    (aw-map/coord      x (dec y))
-                                restcosts (- rest costs)]
-                            (when (aw-map/in-bounds? terrain right)
-                              (helper right restcosts false))
-                            (when (aw-map/in-bounds? terrain left)
-                              (helper left  restcosts false))
-                            (when (aw-map/in-bounds? terrain down)
-                              (helper down  restcosts false))
-                            (when (aw-map/in-bounds? terrain up)
-                             (helper up    restcosts false))))))))]
-      (helper c (min movement-range fuel) true))
-    @acc))
+                     (if (and (aw-map/can-pass? t movement-type)
+                              (or initial? (can-walk-on-field? board unit c))
+                              (>= rest costs))
+                       (let [newacc (conj! acc c)]
+                         (if (> rest costs)
+                           (let [{:keys [x y]} c
+                                 right (aw-map/coord (inc x)     y)
+                                 left  (aw-map/coord (dec x)     y)
+                                 down  (aw-map/coord      x (inc y))
+                                 up    (aw-map/coord      x (dec y))
+                                 restcosts (- rest costs)]
+                             (set/union
+                              (when-not (contains? newacc right)
+                                (helper right restcosts newacc))
+                              (when-not (contains? newacc left)
+                                (helper left  restcosts newacc))
+                              (when-not (contains? newacc down)
+                                (helper down  restcosts newacc))
+                              (when-not (contains? newacc up)
+                                (helper up    restcosts newacc))))
+                         newacc))
+                       acc)))]
+      (persistent! (helper c (min movement-range fuel) (transient #{c}) :initial? true)))))
