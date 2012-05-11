@@ -20,10 +20,13 @@
   `(def-orientation-method ~type [nbs#]
      (let [dirseq# (~'get-connectables-directions ~'connectable? ~type nbs#)]
        ;; Streets have at least two endpoints (Special handling for :u and :d)
-       (case dirseq#
-         ([:north] [:south]) [:north :south]
-         ([:east] [:west])   [:east :west]
-         dirseq#))))
+       (cond
+        (or (= dirseq# [:north])
+            (= dirseq# [:south])) [:north :south]
+            (or (= dirseq# [:east])
+                (= dirseq# [:west])
+                (empty? dirseq#)) [:east :west]
+                true dirseq#))))
 
 (defmacro river-mouth-cond [dir nbs]
   `(and (= :river (~dir ~nbs))
