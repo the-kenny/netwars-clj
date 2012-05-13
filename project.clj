@@ -22,6 +22,7 @@
                            netwars.map-utils
                            netwars.map-renderer
                            netwars.path
+                           netwars.pathfinding.a-star
                            netwars.tiles]
               :builds [{:source-path "src-cljs/"
                         :compiler

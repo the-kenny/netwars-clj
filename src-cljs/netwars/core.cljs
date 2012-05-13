@@ -294,7 +294,7 @@
        (when (pathfinding/update-path! current-path
                                        (aw-game/movement-range game)
                                        c
-                                       (-> game :board :terrain)
+                                       (:board game)
                                        current-unit)
          ;; Hack: Redraw the game (there should be a fn for this)
          (reset! current-game game))
@@ -374,3 +374,5 @@
 
 (defn repl-connect []
   (repl/connect "http://localhost:9000/repl"))
+
+(sorted-set [:foo] )
