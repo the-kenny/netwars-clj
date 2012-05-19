@@ -17,6 +17,11 @@
       (when disabled? (.setEnabled menu-item false)))
     menu))
 
+(defn make-toggle-menu [items]
+  (let [menu (make-action-menu items)]
+    (.setModel menu {:toggle true})
+    menu))
+
 (defn display-menu [menu parent position]
   (.setPosition menu
                 (+ (:x position) 20)
@@ -28,6 +33,9 @@
   (gdom/removeNode (.getElement menu))
   nil)
 
+(defn toggle-menu? [menu]
+  (and (.getModel menu)
+       (:toggle (.getModel menu))))
 
 
 

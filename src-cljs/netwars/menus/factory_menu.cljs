@@ -35,7 +35,7 @@
         spec (:unit-spec game)
         [factory color] (game-board/get-terrain board c)
         player-funds (:funds (aw-game/current-player game))]
-    (generic/make-action-menu
+    (generic/make-toggle-menu
      (for [internal-name (aw-unit/factory-units spec factory)
            :let [unit (aw-unit/make-unit spec internal-name color)]]
        [(make-menu-item unit)

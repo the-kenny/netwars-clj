@@ -276,22 +276,28 @@
   "Generic function ran when the player clicks on the game
   board. Dispatches between units and buildings."  [c]
   (when (and @current-game
-             (not @current-action-menu)
              (aw-map/in-bounds? (-> @current-game :board :terrain) c))
-    (let [game @current-game
-          newgame (let [board (:board game)
-                        terrain (game-board/get-terrain board c)
-                        unit (game-board/get-unit board c)]
-                    (cond
-                     unit    (unit-clicked    game c)
-                     terrain (terrain-clicked game c)
-                     true game))]
-      ;; Don't redraw the game when the state hasn't changed
-      ;; TODO: This shouldn't be necessary when everything is opimized
-      (when newgame
-        (reset! current-game (-> newgame
-                                 (sanitize-game)
-                                 (assoc :last-click-coord c)))))))
+    (if (and @current-action-menu
+             (menu/toggle-menu? @current-action-menu))
+      (swap! current-action-menu menu/hide-menu)
+      (let [game @current-game
+            newgame (let [board (:board game)
+                          terrain (game-board/get-terrain board c)
+                          unit (game-board/get-unit board c)]
+                      (cond
+                       unit
+                       (unit-clicked    game c)
+
+                       terrain
+                       (terrain-clicked game c)
+
+                       true nil))]
+        ;; Don't redraw the game when the state hasn't changed
+        ;; TODO: This shouldn't be necessary when everything is opimized
+        (when newgame
+          (reset! current-game (-> newgame
+                                   (sanitize-game)
+                                   (assoc :last-click-coord c))))))))
 
 (defn mouse-moved
   "Function called when the mouse entered a new field on the game
