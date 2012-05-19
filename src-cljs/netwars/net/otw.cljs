@@ -1,8 +1,7 @@
 (ns netwars.net.otw
   (:require [netwars.aw-map :as aw-map]
             [cljs.reader :as reader]
-            [netwars.logging :as logging]
-            [cljs.core :as cljs.core]))
+            [netwars.logging :as logging]))
 
 (defprotocol Sendable
   (encode [o])
