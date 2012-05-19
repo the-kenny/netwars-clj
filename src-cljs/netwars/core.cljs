@@ -98,10 +98,16 @@
   ;; Return nil to indicate no re-draw is needed
   nil)
 
+(defn buy-unit-action [game c unit]
+  (assert (nil? (game-board/get-unit (:board game) c)))
+  (swap! current-game aw-game/buy-unit c (:internal-name unit))
+  (swap! current-action-menu menu/hide-menu))
+
 (defn show-factory-menu [game c]
-  (let [menu (factory-menu/factory-menu game c nil)]
+  (let [menu (factory-menu/factory-menu game c buy-unit-action)]
     (menu/display-menu menu (dom/get-element :mapBox) (game-drawer/coord->canvas c))
-    (reset! current-action-menu menu)))
+    (reset! current-action-menu menu))
+  nil)
 
 
 ;;; Unit info functions

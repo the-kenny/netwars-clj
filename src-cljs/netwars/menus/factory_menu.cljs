@@ -37,4 +37,4 @@
     (generic/make-action-menu
      (for [internal-name (aw-unit/factory-units spec factory)
            :let [unit (aw-unit/make-unit spec internal-name color)]]
-       [(make-menu-item unit) #(js/alert (pr-str unit))]))))
+       [(make-menu-item unit) #(purchase-fn game c unit)]))))
