@@ -149,7 +149,8 @@ Mostly useful for drawing of maps."
   (boolean (movement-costs terrain movement-type)))
 
 (defn can-produce-units? [t]
-  (and (sequential? t) (is-building? t) (contains? #{:port :base :airport} (first t))))
+  (and (is-building? t)
+       (contains? #{:port :base :airport} (first t))))
 
 (def ^:private +defense-values+
   {:plain 1
