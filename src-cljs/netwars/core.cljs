@@ -18,6 +18,7 @@
             [netwars.menus.generic :as menu]
             [netwars.menus.unit-menu :as unit-menu]
             [netwars.menus.attack-menu :as attack-menu]
+            [netwars.menus.factory-menu :as factory-menu]
 
             ;; Load all crossovers prevent stripping
             [netwars.aw-game :as aw-game]
@@ -96,6 +97,11 @@
     (reset! current-action-menu menu))
   ;; Return nil to indicate no re-draw is needed
   nil)
+
+(defn show-factory-menu [game c]
+  (let [menu (factory-menu/factory-menu game c nil)]
+    (menu/display-menu menu (dom/get-element :mapBox) (game-drawer/coord->canvas c))
+    (reset! current-action-menu menu)))
 
 
 ;;; Unit info functions
@@ -229,6 +235,11 @@
       (own-unit-clicked game c unit)
       (enemy-unit-clicked game c unit))))
 
+(defn factory-clicked [game c]
+  (let [[factory color] (game-board/get-terrain (:board game) c)]
+   (when (= (:color (aw-game/current-player game)) color)
+     (show-factory-menu game c))))
+
 (defn terrain-clicked
   "Ran when the player clicks any terrain. Dispatches to functions
   handling buildings."
@@ -249,7 +260,11 @@
        (draw-game (dom/get-element "gameBoard") (dissoc game-moved :current-path))
        (show-unit-action-menu game-moved c (assoc (game-board/get-unit (:board game-moved) c)
                                              :moved true))
-       nil))))
+       nil)
+
+     (and (not (aw-game/selected-unit game))
+          (aw-map/can-produce-units? terrain))
+     (factory-clicked game c))))
 
 (defn clicked-on
   "Generic function ran when the player clicks on the game

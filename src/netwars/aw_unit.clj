@@ -50,8 +50,11 @@
     :pipe
     :hover})
 
+(defn find-prototypes [spec key value]
+  (filter #(= (get % key) value) spec))
+
 (defn find-prototype [spec key value]
-  (first (filter #(= (get % key) value) spec)))
+  (first (find-prototypes spec key value)))
 
 (defn make-unit [spec id-or-internal-name color]
   (when-let [prototype (or (find-prototype spec :id id-or-internal-name)
@@ -63,7 +66,7 @@
                   prototype)))
 
 (defn factory-units [spec factory]
-  (filter #(= (:factory %) factory) spec))
+  (map :internal-name (filter #(= (:factory %) factory) spec)))
 
 ;;; Misc Functions
 
