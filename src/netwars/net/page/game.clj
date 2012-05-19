@@ -41,6 +41,11 @@
    [:tr
     [:th "Funds:"] [:td {:id "player-funds"}]]])
 
+(defn- include-clojurescript [path]
+  (list
+   (javascript-tag "var CLOSURE_NO_DEPS = true;")
+   (include-js path)))
+
 (defn page []
   (html5
    [:head
@@ -66,4 +71,4 @@
           [:th {:colspan 2
                 :valign "bottom"}
            (submit-button {:id "end-turn-button"} "End Turn")]]]]]]]
-    (include-js "netwars.js")]))
+    (include-clojurescript "netwars.js")]))
