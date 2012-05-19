@@ -33,8 +33,11 @@
 (defn factory-menu [game c purchase-fn]
   (let [board (:board game)
         spec (:unit-spec game)
-        [factory color] (game-board/get-terrain board c)]
+        [factory color] (game-board/get-terrain board c)
+        player-funds (:funds (aw-game/current-player game))]
     (generic/make-action-menu
      (for [internal-name (aw-unit/factory-units spec factory)
            :let [unit (aw-unit/make-unit spec internal-name color)]]
-       [(make-menu-item unit) #(purchase-fn game c unit)]))))
+       [(make-menu-item unit)
+        #(purchase-fn game c unit)
+        (< player-funds (:price (meta unit)))]))))
