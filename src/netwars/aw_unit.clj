@@ -62,6 +62,9 @@
                            (:max-fuel-level prototype))
                   prototype)))
 
+(defn factory-units [spec factory]
+  (filter #(= (:factory %) factory) spec))
+
 ;;; Misc Functions
 
 (defn apply-damage [u d]
