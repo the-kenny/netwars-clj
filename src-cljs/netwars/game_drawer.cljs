@@ -172,23 +172,26 @@
 
 (defn- draw-terrain [canvas game callback & [last-clicked-coord]]
   (let [cont (fn [canvas game]
-               (.drawImage (.getContext canvas "2d") @hidden-background-canvas 0 0)
-               (callback canvas game))]
+               (.drawImage (.getContext canvas "2d") (second @hidden-background-canvas) 0 0)
+               (callback canvas game))
+        [map-url hidden-canvas] @hidden-background-canvas]
 
     (cond
-     (nil? @hidden-background-canvas)
+     (or (nil? hidden-canvas)
+         (not= map-url (:map-url game)))
      (let [newcanvas (dom/element :canvas)]
        (prepare-canvas newcanvas game
                        (fn [newcanvas game]
                          (draw-map-background (.getContext newcanvas "2d")
                                               game
                                               (fn []
-                                                (reset! hidden-background-canvas newcanvas)
+                                                (reset! hidden-background-canvas [(:map-url game)
+                                                                                  newcanvas])
                                                 (cont canvas game))))))
      last-clicked-coord
      (do
        (logging/log "Redrawing on hidden canvas")
-       (render-background-for-coordinate (.getContext @hidden-background-canvas "2d")
+       (render-background-for-coordinate (.getContext canvas "2d")
                                         (-> game :board :terrain)
                                         last-clicked-coord
                                         (fn []
