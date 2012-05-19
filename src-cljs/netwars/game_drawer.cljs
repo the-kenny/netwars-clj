@@ -9,7 +9,8 @@
             [netwars.logging :as logging]
             [netwars.map-renderer :as map-renderer]
             [netwars.map-utils :as map-utils]
-            [clojure.browser.dom :as dom]))
+            [clojure.browser.dom :as dom]
+            [goog.dom :as gdom]))
 
 (def +field-width+  16)
 (def +field-height+ 16)
@@ -131,7 +132,7 @@
         terrain (game-board/get-terrain (:board game) c)
         cont (fn []
                (when (:moved unit)
-                     (let [unit-canvas (dom/element :canvas)
+                     (let [unit-canvas (gdom/createElement "canvas")
                            unit-context (.getContext unit-canvas "2d")
                            unit-tile-area (tiles/tile-rect tiles/+unit-tiles+ path)]
                        (set! (.-width unit-canvas) (:width unit-tile-area))

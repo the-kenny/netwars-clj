@@ -9,11 +9,11 @@
             [netwars.tile-drawer :as tile-drawer]
             [netwars.tiles :as tiles]
 
-            [clojure.browser.dom :as dom]))
+            [clojure.browser.dom :as dom]
+            [goog.dom :as gdom]))
 
 (defn ^:private make-menu-item [unit]
-  (let [canvas (dom/element :canvas)
-        table (dom/element :table)]
+  (let [canvas (gdom/createElement "canvas")]
     (set! (.-width canvas) 16)
     (set! (.-height canvas) 16)
     (tile-drawer/draw-tile (.getContext canvas "2d")
@@ -23,12 +23,14 @@
                            [0 0]
                            nil)
     (let [m (meta unit)]
-      (dom/element :table
-                   {:class "factory-menu-item"}
-                   (dom/element :tr
-                    (dom/element :td canvas)
-                    (dom/element :td {:class "unit-name"}  (str (:name m) ":"))
-                    (dom/element :td {:class "unit-price"} (str (:price m))))))))
+      (gdom/createDom
+       "table" "factory-menu-item"
+       (gdom/createDom
+        "tr"
+        nil
+        (gdom/createDom "td" nil canvas)
+        (gdom/createDom "td" "unit-name"  (str (:name m) ":"))
+        (gdom/createDom "td" "unit-price" (str (:price m))))))))
 
 (defn factory-menu [game c purchase-fn]
   (let [board (:board game)
