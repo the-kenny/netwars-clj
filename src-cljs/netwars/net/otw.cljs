@@ -20,5 +20,4 @@
 
 (defn decode-data [s]
   {:pre [(string? s)]}
-  (.log js/console s)
   (reader/read-string s))
