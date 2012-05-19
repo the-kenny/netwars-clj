@@ -25,7 +25,7 @@
                      (sort-colors (-> loaded-map :info :player-colors)))
         initial-event {:type :game-started
                        :info newinfo
-                       :loaded-map loaded-map
+                       :initial-board board
                        :unit-spec unit-spec
                        :players players}]
     (AwGame. newinfo

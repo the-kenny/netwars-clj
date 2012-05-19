@@ -349,30 +349,18 @@
              (fn [key ref old new]
                (draw-game canvas new))))
 
-#_(register-handlers (dom/get-element :gameBoard))
-
-#_(reset! current-game netwars.test-games/basic-game)
-
-;;; Testing functions
-
-(defn load-test-game []
-  (logging/log "Loading game...")
-  (goog.net.XhrIo/send "http://localhost:8080/api/new-game/7330.aws"
-                       (fn [e]
-                         (logging/log "Got data, started reading in")
-                         (let [game (-> e
-                                        .-target
-                                        .getResponseText
-                                        otw/decode-data
-                                        aw-game/map->AwGame)]
-                           (reset! current-game game))
-                         (logging/log "Loaded game."))))
-
 (defn ^:export start-game [game]
   (register-handlers (dom/get-element :gameBoard))
   (reset! current-game game))
 
+(defn start-game-from-server [map-name]
+  (logging/log "Loading game...")
+  (goog.net.XhrIo/send (str "http://localhost:8080/api/new-game/" map-name)
+                       (fn [e]
+                         (logging/log "Got data, started reading in")
+                         (let [text (-> e .-target .getResponseText)]
+                           (start-game (otw/decode-data text)))
+                         (logging/log "Loaded game."))))
+
 (defn repl-connect []
   (repl/connect "http://localhost:9000/repl"))
-
-(sorted-set [:foo] )

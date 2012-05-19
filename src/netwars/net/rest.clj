@@ -64,7 +64,6 @@
 
 (defn make-game [map-name]
   (->  (game-creator/make-game {} map-name)
-       (dissoc :moves)
        (assoc  :map-url (map-url map-name))
        (otw/encode-data)))
 
