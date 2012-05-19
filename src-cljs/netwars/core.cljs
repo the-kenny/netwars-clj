@@ -14,7 +14,6 @@
             [cljs.reader :as reader]
 
             [netwars.game-drawer :as game-drawer]
-            [netwars.test-games :as test-games]
 
             [netwars.menus.generic :as menu]
             [netwars.menus.unit-menu :as unit-menu]
