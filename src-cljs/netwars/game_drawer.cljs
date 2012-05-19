@@ -70,10 +70,12 @@
 
 (defn- draw-map-background [context game callback]
   (let [terrain-board (-> game :board :terrain)]
-    (doseq [x (range (aw-map/width terrain-board))
-            y (range (aw-map/height terrain-board))
-            :let [c (aw-map/coord x y)]]
-      (render-background-for-coordinate context terrain-board c nil))
+    (dotimes [x (aw-map/width terrain-board)]
+      (dotimes [y (aw-map/height terrain-board)]
+        (render-background-for-coordinate context
+                                          terrain-board
+                                          (aw-map/coord x y)
+                                          nil)))
     (when (fn? callback) (callback))))
 
 ;;; General functions for drawing units, background etc.
