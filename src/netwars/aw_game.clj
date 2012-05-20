@@ -215,9 +215,16 @@ Returns path."
 (defn capture-building [game c]
   {:pre [(board/capture-possible? (:board game) c)
          (not (:moved (board/get-unit (:board game) c)))]}
-  (-> game
-      (update-in [:board] board/capture-building c)
-      (update-in [:board] board/update-unit c assoc :moved true)))
+  (let [unit (board/get-unit (:board game) c)
+        newboard (board/capture-building (:board game) c)
+        terrain (board/get-terrain newboard c)]
+   (-> game
+       (assoc :board newboard)
+       (update-in [:board] board/update-unit c assoc :moved true)
+       (log-event {:type :building-captured
+                   :building terrain
+                   :unit unit
+                   :coordinate c}))))
 
 ;;; Attacking
 
