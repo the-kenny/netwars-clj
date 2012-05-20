@@ -21,6 +21,9 @@
 
 (background (around :facts (binding [*game* (make-test-game)] ?form)))
 
+(defn- check-game-events [game type]
+  (= (-> game game-events last :type) type))
+
 (deftest test-aw-game
   (is (instance? netwars.aw_game.AwGame *game*))
   (is (= :game-started (-> *game* :moves first :type))))
@@ -54,8 +57,7 @@
       current-player) => (contains {:color :red})
   (-> *game*
       next-player
-      game-events
-      last)           => (contains {:type :turn-completed}))
+      (check-game-events :turn-completed)) => true)
 
 
 (facts "about get-player"
@@ -266,7 +268,7 @@
       (is (= to (selected-coordinate newgame)) "`current-unit' was updated")
       (let [new-unit (board/get-unit (:board newgame) to)]
         (is (< (:fuel new-unit) (:fuel unit)) "the move used fuel"))
-      (is (= :unit-moved (:type (last (game-events newgame)))) "the move was logged"))))
+      (is (check-game-events newgame :unit-moved) "the move was logged"))))
 
 ;;; From here on, it's Midje
 
@@ -279,7 +281,7 @@
        (:internal-name u)                             => :infantry
        (:moved u)                                     => true)
      (< (:funds (current-player *game*)) old-funds)   => true
-     (-> *game* game-events last)                     => (contains {:type :bought-unit})))
+     (check-game-events *game* :bought-unit)          => true))
 
  (facts "about misuse of buy-unit"
    ;; Can't buy unit when there's already an unit on this coord
@@ -294,8 +296,9 @@
   (let [infantry (coord 1 13)
         white-city (coord 1 1)
         *game* (update-in *game* [:board] board/add-unit white-city
-                          (board/get-unit (:board *game*) infantry))]
-    (-> *game*
-        (capture-building white-city)
+                          (board/get-unit (:board *game*) infantry))
+        captured-game (capture-building *game* white-city)]
+    (-> captured-game
         :board
-        (board/get-terrain white-city)) => [:city :white 10]))
+        (board/get-terrain white-city))                  => [:city :white 10]
+    (check-game-events captured-game :building-captured) => true))
