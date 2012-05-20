@@ -377,7 +377,7 @@
 
 (defn ^:export start-game [game]
   (register-handlers (dom/get-element :gameBoard))
-  (reset! current-game game))
+  (reset! current-game (aw-game/start-game game)))
 
 (defn start-game-from-server [map-name]
   (logging/log "Loading game...")

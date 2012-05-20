@@ -7,7 +7,6 @@
         [netwars.unit-loader :only [load-units]])
   (:import [netwars.aw_game AwGame]))
 
-(def +default-funds+ 1000)
 (def +maps-path+ "maps/")
 
 (defn- sort-colors [colors]
@@ -18,22 +17,14 @@
         unit-spec (load-units "resources/units.xml")
         damagetable (damagetable/load-damagetable "resources/damagetable.xml")
         board (board/generate-game-board loaded-map unit-spec)
+        settings aw-game/*default-game-settings*
         newinfo (assoc info :map (:info loaded-map)
                        :map-name mapsource)
-        players (map #(player/make-player %1 %2 +default-funds+)
+        players (map #(player/make-player %1 %2 0)
                      (map #(str "Player " %) (range 1 1000))
-                     (sort-colors (-> loaded-map :info :player-colors)))
-        initial-event {:type :game-started
-                       :info newinfo
-                       :initial-board board
-                       :unit-spec unit-spec
-                       :players players}]
-    (AwGame. newinfo
-             0                    ;current-player-index
-             1                    ;round-counter
-             (vec players)
-             unit-spec
-             damagetable
-             board
-             nil                  ;current-unit
-             [initial-event])))
+                     (sort-colors (-> loaded-map :info :player-colors)))]
+    (-> (aw-game/map->AwGame {:settings settings
+                              :players (vec players)
+                              :unit-spec unit-spec
+                              :damagetable damagetable
+                              :board board}))))

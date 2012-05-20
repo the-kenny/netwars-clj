@@ -13,7 +13,7 @@
 
 (def ^:dynamic *game* nil)
 (defn- make-test-game []
-  (make-game nil +aw-test-map+))
+  (start-game (make-game nil +aw-test-map+)))
 
 (use-fixtures :each (fn [f]
                       (binding [*game* (make-test-game)]
@@ -32,10 +32,10 @@
   (is (thrown? java.lang.Error
                (log-event *game* {})))
 
-  (is (= 1 (count (game-events *game*))))
+  (is (= 2 (count (game-events *game*))))
 
   (is (= {:type :foobar}
-         (second (game-events (log-event *game* {:type :foobar}))))))
+         (nth (game-events (log-event *game* {:type :foobar})) 2))))
 
 (fact (:players *game*) => (has every? player/is-player?))
 (fact (current-player *game*) => player/is-player?)
@@ -68,19 +68,10 @@
 
 (facts "about update-player"
   (-> *game*
-      (update-player
-                     (:color (current-player *game*))
+      (update-player (:color (current-player *game*))
                      player/spend-funds
-                     1000)
-      (current-player)) => (contains {:color :red, :funds 0})
-
-
-  (let [*game* (-> *game* next-player next-player)]
-      (-> (update-player *game*
-                      (:color (current-player *game*))
-                      player/spend-funds
-                      500)
-          (current-player))) => (contains {:color :black, :funds 500}))
+                     (:funds (current-player *game*)))
+      (current-player)) => (contains {:color :red, :funds 0}))
 
 (facts "about remove-player"
   (let [*game* (remove-player *game* :black)]

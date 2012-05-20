@@ -13,6 +13,7 @@
 ;; To move an unit, a path is needed. The functions in this namespace will automatically cause the necessary side effects (for example: consuming fuel).
 
 (defrecord AwGame [info
+                   settings
                    current-player-index
                    round-counter
                    players
@@ -22,6 +23,15 @@
                    current-unit         ;Stores the selected unit
                    moves                ;Every move in the game gets saved here
                    ])
+
+(def ^:dynamic *default-game-settings*
+  {:funds {:initial 0
+           :per-building 1000}
+   :turn-limit nil                      ;Cut after n days; player with
+                                        ;most bases wins
+
+   :fog-of-war false                    ;Not implemented
+   })
 
 ;;; Game events
 
@@ -40,6 +50,24 @@
 (defn current-player [game]
   (get (:players game) (:current-player-index game)))
 
+(defn get-player [game color]
+  (first (filter #(= (:color %) color) (:players game))))
+
+(defn update-player [game player-color f & args]
+  (update-in game [:players]
+             #(let [p (get-player game player-color)]
+                (replace {p (apply f p args)} %))))
+
+(defn ^:private turn-start-update-funds [game]
+  (let [funds-per-building (get-in game [:settings :funds :per-building] 0)
+        player-color (:color (current-player game))]
+    (update-player game
+                   player-color
+                   player/raise-funds
+                   (* funds-per-building
+                      (count (board/buildings-with-color (:board game)
+                               player-color))))))
+
 (defn next-player [game]
   (let [newgame (-> game
                     (update-in [:current-player-index]
@@ -47,6 +75,7 @@
                                  (if (>= (inc idx) (player-count game))
                                    0
                                    (inc idx))))
+                    (turn-start-update-funds)
                     (update-in [:board] (fn [board]
                                           (reduce #(board/update-unit %1 %2 dissoc :moved)
                                                   board (keys (:units board)))))
@@ -55,14 +84,6 @@
     (if (zero? (:current-player-index newgame))
       (update-in newgame [:round-counter] inc)
       newgame)))
-
-(defn get-player [game color]
-  (first (filter #(= (:color %) color) (:players game))))
-
-(defn update-player [game player-color f & args]
-  (update-in game [:players]
-             #(let [p (get-player game player-color)]
-                (replace {p (apply f p args)} %))))
 
 (defn remove-player
   "Removes a player in a running game.
@@ -283,3 +304,26 @@ Returns path."
                  (not counterattack))
           (perform-attack newgame vic-coord att-coord :counterattack true)
           newgame)))))
+
+;;; Starting the game
+
+(defn game-started? [game]
+  (> (count (game-events game)) 0))
+
+(defn start-game [game]
+  {:pre [(not (game-started? game))]
+   :post [(game-started? %)]}
+  (assert (= 0 (count (game-events game))))
+  ;; The first player must be given sufficient funds. For any
+  ;; following player this is done in `next-player'
+  (-> game
+      (assoc :current-player-index -1
+             :round-counter 0
+             :moves [])
+      (log-event
+       {:type :game-started
+        :info (:info game)
+        :initial-board (:board game)
+        :unit-spec (:unit-spec game)
+        :players (:players game)})
+    (next-player)))
