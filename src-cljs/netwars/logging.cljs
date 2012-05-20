@@ -2,4 +2,8 @@
   (:require [clojure.browser.dom :as dom]))
 
 (defn log [& more]
-  (.log js/console (apply pr-str more)))
+  (.apply (.-log js/console) js/console
+          (into-array (map #(if (satisfies? cljs.core.ISeqable %)
+                              (pr-str %)
+                              %)
+                           more))))
