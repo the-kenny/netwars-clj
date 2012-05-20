@@ -79,6 +79,9 @@
                                                    [:silo :white]
                                                    [t color]))))))
 
+(defn buildings-with-color [board color]
+  (filter (fn [[_ [_ bc]]] (= color bc)) (aw-map/buildings (:terrain board))))
+
 (defn neutralize-buildings [board color]
   (let [buildings (filter (fn [[c [typ col]]]
                             (= color col))

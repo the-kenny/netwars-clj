@@ -12,6 +12,10 @@
 (defn can-spend? [player amount]
   (>= (- (:funds player) amount) 0))
 
+(defn raise-funds [player amount]
+  {:pre [(pos? amount)]}
+  (update-in player [:funds] + amount))
+
 (defn spend-funds [player amount]
   {:pre [(can-spend? player amount)]
    :post [(>= (:funds %) 0)]}
