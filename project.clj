@@ -3,16 +3,16 @@
                  [org.clojure/data.json "0.1.1"]
                  [aleph "0.2.1-beta2"]
                  [commons-codec "1.5" :exclusions [commons-logging]]
-                 [org.clojure/tools.logging "0.2.0"]
+                 [org.clojure/tools.logging "0.2.3"]
                  [log4j/log4j "1.2.16"]
-                 [clj-logging-config "1.9.6"]
+                 [clj-logging-config "1.9.6" :exclusions [swank-clojure]]
                  [compojure "1.0.1"]
                  [hiccup "1.0.0"]
-                 [ring/ring-devel "1.1.0"]]
-  :exclusions [org.clojure/clojure
-               swank-clojure/swank-clojure]
+                 [ring/ring-devel "1.1.0"]
+                 [swank-clojure "1.4.2"]]
+  :exclusions [org.clojure/clojure]
   :extra-files-to-clean ["resoures/public/netwars.js"]
-  ;; :main netwars.core
+  :main netwars.core
   :cljsbuild {:crossovers [netwars.aw-game
                            netwars.aw-map
                            netwars.aw-player

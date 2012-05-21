@@ -1,20 +1,22 @@
 (ns netwars.core
-  (:use [netwars.net.connection :as connection]
-        [netwars.net.game-server :as game-server]
-        [netwars.net.rest :as rest]
-
-        [netwars.net.page.game :as game-page]
-
+  (:use compojure.core
+        clojure.tools.logging
+        clj-logging-config.log4j
         [aleph.http :only [start-http-server
                            wrap-aleph-handler
                            wrap-ring-handler]]
-        compojure.core
-        [compojure.route :as route]
-        [ring.util.response :only [redirect]]
-        [ring.middleware.stacktrace :as ringtrace]
         [clojure.java.browse :only [browse-url]]
-        clojure.tools.logging
-        clj-logging-config.log4j))
+        [ring.util.response :only [redirect]])
+  (:require [netwars.net.connection :as connection]
+            [netwars.net.game-server :as game-server]
+            [netwars.net.rest :as rest]
+
+            [swank.swank :as swank]
+
+            [netwars.net.page.game :as game-page]
+
+            [compojure.route :as route]
+            [ring.middleware.stacktrace :as ringtrace]))
 
 (def webapp-url "http://localhost")
 (def webapp-port 8080)
@@ -52,6 +54,7 @@
     (info "Server stopped")))
 
 (defn -main []
+  (swank/start-server :port 4005)
   (set-loggers!
    "netwars"
    {:level :info
