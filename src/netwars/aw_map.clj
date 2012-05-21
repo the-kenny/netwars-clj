@@ -136,7 +136,8 @@ Mostly useful for drawing of maps."
    :silo         {:foot 1   :mechanical 1   :tread 1   :tires 1   :fly 1   :swim nil :transport nil :oozium 1   :pipe 1   :hover nil}
    :river        {:foot 2   :mechanical 1   :tread nil :tires nil :fly 1   :swim nil :transport nil :oozium 1   :pipe nil :hover nil}
    :beach        {:foot 1   :mechanical 1   :tread 1   :tires 1   :fly 1   :swim nil :transport 1   :oozium 1   :pipe nil :hover nil}
-   :port         {:foot 1   :mechanical 1   :tread 1   :tires 1   :fly 1   :swim nil :transport 1   :oozium 1   :pipe nil :hover nil}})
+   :port         {:foot 1   :mechanical 1   :tread 1   :tires 1   :fly 1   :swim nil :transport 1   :oozium 1   :pipe nil :hover nil}
+   :airport      {:foot 1   :mechanical 1   :tread 1   :tires 1   :fly 1   :swim nil :transport nil :oozium 1   :pipe nil :hover 1}})
 
 (defn movement-costs
   "Returns the movement cost for a movement-type `type` on `terrain`"
