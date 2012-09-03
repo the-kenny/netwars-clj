@@ -150,8 +150,9 @@
     (assert (meta unit))
     (let [helper (fn helper [c rest acc & {:keys [initial?]}]
                    (let [t (get-terrain board c)
+                         ;; Costs may be nil if the unit can't pass
                          costs (if initial? 0 (aw-map/movement-costs t movement-type))
-                         rest (- rest costs)]
+                         rest (if-not (number? costs) 0 (- rest costs))]
                      (if (and (>= rest 0)
                               (can-walk-on-field? board unit c))
                        (let [newacc (assoc! acc c rest)]
