@@ -32,5 +32,5 @@
                          :pretty-print true
                          :optimizations :whitespace}}]}
   :profiles {:dev {:dependencies [[midje "1.3.1"]]
-                   :plugins [[org.clojars.the-kenny/lein-midje "1.0.9"]]}}
-  :plugins [[lein-cljsbuild "0.1.10"]])
+                   :plugins [[lein-midje "2.0.0-SNAPSHOT"]]}}
+  :plugins [[lein-cljsbuild "0.2.7"]])
