@@ -145,32 +145,33 @@
   [board c]
   (let [unit (get-unit board c)
         movement-range (:movement-range (meta unit))
-        movement-type (:movement-type (meta unit))
+        movement-type  (:movement-type  (meta unit))
         fuel (:fuel unit)]
     (assert (meta unit))
     (let [helper (fn helper [c rest acc & {:keys [initial?]}]
                    (let [t (get-terrain board c)
-                         costs (if initial? 0 (aw-map/movement-costs t movement-type))]
-                     (if (and (aw-map/can-pass? t movement-type)
-                              (or initial? (can-walk-on-field? board unit c))
-                              (>= rest costs))
-                       (let [newacc (conj! acc c)]
-                         (if (> rest costs)
+                         costs (if initial? 0 (aw-map/movement-costs t movement-type))
+                         rest (- rest costs)]
+                     (if (and (>= rest 0)
+                              (can-walk-on-field? board unit c))
+                       (let [newacc (assoc! acc c rest)]
+                         (if (pos? rest)
                            (let [{:keys [x y]} c
                                  right (aw-map/coord (inc x)     y)
                                  left  (aw-map/coord (dec x)     y)
                                  down  (aw-map/coord      x (inc y))
-                                 up    (aw-map/coord      x (dec y))
-                                 restcosts (- rest costs)]
-                             (set/union
-                              (when-not (contains? newacc right)
-                                (helper right restcosts newacc))
-                              (when-not (contains? newacc left)
-                                (helper left  restcosts newacc))
-                              (when-not (contains? newacc down)
-                                (helper down  restcosts newacc))
-                              (when-not (contains? newacc up)
-                                (helper up    restcosts newacc))))
-                         newacc))
+                                 up    (aw-map/coord      x (dec y))]
+                             (reduce #(if (>= rest (get %1 %2 0))
+                                        (helper %2 rest %1)
+                                        %1)
+                                     newacc
+                                     [right left down up]))
+                           newacc))
                        acc)))]
-      (persistent! (helper c (min movement-range fuel) (transient #{c}) :initial? true)))))
+      (-> (helper c
+                  (min movement-range fuel)
+                  (transient {})
+                  :initial? true)
+          persistent!
+          keys
+          set))))
