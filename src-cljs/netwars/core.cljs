@@ -381,7 +381,7 @@
 
 (defn start-game-from-server [map-name]
   (logging/log "Loading game...")
-  (goog.net.XhrIo/send (str "http://localhost:8080/api/new-game/" map-name)
+  (goog.net.XhrIo/send (str "/api/new-game/" map-name)
                        (fn [e]
                          (logging/log "Got data, started reading in")
                          (let [text (-> e .-target .getResponseText)]
