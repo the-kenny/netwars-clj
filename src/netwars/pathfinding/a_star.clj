@@ -4,21 +4,21 @@
 
 ;;; Pathfinding (A*)
 
-(defn- neighbours [movement-range c]
+(defn ^:private neighbours [movement-range c]
   (let [{:keys [x y]} c]
    (filter movement-range (map (fn [[dx dy]] (aw-map/coord (+ x dx) (+ y dy)))
                                [[0 1] [1 0] [-1 0] [0 -1]]))))
 
 ;;; TODO: Handle cyclic paths
-(defn- reconstruct-path [came-from start goal]
+(defn ^:private reconstruct-path [came-from start goal]
   (reverse (loop [n goal, path []]
              (if-not (= start n)
                (when-let [n (get came-from n)]
                  (recur n (conj path n)))
                (cons goal path)))))
 
-(defn- a-star-path [board movement-range
-                    start end]
+(defn a-star-path [board movement-range
+                   start end]
   (assert (contains? movement-range start))
   (assert (contains? movement-range end))
   (let [movement-type (:movement-type (meta (board/get-unit board start)))
