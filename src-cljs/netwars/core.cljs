@@ -262,11 +262,14 @@
      ;; don't actually change the state of `current-game', we just
      ;; draw it. The global state is only changed AFTER the user
      ;; selected a continuing action (Wait, Capture, Attack, ...)
-     (let [game-moved (aw-game/move-unit game (pathfinding/path->aw-path (:current-path game)))]
-       (draw-game (dom/get-element "gameBoard") (dissoc game-moved :current-path))
-       (show-unit-action-menu game-moved c (assoc (game-board/get-unit (:board game-moved) c)
-                                             :moved true))
-       nil)
+     (try
+      (let [game-moved (aw-game/move-unit game (pathfinding/path->aw-path (:current-path game)))]
+        (draw-game (dom/get-element "gameBoard") (dissoc game-moved :current-path))
+        (show-unit-action-menu game-moved c (assoc (game-board/get-unit (:board game-moved) c)
+                                              :moved true))
+        nil)
+      (catch js/Error e
+          (js/alert "Invalid path!")))
 
      (and (not (aw-game/selected-unit game))
           (aw-map/can-produce-units? terrain))
@@ -344,6 +347,7 @@
        (when (and (aw-map/in-bounds? (-> game :board :terrain) c)
                   ;; CLJS-BUG: (= nil c) => Error (fixed in master)
                   (not= @last-coord c))
+         (.log js/console "Mouse:" (pr-str c))
          (mouse-moved (reset! last-coord c)))))))
 
 ;;; Functions for setting up games in the DOM
@@ -379,7 +383,7 @@
   (register-handlers (dom/get-element :gameBoard))
   (reset! current-game (aw-game/start-game game)))
 
-(defn start-game-from-server [map-name]
+(defn ^:export start-game-from-server [map-name]
   (logging/log "Loading game...")
   (goog.net.XhrIo/send (str "/api/new-game/" map-name)
                        (fn [e]
