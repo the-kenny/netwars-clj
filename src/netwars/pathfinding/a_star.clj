@@ -28,6 +28,8 @@
             (+ (get @g c 0)
                (h c)))
         closedset #{}
+        ;; It'd be easier to use (into (empty openset) ...) but that
+        ;; seems to be broken
         openset (sorted-set-by #(cond
                                  (= %1 %2) 0
                                  (not= %1 %2) (if (= (f %1) (f %2))
@@ -71,11 +73,18 @@
                             (do
                               ;; (println "reduce/b:" edge)
                               [(if (< path-costs (get @g x))
-                                 (do (swap! g assoc path-costs) g)
+                                 (do (swap! g assoc edge path-costs) g)
                                  g)
                                came-from
                                openset]))))
-                      [g came-from (into (empty openset)
+                      [g came-from (into (sorted-set-by #(cond
+                                                          (= %1 %2) 0
+                                                          (not= %1 %2) (if (= (f %1) (f %2))
+                                                                         (if (< (h %1) (h %2))
+                                                                           -1 1)
+                                                                         (if (< (f %1) (f %2))
+                                                                           -1 1))
+                                                          true 1))
                                          (remove #{x} openset))]
                       edges)]
           (if (or (contains? closedset end) (empty? openset))
