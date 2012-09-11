@@ -23,57 +23,61 @@
   (assert (contains? movement-range end))
   (let [movement-type (:movement-type (meta (board/get-unit board start)))
         g (atom {start 0})
-        h #(* 2 (aw-map/distance % end))
-        f #(+ (get @g % 0) (h %))
+        h #(aw-map/distance % end)
+        f (fn [c]
+            (+ (get @g c 0)
+               (h c)))
         closedset #{}
-        openset (sorted-set-by #(compare (f %1) (f %2)) start)
+        openset (sorted-set-by #(cond
+                                 (= %1 %2) 0
+                                 (not= %1 %2) (if (= (f %1) (f %2))
+                                                (if (< (h %1) (h %2))
+                                                  -1 1)
+                                                (if (< (f %1) (f %2))
+                                                  -1 1))
+                                 true 1)
+                               start)
         came-from {}]
     (loop [g g
            closedset closedset
            openset openset
-           came-from came-from]
-      (let [x (first openset)
-            closedset (conj closedset x)
-            edges (remove closedset (neighbours movement-range x))
-
-            [g came-from openset]
-            (reduce (fn [[g came-from openset] edge]
-                      (let [path-costs (+ (aw-map/movement-costs
-                                           (board/get-terrain board edge)
-                                           movement-type)
-                                          (get @g x 0))]
-                        (if-not (contains? openset edge)
-                          [(do (swap! g assoc edge path-costs) g)
-                           (assoc came-from edge x)
-                           (conj openset edge)]
-                          [(if (< path-costs (get @g x))
-                             (do (swap! g assoc path-costs) g)
-                             g)
-                           came-from
-                           openset])))
-                    [g came-from (disj openset x)] edges)]
-        (if (or (contains? closedset end) (empty? openset))
-          (reconstruct-path came-from start end)
-          (recur g closedset openset came-from))))))
-
-
-(comment
-  (let [board (:board (netwars.game-creator/make-game {} "7330.aws"))
-        start (aw-map/coord 3 14)
-        end (aw-map/coord 0 12)
-        r (board/reachable-fields board start)]
-    (defn test-a-star []
-      (= [#netwars.aw_map.Coordinate{:x 3, :y 14}
-          #netwars.aw_map.Coordinate{:x 2, :y 14}
-          #netwars.aw_map.Coordinate{:x 2, :y 13}
-          #netwars.aw_map.Coordinate{:x 1, :y 13}
-          #netwars.aw_map.Coordinate{:x 0, :y 13}
-          #netwars.aw_map.Coordinate{:x 0, :y 12}]
-          (a-star-path board r start end)))
-
-    (defn test-performance-path []
-      (print "Path: ")
-      (doseq [c (a-star-path board r start end)] (print " ->" (str "(" (:x c) "," (:y c) ")")))
-      (prn)
-      (time
-       (dotimes [_ 1000] (a-star-path board r start end))))))
+           came-from came-from
+           limit 50]
+      (if-not (pos? limit)
+        :loop-limit-exceeded
+        (let [x (first openset)
+              closedset (conj closedset x)
+              edges (remove closedset (neighbours movement-range x))
+              ;; _ (println "+++++++++++++++++++++++++++++++++++++++")
+              ;; _ (println "x:" x)
+              ;; _ (println (str "f(" (:x x) ", "(:y x) "):") (f x))
+              ;; _ (println "g:" @g)
+              ;; _ (println "openset:" (rest openset))
+              ;; _ (println "closedset:" closedset)
+              ;; _ (println "edges:" edges)
+              [g came-from openset]
+              (reduce (fn [[g came-from openset] edge]
+                        ;; (println "reduce/openset:" openset)
+                        (let [path-costs (+ (aw-map/movement-costs
+                                             (board/get-terrain board edge)
+                                             movement-type)
+                                            (get @g x 0))]
+                          (if-not (contains? openset edge)
+                            (do
+                              ;;   (println "reduce/a:" edge)
+                              [(do (swap! g assoc edge path-costs) g)
+                               (assoc came-from edge x)
+                               (conj openset edge)])
+                            (do
+                              ;; (println "reduce/b:" edge)
+                              [(if (< path-costs (get @g x))
+                                 (do (swap! g assoc path-costs) g)
+                                 g)
+                               came-from
+                               openset]))))
+                      [g came-from (into (empty openset)
+                                         (remove #{x} openset))]
+                      edges)]
+          (if (or (contains? closedset end) (empty? openset))
+            (reconstruct-path came-from start end)
+            (recur g closedset openset came-from (dec limit))))))))
