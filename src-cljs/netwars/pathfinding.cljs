@@ -74,8 +74,11 @@ It destructively updates the path according to some magic rules which implement 
      (contains? movement-range c)
      (copy-path! path (shortest-path (start path) c movement-range board unit)))))
 
-(declare dijkstra-wrapper)
-
 (defn shortest-path [start end movement-range board unit]
-  (let [movement-type (:movement-type (meta unit))]
-   (atom (a-star/a-star-path board movement-range start end))))
+  (let [path (a-star/a-star-path board movement-range start end)]
+    (.log js/console (pr-str path))
+    (when (keyword? path)
+      (js/alert (str "Invalid path calculated via A*; ["
+                     (:x start) "," (:y start) "] -> [" (:x end) "," (:y end) "]"))
+      (throw (js/Error. "Loop limit reached.")))
+    (atom path)))
