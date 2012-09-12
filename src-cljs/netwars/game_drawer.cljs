@@ -62,6 +62,7 @@
 
 (defn render-background-for-coordinate [context terrain-board c callback]
   (when-let [terr (aw-map/at terrain-board c)]
+    (.log js/console "render-background-for-coordinatea" terr c callback)
     (map-renderer/draw-tile (if (aw-map/is-building? terr)
                               (aw-map/reset-capture-points terr)
                               terr)
@@ -191,14 +192,12 @@
                                                 (reset! hidden-background-canvas [(:map-url game)
                                                                                   newcanvas])
                                                 (cont canvas game))))))
+
      last-clicked-coord
-     (do
-       (logging/log "Redrawing on hidden canvas")
-       (render-background-for-coordinate (.getContext canvas "2d")
-                                        (-> game :board :terrain)
-                                        last-clicked-coord
-                                        (fn []
-                                          (cont canvas game))))
+     (render-background-for-coordinate (.getContext hidden-canvas "2d")
+                                       (-> game :board :terrain)
+                                       last-clicked-coord
+                                       #(cont canvas game))
 
      true
      (cont canvas game))))
