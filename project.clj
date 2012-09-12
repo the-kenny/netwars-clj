@@ -13,6 +13,7 @@
   :exclusions [org.clojure/clojure]
   :extra-files-to-clean ["resoures/public/netwars.js"]
   :main netwars.core
+  :repl-options {:port 7888}
   :cljsbuild {:crossovers [netwars.aw-game
                            netwars.aw-map
                            netwars.aw-player
