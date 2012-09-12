@@ -62,7 +62,6 @@
 
 (defn render-background-for-coordinate [context terrain-board c callback]
   (when-let [terr (aw-map/at terrain-board c)]
-    (.log js/console "render-background-for-coordinatea" terr c callback)
     (map-renderer/draw-tile (if (aw-map/is-building? terr)
                               (aw-map/reset-capture-points terr)
                               terr)
