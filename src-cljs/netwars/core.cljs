@@ -282,7 +282,9 @@
              (aw-map/in-bounds? (-> @current-game :board :terrain) c))
     (if (and @current-action-menu
              (menu/toggle-menu? @current-action-menu))
-      (swap! current-action-menu menu/hide-menu)
+      (do
+        (swap! current-action-menu menu/hide-menu)
+        (swap! current-game identity))
       (let [game @current-game
             newgame (let [board (:board game)
                           terrain (game-board/get-terrain board c)

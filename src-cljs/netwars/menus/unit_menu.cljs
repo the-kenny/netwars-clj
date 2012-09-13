@@ -20,7 +20,7 @@
                        (not (:moved unit))
                        true))]
     (.log js/console unit)
-    (generic/make-action-menu
+    (generic/make-toggle-menu
      [["Attack"  (:attack  fns) (not attack?)]
       ["Capture" (:capture fns) (not capture?)]
       [:separator]
