@@ -42,7 +42,7 @@
 
 (defn pop-game-state! []
   (-> current-game-state
-      (swap! #(if (seq %)
+      (swap! #(if (seq (pop %))
                 (pop %)
                 (throw (js/Error. "Can't pop beyond current state."))))
       (game-state)))
@@ -62,19 +62,22 @@
 (defn update-game-state-reversible! [f & args]
   (push-game-state! (apply f (game-state) args)))
 
+(defn redraw-game! []
+  (swap! current-game-state identity))
+
 ;;; Unit Actions (Attack, Wait, Capture, ...)
 
 (defn action-cancel
   "Generic action for canceling actions.
    Deselects current unit and hides the action menu."
   []
-  (update-game-state! aw-game/deselect-unit)
+  (pop-game-state!)
   (swap! current-action-menu menu/hide-menu))
 
 (defn unit-action-wait
   "Deselects and 'Waits' the current unit."
   [game c]
-  (update-game-state! (fn [_] (aw-game/wait-unit game)))
+  (update-game-state! aw-game/wait-unit)
   ;; TODO: Dismissal shouldn't be done in every action-fn
   (swap! current-action-menu menu/hide-menu))
 
@@ -83,7 +86,7 @@
   function applies the game-state given as argument because it after
   moving the current state is just drawn, not applied."
   [game c]
-  (update-game-state! (fn [_] (dissoc game :current-path)))
+  #_(update-game-state-reversible! dissoc :current-path)
   (swap! current-action-menu menu/hide-menu))
 
 (defn unit-action-capture
@@ -250,9 +253,10 @@
 
    (and (nil? (aw-game/selected-unit game))
         (not (:moved unit)))
-   (-> game
-       (aw-game/select-unit c)
-       (assoc :current-path (pathfinding/make-path c)))))
+   (update-game-state-reversible!
+    #(-> %
+         (aw-game/select-unit c)
+         (assoc :current-path (pathfinding/make-path c))))))
 
 (defn enemy-unit-clicked
   "Function ran when the player clicks an enemy unit."
@@ -283,23 +287,18 @@
   (let [terrain (-> game :board (game-board/get-terrain c))]
     (cond
      (and (aw-game/selected-unit game)
-          (> (-> game :current-path pathfinding/elements count) 1)
-          (= c (-> game :current-path pathfinding/elements last))
+          (when-let [path (:current-path game)]
+            (> (-> path pathfinding/elements count) 1)
+            (= c (-> path pathfinding/elements last)))
           (not (game-board/get-unit (:board game) c)))
-     ;; Okay. We do awesome stuff here: An action menu is shown after
-     ;; a unit is moved. The problem is: There's the 'Cancel' option
-     ;; which also reverts the move. The solution is kind of hacky: We
-     ;; don't actually change the state of `current-game', we just
-     ;; draw it. The global state is only changed AFTER the user
-     ;; selected a continuing action (Wait, Capture, Attack, ...)
-     (try
-       (let [game-moved (aw-game/move-unit game (pathfinding/path->aw-path (:current-path game)))]
-         (draw-game (dom/get-element "gameBoard") (dissoc game-moved :current-path))
-         (show-unit-action-menu game-moved c (assoc (game-board/get-unit (:board game-moved) c)
-                                               :moved true))
-         nil)
-       (catch js/Error e
-         (js/alert "Invalid path!")))
+     ;; TODO: Somehow prevent drawing the movement-area
+     (let [game (update-game-state-reversible!
+                 (comp #(dissoc % :current-path) aw-game/move-unit)
+                 (pathfinding/path->aw-path (:current-path game)))]
+       (show-unit-action-menu
+        game
+        c
+        (game-board/get-unit (:board game) c)))
 
      (and (not (aw-game/selected-unit game))
           (aw-map/can-produce-units? terrain))
@@ -314,25 +313,17 @@
              (menu/toggle-menu? @current-action-menu))
       (do
         (swap! current-action-menu menu/hide-menu)
-        (update-game-state! identity))
+        (pop-game-state!))
       (let [game (game-state)
-            newgame (let [board (:board game)
-                          terrain (game-board/get-terrain board c)
-                          unit (game-board/get-unit board c)]
-                      (cond
-                       unit
-                       (unit-clicked    game c)
+            board (:board game)
+            terrain (game-board/get-terrain board c)
+            unit (game-board/get-unit board c)]
+        (cond
+         unit    (unit-clicked    game c)
 
-                       terrain
-                       (terrain-clicked game c)
+         terrain (terrain-clicked game c)
 
-                       true nil))]
-        ;; Don't redraw the game when the state hasn't changed
-        ;; TODO: This shouldn't be necessary when everything is opimized
-        (when newgame
-          (update-game-state! #(-> newgame
-                                   (sanitize-game)
-                                   (assoc :last-click-coord c))))))))
+         true nil)))))
 
 (defn mouse-moved
   "Function called when the mouse entered a new field on the game
@@ -358,7 +349,7 @@
                                        (:board game)
                                        current-unit)
          ;; Hack: Redraw the game (there should be a fn for this)
-         (update-game-state! (constantly game)))
+         (redraw-game!))
 
        ;; When we're on a field with an unit, show info about it
        unit (show-unit-info unit)
@@ -409,7 +400,7 @@
   ;; We use add-watch to redraw the canvas every time the state changes
   (add-watch current-game-state :redrawer
              (fn [key ref old new]
-               (logging/log (pr-str (map keys new)))
+               (logging/log "Game states:" (count new))
                (draw-game canvas new))))
 
 (defn ^:export start-game [game]
