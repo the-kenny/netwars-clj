@@ -84,6 +84,7 @@
   (swap! current-game #(let [att (aw-game/selected-coordinate %)
                              def c]
                          (-> game
+                             ;; TODO: What's this?
                              (dissoc :moving-disabled)
                              (aw-game/perform-attack att def)
                              (aw-game/deselect-unit))))
