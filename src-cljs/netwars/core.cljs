@@ -263,13 +263,13 @@
      ;; draw it. The global state is only changed AFTER the user
      ;; selected a continuing action (Wait, Capture, Attack, ...)
      (try
-      (let [game-moved (aw-game/move-unit game (pathfinding/path->aw-path (:current-path game)))]
-        (draw-game (dom/get-element "gameBoard") (dissoc game-moved :current-path))
-        (show-unit-action-menu game-moved c (assoc (game-board/get-unit (:board game-moved) c)
-                                              :moved true))
-        nil)
-      (catch js/Error e
-          (js/alert "Invalid path!")))
+       (let [game-moved (aw-game/move-unit game (pathfinding/path->aw-path (:current-path game)))]
+         (draw-game (dom/get-element "gameBoard") (dissoc game-moved :current-path))
+         (show-unit-action-menu game-moved c (assoc (game-board/get-unit (:board game-moved) c)
+                                               :moved true))
+         nil)
+       (catch js/Error e
+         (js/alert "Invalid path!")))
 
      (and (not (aw-game/selected-unit game))
           (aw-map/can-produce-units? terrain))
