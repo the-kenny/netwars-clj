@@ -400,7 +400,8 @@
   ;; We use add-watch to redraw the canvas every time the state changes
   (add-watch current-game-state :redrawer
              (fn [key ref old new]
-               (logging/log "Game states:" (count new))
+               (logging/log "Game states:"
+                            (pr-str (map (comp :type last aw-game/game-events) new)))
                (draw-game canvas new))))
 
 (defn ^:export start-game [game]
