@@ -23,7 +23,7 @@
     (assert attacker)
     (assert victim)
     (assert can-attack?)
-    (generic/make-action-menu
+    (generic/make-toggle-menu
      [[(str "Damage: " damage "%") nil :disabled]
       [:separator]
       ["Attack!" (:attack fns)]

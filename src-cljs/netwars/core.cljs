@@ -86,7 +86,7 @@
   function applies the game-state given as argument because it after
   moving the current state is just drawn, not applied."
   [game c]
-  #_(update-game-state-reversible! dissoc :current-path)
+  (update-game-state-reversible! dissoc :current-path)
   (swap! current-action-menu menu/hide-menu))
 
 (defn unit-action-capture
