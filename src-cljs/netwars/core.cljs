@@ -34,11 +34,14 @@
 (def current-game-state (atom []))
 (def current-action-menu (atom nil))
 
+(defn game-states []
+  @current-game-state)
+
 (defn game-state
   ([states]
      (peek states))
   ([]
-     (game-state @current-game-state)))
+     (game-state (game-states))))
 
 (defn pop-game-state! []
   (-> current-game-state
@@ -114,7 +117,7 @@
 (defn attack-action-attack [game c]
   (update-game-state! #(let [att (aw-game/selected-coordinate %)
                              def c]
-                         (-> game
+                         (-> %
                              ;; TODO: What's this?
                              (dissoc :moving-disabled)
                              (aw-game/perform-attack att def)
@@ -290,7 +293,7 @@
           (when-let [path (:current-path game)]
             (> (-> path pathfinding/elements count) 1)
             (= c (-> path pathfinding/elements last)))
-          (not (game-board/get-unit (:board game) c)))
+          (nil? (game-board/get-unit (:board game) c)))
      ;; TODO: Somehow prevent drawing the movement-area
      (let [game (update-game-state-reversible!
                  (comp #(dissoc % :current-path) aw-game/move-unit)
@@ -302,7 +305,10 @@
 
      (and (not (aw-game/selected-unit game))
           (aw-map/can-produce-units? terrain))
-     (factory-clicked game c))))
+     (factory-clicked game c)
+
+     (> (count (game-states)) 1)
+     (pop-game-state!))))
 
 (defn clicked-on
   "Generic function ran when the player clicks on the game
