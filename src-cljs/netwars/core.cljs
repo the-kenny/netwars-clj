@@ -297,24 +297,22 @@
   [game c]
   (let [terrain (-> game :board (game-board/get-terrain c))]
     (cond
+     ;; Move the unit
      (and (aw-game/selected-unit game)
           (when-let [path (:current-path game)]
             (> (-> path pathfinding/elements count) 1)
             (= c (-> path pathfinding/elements last)))
           (nil? (game-board/get-unit (:board game) c)))
-     ;; TODO: Somehow prevent drawing the movement-area
-     (let [game (update-game-state-reversible!
-                 (comp #(dissoc % :current-path) aw-game/move-unit)
-                 (pathfinding/path->aw-path (:current-path game)))]
-       (show-unit-action-menu
-        game
-        c
-        (game-board/get-unit (:board game) c)))
+     (update-game-state-reversible!
+      (comp #(dissoc % :current-path) aw-game/move-unit)
+      (pathfinding/path->aw-path (:current-path game)))
 
+     ;; Show the factory menu
      (and (not (aw-game/selected-unit game))
           (aw-map/can-produce-units? terrain))
      (factory-clicked game c)
 
+     ;; Undo the last move
      (> (count (game-states)) 1)
      (pop-game-state!))))
 
