@@ -161,7 +161,7 @@
 
   (dom/set-properties (dom/get-element :unit-details) {"style" "visibility:visible;"})
 
-
+  
   (let [canvas (dom/get-element "unit-canvas")]
     (set! (.-width  canvas) game-drawer/+field-width+)
     (set! (.-height canvas) game-drawer/+field-height+)
@@ -343,20 +343,20 @@
 
       (show-terrain-info terrain)
 
+      (when
+          (and game
+               current-unit
+               current-path
+               (not @current-action-menu)
+               (pathfinding/update-path! current-path
+                                         (aw-game/movement-range game)
+                                         c
+                                         (:board game)
+                                         current-unit))
+        (redraw-game!))
+
       ;; TODO: We need movement-range here
       (cond
-       (and game
-            current-unit
-            current-path
-            (not @current-action-menu))
-       (when (pathfinding/update-path! current-path
-                                       (aw-game/movement-range game)
-                                       c
-                                       (:board game)
-                                       current-unit)
-         ;; Hack: Redraw the game (there should be a fn for this)
-         (redraw-game!))
-
        ;; When we're on a field with an unit, show info about it
        unit (show-unit-info unit)
 
