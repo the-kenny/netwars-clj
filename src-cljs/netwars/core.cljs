@@ -114,17 +114,6 @@
   ;; Return nil to indicate no re-draw is needed
   nil)
 
-(defn attack-action-attack [game c]
-  (update-game-state! #(let [att (aw-game/selected-coordinate %)
-                             def c]
-                         (-> %
-                             ;; TODO: What's this?
-                             (dissoc :moving-disabled)
-                             (aw-game/perform-attack att def)
-                             (aw-game/deselect-unit))))
-  ;; TODO: Dismissal shouldn't be done in every action-fn
-  (swap! current-action-menu menu/hide-menu))
-
 (defn show-attack-menu [game c]
   (let [menu (attack-menu/attack-menu game c {:attack #(attack-action-attack game c)
                                               :cancel #(action-cancel)})]
@@ -197,13 +186,13 @@
     (set! (.-height canvas) tile-height)
     (when (aw-map/is-building? terrain)
       (let [[terr color] terrain]
-       (tile-drawer/draw-tile context
-                              tiles/+terrain-tiles+
-                              [:buildings terr color]
-                              [game-drawer/+field-width+
-                               (* 2 game-drawer/+field-height+)]
-                              [0 0]
-                              nil))))
+        (tile-drawer/draw-tile context
+                               tiles/+terrain-tiles+
+                               [:buildings terr color]
+                               [game-drawer/+field-width+
+                                (* 2 game-drawer/+field-height+)]
+                               [0 0]
+                               nil))))
 
   (dom/set-text (dom/get-element :terrain-name) (if (aw-map/is-building? terrain)
                                                   (let [[t c] terrain]
@@ -280,7 +269,13 @@
   (when-let [att-coord (aw-game/selected-coordinate game)]
     (when (aw-game/attack-possible? game att-coord c)
       (logging/log "Attack!")
-      (show-attack-menu game c))))
+      (update-game-state! #(let [att (aw-game/selected-coordinate %)
+                                 def c]
+                             (-> %
+                                 ;; TODO: What's this?
+                                 (dissoc :moving-disabled)
+                                 (aw-game/perform-attack att def)
+                                 (aw-game/deselect-unit)))))))
 
 (defn unit-clicked
   "Function ran when the player clicks on any unit. Dispatches to
