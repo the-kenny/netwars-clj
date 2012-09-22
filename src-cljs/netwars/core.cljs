@@ -24,7 +24,7 @@
             [netwars.aw-game :as aw-game]
             [netwars.aw-map :as aw-map]
             [netwars.aw-unit :as aw-unit]
-            [netwars.damagecalculator :as damagecalculator]
+            [netwars.damagecalculator :as damage]
             [netwars.game-board :as game-board]
             [netwars.map-utils :as map-utils]
             [netwars.tile-drawer :as tile-drawer]))
@@ -169,6 +169,19 @@
                            (game-state)
                            (aw-map/coord 0 0)
                            unit)))
+
+(defn show-attack-info [game target]
+  (let [board (:board game)
+        attacker (aw-game/selected-unit game)
+        victim (game-board/get-unit (:board game) target)
+        damage (damage/calculate-unrounded-damage
+                (:damagetable game)
+                [attacker (game-board/get-terrain board
+                                                  (aw-game/selected-unit game))]
+                [victim (game-board/get-terrain board target)])]
+    (assert attacker)
+    (assert victim)
+    (.log js/console "Attack-Info:" attacker "vs." victim ":" damage)))
 
 (defn hide-unit-info []
   (dom/set-properties (dom/get-element :unit-details) {"style" "visibility:hidden;"}))
@@ -357,6 +370,17 @@
 
       ;; TODO: We need movement-range here
       (cond
+       ;; When the selected unit can attack the unit we're hovering
+       ;; over, display attack info
+       (and current-unit
+            unit
+            (not= (:color unit) (:color current-unit))
+            (aw-game/attack-possible?
+             game
+             (aw-game/selected-coordinate game)
+             c))
+       (show-attack-info game c)
+       
        ;; When we're on a field with an unit, show info about it
        unit (show-unit-info unit)
 
