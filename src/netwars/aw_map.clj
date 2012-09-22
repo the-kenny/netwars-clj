@@ -154,17 +154,17 @@ Mostly useful for drawing of maps."
        (contains? #{:port :base :airport} (first t))))
 
 (def ^:private +defense-values+
-  {:plain 1
-   :reef  1
-   :forest 2
-   :city 3
-   :base 3
-   :airport 3
-   :port 3
-   :lab 3
+  {:plain       1
+   :reef        1
+   :forest      2
+   :city        3
+   :base        3
+   :airport     3
+   :port        3
+   :lab         3
    :headquarter 4
-   :mountain 3
-   :silo 3})
+   :mountain    3
+   :silo        3})
 
 (defn defense-value [terrain]
   (let [[t c] (cond
