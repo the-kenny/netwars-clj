@@ -50,6 +50,10 @@
                 (throw (js/Error. "Can't pop beyond current state."))))
       (game-state)))
 
+
+(defn pop-all-game-states! []
+  (swap! current-game-state (comp vector first)))
+
 (defn push-game-state! [game]
   (-> current-game-state
    (swap! conj game)
@@ -115,7 +119,7 @@
   nil)
 
 (defn show-attack-menu [game c]
-  (let [menu (attack-menu/attack-menu game c {:attack #(attack-action-attack game c)
+  (let [menu (attack-menu/attack-menu game c {;; :attack #(attack-action-attack game c)
                                               :cancel #(action-cancel)})]
     (menu/display-menu menu (dom/get-element :mapBox) (game-drawer/coord->canvas c))
     (reset! current-action-menu menu))
@@ -418,6 +422,7 @@
   (event/listen (dom/get-element :end-turn-button) "click"
                 (fn [event]
                   (when (game-state)
+                    (pop-all-game-states!)
                     (update-game-state! aw-game/next-player))))
 
   ;; We use add-watch to redraw the canvas every time the state changes
