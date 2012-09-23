@@ -230,7 +230,7 @@
     (let [targets (aw-game/attackable-targets game)]
       (highlight-squares (.getContext canvas "2d")
                          targets
-                         "rgba(50,50,50,0.6)")))
+                         "rgba(255,0,0,0.8)")))
   (when (fn? callback) (callback canvas game)))
 
 (defn draw-path [canvas game callback]
