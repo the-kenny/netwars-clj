@@ -235,8 +235,7 @@
   [canvas game-states]
   (let [game (game-state game-states)
         clean-game (-> game
-                       (sanitize-game)
-                       (dissoc :last-click-coord))
+                       (sanitize-game))
         last-click-coord (:last-click-coord game)]
     (if-let [unit (aw-game/selected-unit clean-game)]
       (show-unit-info unit)
@@ -322,7 +321,8 @@
 
 (defn clicked-on
   "Generic function ran when the player clicks on the game
-  board. Dispatches between units and buildings."  [c]
+  board. Dispatches between units and buildings."
+  [c]
   (when (and (game-state)
              (aw-map/in-bounds? (-> (game-state) :board :terrain) c))
     (if (and @current-action-menu
@@ -330,16 +330,17 @@
       (do
         (swap! current-action-menu menu/hide-menu)
         (pop-game-state!))
-      (let [game (game-state)
+      (let [game (game-state (update-game-state! assoc :last-click-coord c))
             board (:board game)
             terrain (game-board/get-terrain board c)
             unit (game-board/get-unit board c)]
+        ;; TODO: Remove or better: USE the `game' parameter
         (cond
          unit    (unit-clicked    game c)
 
          terrain (terrain-clicked game c)
 
-         true nil)))))
+         true    nil)))))
 
 (defn mouse-moved
   "Function called when the mouse entered a new field on the game
