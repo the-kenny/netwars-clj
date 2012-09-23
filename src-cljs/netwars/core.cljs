@@ -31,8 +31,9 @@
 
 ;;; TODO: Function for changing game-state instead of
 ;;; (reset current-game ...)
-(def current-game-state (atom []))
+(def current-game-state  (atom []))
 (def current-action-menu (atom nil))
+(def last-click-coord    (atom nil))
 
 (defn game-states []
   @current-game-state)
@@ -235,8 +236,7 @@
   [canvas game-states]
   (let [game (game-state game-states)
         clean-game (-> game
-                       (sanitize-game))
-        last-click-coord (:last-click-coord game)]
+                       (sanitize-game))]
     (if-let [unit (aw-game/selected-unit clean-game)]
       (show-unit-info unit)
       (hide-unit-info))
@@ -245,7 +245,7 @@
 
     (game-drawer/draw-game canvas
                            clean-game
-                           last-click-coord)
+                           @last-click-coord)
 
     clean-game))
 
@@ -325,12 +325,13 @@
   [c]
   (when (and (game-state)
              (aw-map/in-bounds? (-> (game-state) :board :terrain) c))
+    (reset! last-click-coord c)
     (if (and @current-action-menu
              (menu/toggle-menu? @current-action-menu))
       (do
         (swap! current-action-menu menu/hide-menu)
         (pop-game-state!))
-      (let [game (game-state (update-game-state! assoc :last-click-coord c))
+      (let [game (game-state)
             board (:board game)
             terrain (game-board/get-terrain board c)
             unit (game-board/get-unit board c)]
