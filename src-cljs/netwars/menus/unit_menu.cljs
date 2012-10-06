@@ -19,10 +19,22 @@
                      (if (aw-unit/ranged-weapon? (aw-unit/main-weapon unit))
                        (not (:moved unit))
                        true))]
-    (.log js/console unit)
     (generic/make-toggle-menu
-     [["Attack"  (:attack  fns) (not attack?)]
-      ["Capture" (:capture fns) (not capture?)]
+     [["Wait"    (:wait    fns)]
+      ["Cancel"  (:cancel  fns)]
       [:separator]
-      ["Wait"    (:wait    fns)]
-      ["Cancel"  (:cancel  fns)]])))
+      ["Attack"  (:attack  fns) (not attack?)]
+      ["Capture" (:capture fns) (not capture?)]])))
+
+
+
+
+
+
+
+
+
+
+
+
+

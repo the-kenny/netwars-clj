@@ -30,15 +30,15 @@
         closedset #{}
         ;; It'd be easier to use (into (empty openset) ...) but that
         ;; seems to be broken
-        openset (sorted-set-by #(cond
-                                 (= %1 %2) 0
-                                 (not= %1 %2) (if (= (f %1) (f %2))
-                                                (if (< (h %1) (h %2))
-                                                  -1 1)
-                                                (if (< (f %1) (f %2))
-                                                  -1 1))
-                                 true 1)
-                               start)
+        sort-fn #(cond
+                  (= %1 %2) 0
+                  (not= %1 %2) (if (= (f %1) (f %2))
+                                 (if (< (h %1) (h %2))
+                                   -1 1)
+                                 (if (< (f %1) (f %2))
+                                   -1 1))
+                  true 1)
+        openset (sorted-set-by sort-fn start)
         came-from {}]
     (loop [g g
            closedset closedset
@@ -77,14 +77,7 @@
                                  g)
                                came-from
                                openset]))))
-                      [g came-from (into (sorted-set-by #(cond
-                                                          (= %1 %2) 0
-                                                          (not= %1 %2) (if (= (f %1) (f %2))
-                                                                         (if (< (h %1) (h %2))
-                                                                           -1 1)
-                                                                         (if (< (f %1) (f %2))
-                                                                           -1 1))
-                                                          true 1))
+                      [g came-from (into (sorted-set-by sort-fn)
                                          (remove #{x} openset))]
                       edges)]
           (if (or (contains? closedset end) (empty? openset))

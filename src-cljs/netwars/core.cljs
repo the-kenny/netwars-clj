@@ -24,15 +24,54 @@
             [netwars.aw-game :as aw-game]
             [netwars.aw-map :as aw-map]
             [netwars.aw-unit :as aw-unit]
-            [netwars.damagecalculator :as damagecalculator]
+            [netwars.damagecalculator :as damage]
             [netwars.game-board :as game-board]
             [netwars.map-utils :as map-utils]
             [netwars.tile-drawer :as tile-drawer]))
 
 ;;; TODO: Function for changing game-state instead of
 ;;; (reset current-game ...)
-(def current-game (atom nil))
+(def current-game-state  (atom []))
 (def current-action-menu (atom nil))
+(def last-click-coord    (atom nil))
+
+(defn game-states []
+  @current-game-state)
+
+(defn game-state
+  ([states]
+     (peek states))
+  ([]
+     (game-state (game-states))))
+
+(defn pop-game-state! []
+  (-> current-game-state
+      (swap! #(if (seq (pop %))
+                (pop %)
+                (throw (js/Error. "Can't pop beyond current state."))))
+      (game-state)))
+
+
+(defn pop-all-game-states! []
+  (swap! current-game-state (comp vector first)))
+
+(defn push-game-state! [game]
+  (-> current-game-state
+   (swap! conj game)
+   (game-state)))
+
+(defn remove-stacked-game-states! []
+  (swap! current-game-state (comp vector peek)))
+
+(defn update-game-state! [f & args]
+  #_(remove-stacked-game-states!)
+  (swap! current-game-state (comp vector #(apply f % args) peek)))
+
+(defn update-game-state-reversible! [f & args]
+  (push-game-state! (apply f (game-state) args)))
+
+(defn redraw-game! []
+  (swap! current-game-state identity))
 
 ;;; Unit Actions (Attack, Wait, Capture, ...)
 
@@ -40,13 +79,13 @@
   "Generic action for canceling actions.
    Deselects current unit and hides the action menu."
   []
-  (swap! current-game aw-game/deselect-unit)
+  (pop-game-state!)
   (swap! current-action-menu menu/hide-menu))
 
 (defn unit-action-wait
   "Deselects and 'Waits' the current unit."
   [game c]
-  (reset! current-game (aw-game/wait-unit game))
+  (update-game-state! aw-game/wait-unit)
   ;; TODO: Dismissal shouldn't be done in every action-fn
   (swap! current-action-menu menu/hide-menu))
 
@@ -55,7 +94,7 @@
   function applies the game-state given as argument because it after
   moving the current state is just drawn, not applied."
   [game c]
-  (reset! current-game (dissoc game :current-path))
+  (update-game-state-reversible! dissoc :current-path)
   (swap! current-action-menu menu/hide-menu))
 
 (defn unit-action-capture
@@ -63,7 +102,7 @@
    Deselects current unit and hides action menu."
   [game c]
   {:pre (game-board/capture-possible? (:board game) c)}
-  (swap! current-game #(-> game
+  (update-game-state! #(-> game
                            (aw-game/capture-building c)
                            aw-game/deselect-unit))
   ;; TODO: Dismissal shouldn't be done in every action-fn
@@ -80,19 +119,8 @@
   ;; Return nil to indicate no re-draw is needed
   nil)
 
-(defn attack-action-attack [game c]
-  (swap! current-game #(let [att (aw-game/selected-coordinate %)
-                             def c]
-                         (-> game
-                             ;; TODO: What's this?
-                             (dissoc :moving-disabled)
-                             (aw-game/perform-attack att def)
-                             (aw-game/deselect-unit))))
-  ;; TODO: Dismissal shouldn't be done in every action-fn
-  (swap! current-action-menu menu/hide-menu))
-
 (defn show-attack-menu [game c]
-  (let [menu (attack-menu/attack-menu game c {:attack #(attack-action-attack game c)
+  (let [menu (attack-menu/attack-menu game c {;; :attack #(attack-action-attack game c)
                                               :cancel #(action-cancel)})]
     (menu/display-menu menu (dom/get-element :mapBox) (game-drawer/coord->canvas c))
     (reset! current-action-menu menu))
@@ -101,7 +129,7 @@
 
 (defn buy-unit-action [game c unit]
   (assert (nil? (game-board/get-unit (:board game) c)))
-  (swap! current-game aw-game/buy-unit c (:internal-name unit))
+  (update-game-state! aw-game/buy-unit c (:internal-name unit))
   (swap! current-action-menu menu/hide-menu))
 
 (defn show-factory-menu [game c]
@@ -127,14 +155,27 @@
 
   (dom/set-properties (dom/get-element :unit-details) {"style" "visibility:visible;"})
 
-
+  
   (let [canvas (dom/get-element "unit-canvas")]
     (set! (.-width  canvas) game-drawer/+field-width+)
     (set! (.-height canvas) game-drawer/+field-height+)
     (game-drawer/draw-unit (.getContext canvas "2d")
-                           @current-game
+                           (game-state)
                            (aw-map/coord 0 0)
                            unit)))
+
+(defn show-attack-info [game target]
+  (let [board (:board game)
+        attacker (aw-game/selected-unit game)
+        victim (game-board/get-unit (:board game) target)
+        damage (damage/calculate-unrounded-damage
+                (:damagetable game)
+                [attacker (game-board/get-terrain board
+                                                  (aw-game/selected-unit game))]
+                [victim (game-board/get-terrain board target)])]
+    (assert attacker)
+    (assert victim)
+    (.log js/console "Attack-Info:" attacker "vs." victim ":" damage)))
 
 (defn hide-unit-info []
   (dom/set-properties (dom/get-element :unit-details) {"style" "visibility:hidden;"}))
@@ -150,13 +191,13 @@
     (set! (.-height canvas) tile-height)
     (when (aw-map/is-building? terrain)
       (let [[terr color] terrain]
-       (tile-drawer/draw-tile context
-                              tiles/+terrain-tiles+
-                              [:buildings terr color]
-                              [game-drawer/+field-width+
-                               (* 2 game-drawer/+field-height+)]
-                              [0 0]
-                              nil))))
+        (tile-drawer/draw-tile context
+                               tiles/+terrain-tiles+
+                               [:buildings terr color]
+                               [game-drawer/+field-width+
+                                (* 2 game-drawer/+field-height+)]
+                               [0 0]
+                               nil))))
 
   (dom/set-text (dom/get-element :terrain-name) (if (aw-map/is-building? terrain)
                                                   (let [[t c] terrain]
@@ -192,11 +233,10 @@
 (defn draw-game
   "Generic game-drawing function. Strips non-important data used for
   drawing."
-  [canvas game]
-  (let [clean-game (-> game
-                       (sanitize-game)
-                       (dissoc :last-click-coord))
-        last-click-coord (:last-click-coord game)]
+  [canvas game-states]
+  (let [game (game-state game-states)
+        clean-game (-> game
+                       (sanitize-game))]
     (if-let [unit (aw-game/selected-unit clean-game)]
       (show-unit-info unit)
       (hide-unit-info))
@@ -205,7 +245,7 @@
 
     (game-drawer/draw-game canvas
                            clean-game
-                           last-click-coord)
+                           @last-click-coord)
 
     clean-game))
 
@@ -221,9 +261,10 @@
 
    (and (nil? (aw-game/selected-unit game))
         (not (:moved unit)))
-   (-> game
-       (aw-game/select-unit c)
-       (assoc :current-path (pathfinding/make-path c)))))
+   (update-game-state-reversible!
+    #(-> %
+         (aw-game/select-unit c)
+         (assoc :current-path (pathfinding/make-path c))))))
 
 (defn enemy-unit-clicked
   "Function ran when the player clicks an enemy unit."
@@ -231,7 +272,13 @@
   (when-let [att-coord (aw-game/selected-coordinate game)]
     (when (aw-game/attack-possible? game att-coord c)
       (logging/log "Attack!")
-      (show-attack-menu game c))))
+      (update-game-state! #(let [att (aw-game/selected-coordinate %)
+                                 def c]
+                             (-> %
+                                 ;; TODO: What's this?
+                                 (dissoc :moving-disabled)
+                                 (aw-game/perform-attack att def)
+                                 (aw-game/deselect-unit)))))))
 
 (defn unit-clicked
   "Function ran when the player clicks on any unit. Dispatches to
@@ -253,63 +300,54 @@
   [game c]
   (let [terrain (-> game :board (game-board/get-terrain c))]
     (cond
+     ;; Move the unit
      (and (aw-game/selected-unit game)
-          (> (-> game :current-path pathfinding/elements count) 1)
-          (= c (-> game :current-path pathfinding/elements last))
-          (not (game-board/get-unit (:board game) c)))
-     ;; Okay. We do awesome stuff here: An action menu is shown after
-     ;; a unit is moved. The problem is: There's the 'Cancel' option
-     ;; which also reverts the move. The solution is kind of hacky: We
-     ;; don't actually change the state of `current-game', we just
-     ;; draw it. The global state is only changed AFTER the user
-     ;; selected a continuing action (Wait, Capture, Attack, ...)
-     (try
-       (let [game-moved (aw-game/move-unit game (pathfinding/path->aw-path (:current-path game)))]
-         (draw-game (dom/get-element "gameBoard") (dissoc game-moved :current-path))
-         (show-unit-action-menu game-moved c (assoc (game-board/get-unit (:board game-moved) c)
-                                               :moved true))
-         nil)
-       (catch js/Error e
-         (js/alert "Invalid path!")))
+          (when-let [path (:current-path game)]
+            (> (-> path pathfinding/elements count) 1)
+            (= c (-> path pathfinding/elements last)))
+          (nil? (game-board/get-unit (:board game) c)))
+     (update-game-state-reversible!
+      (comp #(dissoc % :current-path) aw-game/move-unit)
+      (pathfinding/path->aw-path (:current-path game)))
 
+     ;; Show the factory menu
      (and (not (aw-game/selected-unit game))
           (aw-map/can-produce-units? terrain))
-     (factory-clicked game c))))
+     (factory-clicked game c)
+
+     ;; Undo the last move
+     (> (count (game-states)) 1)
+     (pop-game-state!))))
 
 (defn clicked-on
   "Generic function ran when the player clicks on the game
-  board. Dispatches between units and buildings."  [c]
-  (when (and @current-game
-             (aw-map/in-bounds? (-> @current-game :board :terrain) c))
+  board. Dispatches between units and buildings."
+  [c]
+  (when (and (game-state)
+             (aw-map/in-bounds? (-> (game-state) :board :terrain) c))
+    (reset! last-click-coord c)
     (if (and @current-action-menu
              (menu/toggle-menu? @current-action-menu))
       (do
         (swap! current-action-menu menu/hide-menu)
-        (swap! current-game identity))
-      (let [game @current-game
-            newgame (let [board (:board game)
-                          terrain (game-board/get-terrain board c)
-                          unit (game-board/get-unit board c)]
-                      (cond
-                       unit
-                       (unit-clicked    game c)
+        (pop-game-state!))
+      (let [game (game-state)
+            board (:board game)
+            terrain (game-board/get-terrain board c)
+            unit (game-board/get-unit board c)]
+        ;; TODO: Remove or better: USE the `game' parameter
+        (cond
+         unit    (unit-clicked    game c)
 
-                       terrain
-                       (terrain-clicked game c)
+         terrain (terrain-clicked game c)
 
-                       true nil))]
-        ;; Don't redraw the game when the state hasn't changed
-        ;; TODO: This shouldn't be necessary when everything is opimized
-        (when newgame
-          (reset! current-game (-> newgame
-                                   (sanitize-game)
-                                   (assoc :last-click-coord c))))))))
+         true    nil)))))
 
 (defn mouse-moved
   "Function called when the mouse entered a new field on the game
   board."
   [c]
-  (when-let [game @current-game]
+  (when-let [game (game-state)]
     (let [unit (game-board/get-unit (:board game) c)
           terrain (game-board/get-terrain (:board game) c)
           current-unit (aw-game/selected-unit game)
@@ -317,20 +355,31 @@
 
       (show-terrain-info terrain)
 
+      (when
+          (and game
+               current-unit
+               current-path
+               (not @current-action-menu)
+               (pathfinding/update-path! current-path
+                                         (aw-game/movement-range game)
+                                         c
+                                         (:board game)
+                                         current-unit))
+        (redraw-game!))
+
       ;; TODO: We need movement-range here
       (cond
-       (and game
-            current-unit
-            current-path
-            (not @current-action-menu))
-       (when (pathfinding/update-path! current-path
-                                       (aw-game/movement-range game)
-                                       c
-                                       (:board game)
-                                       current-unit)
-         ;; Hack: Redraw the game (there should be a fn for this)
-         (reset! current-game game))
-
+       ;; When the selected unit can attack the unit we're hovering
+       ;; over, display attack info
+       (and current-unit
+            unit
+            (not= (:color unit) (:color current-unit))
+            (aw-game/attack-possible?
+             game
+             (aw-game/selected-coordinate game)
+             c))
+       (show-attack-info game c)
+       
        ;; When we're on a field with an unit, show info about it
        unit (show-unit-info unit)
 
@@ -346,11 +395,11 @@
  (defn ^:private mouse-moved-internal [event]
    (let [c (game-drawer/canvas->coord (aw-map/coord (.-offsetX event)
                                                     (.-offsetY event)))]
-     (when-let [game @current-game]
+     (when-let [game (game-state)]
        (when (and (aw-map/in-bounds? (-> game :board :terrain) c)
                   ;; CLJS-BUG: (= nil c) => Error (fixed in master)
                   (not= @last-coord c))
-         (.log js/console "Mouse:" (pr-str c))
+         #_(logging/log "Mouse:" (pr-str c))
          (mouse-moved (reset! last-coord c)))))))
 
 ;;; Functions for setting up games in the DOM
@@ -358,7 +407,7 @@
 (defn unregister-handlers [canvas]
   (gevents/removeAll canvas)
   (gevents/removeAll (dom/get-element :end-turn-button))
-  (remove-watch current-game :redrawer))
+  (remove-watch current-game-state :redrawer))
 
 (defn register-handlers [canvas]
   ;; remove all handlers prior adding new
@@ -374,17 +423,20 @@
 
   (event/listen (dom/get-element :end-turn-button) "click"
                 (fn [event]
-                  (when @current-game
-                    (swap! current-game aw-game/next-player))))
+                  (when (game-state)
+                    (pop-all-game-states!)
+                    (update-game-state! aw-game/next-player))))
 
   ;; We use add-watch to redraw the canvas every time the state changes
-  (add-watch current-game :redrawer
+  (add-watch current-game-state :redrawer
              (fn [key ref old new]
+               (logging/log "Game states:"
+                            (pr-str (map (comp :type last aw-game/game-events) new)))
                (draw-game canvas new))))
 
 (defn ^:export start-game [game]
   (register-handlers (dom/get-element :gameBoard))
-  (reset! current-game (aw-game/start-game game)))
+  (update-game-state! (constantly (aw-game/start-game game))))
 
 (defn ^:export start-game-from-server [map-name]
   (logging/log "Loading game...")
