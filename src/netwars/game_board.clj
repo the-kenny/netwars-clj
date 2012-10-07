@@ -38,24 +38,21 @@
   {:pre [(not (nil? (get-unit board coord)))]}
   (assoc-in board [:units coord] (apply f (get-in board [:units coord]) args)))
 
+(declare reset-capture-maybe)
+
 (defn remove-unit [^GameBoard board coord]
   {:pre [(not (nil? (get-unit board coord)))]
    :post [(nil? (get-unit % coord))]}
-  (assoc board :units (dissoc (:units board) coord)))
-
-(declare reset-capture)
+  (-> board
+      (update-in [:units] dissoc coord)
+      (reset-capture-maybe coord)))
 
 (defn remove-units [board color]
   (let [units (filter (fn [[c u]]
                         (= (:color u) color))
                       (:units board))
         cs (map first units)] 
-    (reduce (fn [board c]
-              (if (aw-map/is-building? (get-terrain board c))
-                (reset-capture board c)
-                board))
-            (reduce remove-unit board cs)
-            cs)))
+    (reduce remove-unit board cs)))
 
 (defn can-walk-on-field?
   "Returns true if unit can pass a field.
@@ -119,6 +116,11 @@
    (assoc board :terrain
           (aw-map/update-board terrain c
                                (aw-map/reset-capture-points (get-terrain board c))))))
+
+(defn- reset-capture-maybe [board c]
+  (if (aw-map/is-building? (get-terrain board c))
+    (reset-capture board c)
+    board))
 
 ;;; Attacking
 
