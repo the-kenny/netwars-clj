@@ -43,12 +43,19 @@
    :post [(nil? (get-unit % coord))]}
   (assoc board :units (dissoc (:units board) coord)))
 
-;;; TODO: Remove capture points
+(declare reset-capture)
+
 (defn remove-units [board color]
   (let [units (filter (fn [[c u]]
-                            (= (:color u) color))
-                          (:units board))]
-    (reduce remove-unit board (map first units))))
+                        (= (:color u) color))
+                      (:units board))
+        cs (map first units)] 
+    (reduce (fn [board c]
+              (if (aw-map/is-building? (get-terrain board c))
+                (reset-capture board c)
+                board))
+            (reduce remove-unit board cs)
+            cs)))
 
 (defn can-walk-on-field?
   "Returns true if unit can pass a field.
