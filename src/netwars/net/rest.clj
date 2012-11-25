@@ -38,8 +38,9 @@
     ;; Now this is fun stuff:
     ;; We throw off a future which writes data to the output stream
     ;; which then feeds this data to in which is read by Ring
-    (future (with-open [out (java.io.PipedOutputStream. in)]
-              (javax.imageio.ImageIO/write image "png" out)))
+    (.run
+     (Thread. #(with-open [out (java.io.PipedOutputStream. in)]
+                 (javax.imageio.ImageIO/write image "png" out))))
     {:status 200
      :headers {"Content-Type" "image/png"}
      :body in}))
