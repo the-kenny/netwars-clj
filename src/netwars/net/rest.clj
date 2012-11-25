@@ -46,9 +46,9 @@
      :body in}))
 
 (defn make-game [map-name]
-  (->  (game-creator/make-game {} map-name)
-       (assoc  :map-url (map-url map-name))
-       (otw/edn-response)))
+  (if-let [game (game-creator/make-game {} map-name)]
+    (otw/edn-response (assoc game :map-url (map-url map-name)))
+    (otw/edn-response {:error :map-not-found} 404)))
 
 ;;; Compojure routes
 

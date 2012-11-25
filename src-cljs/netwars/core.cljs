@@ -442,10 +442,13 @@
   (logging/log "Loading game...")
   (goog.net.XhrIo/send (str "/api/new-game/" map-name)
                        (fn [e]
-                         (logging/log "Got data, started reading in")
-                         (let [text (-> e .-target .getResponseText)]
-                           (start-game (otw/decode-data text)))
-                         (logging/log "Loaded game."))))
+                         (let [req (.-target e)
+                               status (.getStatus req)
+                               text (.getResponseText req)]
+                          (logging/log "Got response")
+                          (case status
+                            200 (start-game (otw/decode-data text))
+                            (js/alert (str "Error response from server: " text)))))))
 
 (defn repl-connect []
   (repl/connect "http://localhost:9000/repl"))
