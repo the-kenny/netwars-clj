@@ -14,10 +14,9 @@
 (reader/register-tag-parser! "netwars.aw_game.AwGame" aw-game/map->AwGame)
 
 (defn encode-data [data]
-  {:pre [(map? data)]}
-  (binding [*print-meta* true]
-    (pr-str data)))
+  (pr-str data))
 
 (defn decode-data [s]
   {:pre [(string? s)]}
   (reader/read-string s))
+
