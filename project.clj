@@ -15,7 +15,9 @@
                  [clojure-complete "0.2.2"]
                  
                  ;; Clojurescript stuff
-                 [org.clojure/clojurescript "0.0-1535"]]
+                 [org.clojure/clojurescript "0.0-1535"]
+                 [org.clojure/google-closure-library "0.0-2029"] 
+                 [org.clojure/google-closure-library-third-party "0.0-2029"]] 
   :exclusions [org.clojure/clojure]
   :extra-files-to-clean ["resoures/public/netwars.js"]
   :main netwars.core
@@ -34,9 +36,8 @@
               :builds [{:source-path "src-cljs/"
                         :compiler
                         {:output-to "resources/public/netwars.js"
-                         :foreign-libs [{:file "resources/public/dijkstra.js"
-                                         :provides ["dijkstra"]}]
                          :pretty-print true
+                         :warnings true
                          :optimizations :whitespace}}]}
   :profiles {:dev {:dependencies [[midje "1.3.1"]]
                    :plugins [[lein-midje "2.0.0-SNAPSHOT"]]}}
