@@ -1,6 +1,5 @@
 (ns netwars.net.rest
   (:use compojure.core
-        clojure.data.json
         ;; [netwars.net.game-server :as server]
         [clojure.java.io :only [input-stream output-stream]])
   (:require [netwars.aw-game :as aw-gameq]
@@ -11,36 +10,17 @@
             [netwars.map-drawer :as map-drawer])
   (:import [netwars.aw_map Coordinate]))
 
-;;; Serialization
-
-(extend-type java.util.UUID
-  Write-JSON
-  (write-json [object out escape-unicode?]
-    (write-json (str object) out escape-unicode?)))
-
-;; (extend-type netwars.aw_game.AwGame
-;;   Write-JSON
-;;   (write-json [object out escape-unicode?]
-;;     (write-json object out escape-unicode?)))
-
-(extend-type Coordinate
-  Write-JSON
-  (write-json [c out escape-unicode?]
-    (write-json (list 'coord (:x c) (:y c))
-                out
-                escape-unicode?)))
-
 ;;; Methods
 
 (defn main []
-  (json-str {:api-version 0.1}))
+  (pr-str {:api-version 0.1}))
 
 (defn damagetable []
-  (json-str (damagetable/load-damagetable "resources/damagetable.xml")))
+  (pr-str (damagetable/load-damagetable "resources/damagetable.xml")))
 ;; (alter-var-root #'damagetable memoize)
 
 (defn unit-spec []
-  (json-str (unit-loader/load-units "resources/units.xml")))
+  (pr-str (unit-loader/load-units "resources/units.xml")))
 ;; (alter-var-root #'unit-spec memoize)
 
 ;;; Map stuff
@@ -65,29 +45,14 @@
 (defn make-game [map-name]
   (->  (game-creator/make-game {} map-name)
        (assoc  :map-url (map-url map-name))
-       (otw/encode-data)))
-
-;; (defn games []
-;;   (let [ids (keys @server/running-games)]
-;;     (json-str {:count (count ids)
-;;                :ids (vec ids)})))
-
-;; (defn game [id]
-;;   (json-str
-;;    (if-let [uuid (try (java.util.UUID/fromString id) (catch Exception _ nil))]
-;;      (if-let [game (server/get-game uuid)]
-;;        game
-;;        {:error :not-found})
-;;      {:error :invalid-uuid})))
+       (pr-str)))
 
 ;;; Compojure routes
 
-(defroutes api-routes
-  (GET "/" [] (main))
-  (GET "/damagetable.json" [] (damagetable))
-  (GET "/unit-spec.json" [] (unit-spec))
-  (GET "/new-game/:map-name" [map-name] (make-game map-name))
-  (GET "/render-map/:map-name" [map-name] (render-map map-name))
-  ;; (GET "/games" [] (games))
-  ;; (GET "/game/:id" [id] (game id))
-  )
+(binding [*print-meta* true]
+  (defroutes api-routes
+    (GET "/"                     [] (main))
+    (GET "/damagetable"          [] (damagetable))
+    (GET "/unit-spec"            [] (unit-spec))
+    (GET "/new-game/:map-name"   [map-name] (make-game map-name))
+    (GET "/render-map/:map-name" [map-name] (render-map map-name))))

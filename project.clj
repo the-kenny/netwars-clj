@@ -1,7 +1,7 @@
 (defproject netwars "0.0.1-SNAPSHOT"
   :dependencies [[org.clojure/clojure "1.4.0"]
-                 [org.clojure/data.json "0.1.1"]
-                 [aleph "0.2.1-beta2"]
+                 [org.clojure/data.json "0.2.0"]
+                 [aleph "0.3.0-beta7"]
                  [commons-codec "1.5" :exclusions [commons-logging]]
                  [org.clojure/tools.logging "0.2.3"]
                  [log4j/log4j "1.2.16"]
@@ -9,7 +9,12 @@
                  [compojure "1.0.1"]
                  [hiccup "1.0.0"]
                  [ring/ring-devel "1.1.0"]
-                 [swank-clojure "1.4.2"]]
+
+                 [org.clojure/tools.nrepl "0.2.0-RC1"]
+                 [clojure-complete "0.2.2"]
+                 
+                 ;; Clojurescript stuff
+                 [org.clojure/clojurescript "0.0-1535"]]
   :exclusions [org.clojure/clojure]
   :extra-files-to-clean ["resoures/public/netwars.js"]
   :main netwars.core
@@ -34,4 +39,4 @@
                          :optimizations :whitespace}}]}
   :profiles {:dev {:dependencies [[midje "1.3.1"]]
                    :plugins [[lein-midje "2.0.0-SNAPSHOT"]]}}
-  :plugins [[lein-cljsbuild "0.2.7"]])
+  :plugins [[lein-cljsbuild "0.2.9"]])

@@ -7,12 +7,10 @@
                            wrap-ring-handler]]
         [clojure.java.browse :only [browse-url]]
         [ring.util.response :only [redirect]])
-  (:require [netwars.net.connection :as connection]
-            [netwars.net.game-server :as game-server]
-            [netwars.net.rest :as rest]
+  (:require [netwars.net.rest :as rest]
 
-            [swank.swank :as swank]
-
+            [clojure.tools.nrepl.server :refer [start-server stop-server]]
+            
             [netwars.net.page.game :as game-page]
 
             [compojure.route :as route]
@@ -25,13 +23,12 @@
   (GET "/" [] (redirect "/game"))
   (GET "/game" [] (game-page/page))
   (route/resources "/")
-  (GET "/socket" [] (wrap-aleph-handler connection/websocket-handler))
   ;; Api
   (context "/api" [] rest/api-routes)
   (route/not-found "<p>aww... this doesn't exist</p>"))
 
-(def ^:dynamic *server* (atom nil))
-
+(defonce nrepl-server (start-server :port 4006))
+(defonce server (atom nil))
 
 (defn start [& open-browser]
   (set-loggers!
@@ -39,7 +36,7 @@
    {:level :info
     :pattern "%d %p: %m%n"
     :out #_(java.io.File. "netwars.log") :console})
-  (reset! *server* (start-http-server (-> #'main-routes
+  (reset! server (start-http-server (-> #'main-routes
                                         ringtrace/wrap-stacktrace
                                         wrap-ring-handler)
                                     {:port webapp-port :websocket true}))
@@ -48,13 +45,12 @@
     (browse-url (str webapp-url ":" webapp-port))))
 
 (defn stop []
-  (when @*server*
-    (@*server*)
-    (reset! *server* nil)
+  (when @server
+    (@server)
+    (reset! server nil)
     (info "Server stopped")))
 
 (defn -main []
-  (swank/start-server :port 4005)
   (set-loggers!
    "netwars"
    {:level :info
