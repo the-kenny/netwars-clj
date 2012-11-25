@@ -15,14 +15,14 @@
 ;;; Methods
 
 (defn main []
-  (otw/encode-data {:api-version 0.1}))
+  (otw/edn-response {:api-version 0.1}))
 
 (defn damagetable []
-  (otw/encode-data (damagetable/load-damagetable "resources/damagetable.xml")))
+  (otw/edn-response (damagetable/load-damagetable "resources/damagetable.xml")))
 ;; (alter-var-root #'damagetable memoize)
 
 (defn unit-spec []
-  (otw/encode-data (unit-loader/load-units "resources/units.xml")))
+  (otw/edn-response (unit-loader/load-units "resources/units.xml")))
 ;; (alter-var-root #'unit-spec memoize)
 
 ;;; Map stuff
@@ -47,7 +47,7 @@
 (defn make-game [map-name]
   (->  (game-creator/make-game {} map-name)
        (assoc  :map-url (map-url map-name))
-       (otw/encode-data)))
+       (otw/edn-response)))
 
 ;;; Compojure routes
 

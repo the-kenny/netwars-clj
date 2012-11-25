@@ -16,3 +16,8 @@
 (defn decode-data [s]
   (binding [*read-eval* false]
     (read-string s)))
+
+(defn edn-response [data & [status]]
+  {:status (or status 200)
+   :headers {"Content-Type" "application/edn"}
+   :body (encode-data data)})
