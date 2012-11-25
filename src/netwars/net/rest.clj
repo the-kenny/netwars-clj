@@ -7,20 +7,22 @@
             [netwars.unit-loader :as unit-loader]
             [netwars.game-creator :as game-creator]
             [netwars.net.otw :as otw]
-            [netwars.map-drawer :as map-drawer])
+            [netwars.map-drawer :as map-drawer]
+
+            [ring.middleware.edn :as edn])
   (:import [netwars.aw_map Coordinate]))
 
 ;;; Methods
 
 (defn main []
-  (pr-str {:api-version 0.1}))
+  (otw/encode-data {:api-version 0.1}))
 
 (defn damagetable []
-  (pr-str (damagetable/load-damagetable "resources/damagetable.xml")))
+  (otw/encode-data (damagetable/load-damagetable "resources/damagetable.xml")))
 ;; (alter-var-root #'damagetable memoize)
 
 (defn unit-spec []
-  (pr-str (unit-loader/load-units "resources/units.xml")))
+  (otw/encode-data (unit-loader/load-units "resources/units.xml")))
 ;; (alter-var-root #'unit-spec memoize)
 
 ;;; Map stuff
@@ -45,14 +47,17 @@
 (defn make-game [map-name]
   (->  (game-creator/make-game {} map-name)
        (assoc  :map-url (map-url map-name))
-       (pr-str)))
+       (otw/encode-data)))
 
 ;;; Compojure routes
 
-(binding [*print-meta* true]
-  (defroutes api-routes
-    (GET "/"                     [] (main))
-    (GET "/damagetable"          [] (damagetable))
-    (GET "/unit-spec"            [] (unit-spec))
-    (GET "/new-game/:map-name"   [map-name] (make-game map-name))
-    (GET "/render-map/:map-name" [map-name] (render-map map-name))))
+(defroutes api-handler
+  (GET "/"                     [] (main))
+  (GET "/damagetable"          [] (damagetable))
+  (GET "/unit-spec"            [] (unit-spec))
+  (GET "/new-game/:map-name"   [map-name] (make-game map-name))
+  (GET "/render-map/:map-name" [map-name] (render-map map-name)))
+
+(def api
+  (-> api-handler
+      edn/wrap-edn-params))

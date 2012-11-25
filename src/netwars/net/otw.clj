@@ -10,11 +10,9 @@
   (.write w (str "#coord [" (:x o) " " (:y o) "]")))
 
 (defn encode-data [data]
-  {:pre [(map? data)]}
   (binding [*print-meta* true]
     (pr-str data)))
 
 (defn decode-data [s]
-  {:pre [(string? s)]}
   (binding [*read-eval* false]
     (read-string s)))

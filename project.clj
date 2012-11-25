@@ -9,6 +9,7 @@
                  [compojure "1.0.1"]
                  [hiccup "1.0.0"]
                  [ring/ring-devel "1.1.0"]
+                 [ring-edn "0.1.0"]
 
                  [org.clojure/tools.nrepl "0.2.0-RC1"]
                  [clojure-complete "0.2.2"]
