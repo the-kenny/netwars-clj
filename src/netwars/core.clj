@@ -21,10 +21,10 @@
 
 (defroutes main-routes
   (GET "/" [] (redirect "/game"))
-  (GET "/game" [] (game-page/page))
+  (GET "/game" [] (#'game-page/page))
   (route/resources "/")
   ;; Api
-  (context "/api" [] rest/api)
+  (context "/api" [] #'rest/api)
   (route/not-found "<p>aww... this doesn't exist</p>"))
 
 (defonce nrepl-server (start-server :port 4006))
