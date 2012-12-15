@@ -60,21 +60,21 @@
                                player-color))))))
 
 (defn next-player [game]
-  (let [newgame (-> game
-                    (update-in [:current-player-index]
-                               (fn [idx]
-                                 (if (>= (inc idx) (player-count game))
-                                   0
-                                   (inc idx))))
-                    (turn-start-update-funds)
-                    (update-in [:board] (fn [board]
-                                          (reduce #(board/update-unit %1 %2 dissoc :moved)
-                                                  board (keys (:units board)))))
-                    (log-event {:type :turn-completed
-                                :player (current-player game)}))]
-    (if (zero? (:current-player-index newgame))
-      (update-in newgame [:round-counter] inc)
-      newgame)))
+  (let [game (-> game
+                 (update-in [:current-player-index]
+                            (fn [idx]
+                              (if (>= (inc idx) (player-count game))
+                                0
+                                (inc idx))))
+                 (turn-start-update-funds)
+                 (update-in [:board] (fn [board]
+                                       (reduce #(board/update-unit %1 %2 dissoc :moved)
+                                               board (keys (:units board))))))
+        game (log-event game {:type :turn-completed
+                              :player (current-player game)})]
+    (if (zero? (:current-player-index game))
+      (update-in game [:round-counter] inc)
+      game)))
 
 (defn remove-player
   "Removes a player in a running game.
