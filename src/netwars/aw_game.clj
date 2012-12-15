@@ -24,15 +24,6 @@
                    moves                ;Every move in the game gets saved here
                    ])
 
-(def ^:dynamic *default-game-settings*
-  {:funds {:initial 0
-           :per-building 1000}
-   :turn-limit nil                      ;Cut after n days; player with
-                                        ;most bases wins
-
-   :fog-of-war false                    ;Not implemented
-   })
-
 ;;; Game events
 
 (defn game-events [game]

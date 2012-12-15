@@ -71,51 +71,54 @@
     (disj (set (concat (map :color units) (map second buildings))) :white)))
 
 (defn load-map [source]
-  (let [ ;; I hope Little-Endianess doesn't cause problems
-        buf (.order (read-binary-resource source)
-                    java.nio.ByteOrder/LITTLE_ENDIAN)
-        filetype (last (.split source "\\."))
-		editor-version (read-n-string buf 6)
-		format-version (read-n-string buf 3)
-		_ (read-byte buf)
-		width (if (= filetype "aws")
-                (read-byte buf)
-                30)
-		height (if (= filetype "aws")
-                 (read-byte buf)
-                 20)
-		tileset (parse-tileset
-                 (condp = filetype
+  ;; shortcut if we already have a aw-map
+  (if (instance? netwars.map_loader.LoadedMap source)
+    source
+    (let [ ;; I hope Little-Endianess doesn't cause problems
+          buf (.order (read-binary-resource source)
+                      java.nio.ByteOrder/LITTLE_ENDIAN)
+          filetype (last (.split source "\\."))
+          editor-version (read-n-string buf 6)
+          format-version (read-n-string buf 3)
+          _ (read-byte buf)
+          width (if (= filetype "aws")
+                  (read-byte buf)
+                  30)
+          height (if (= filetype "aws")
+                   (read-byte buf)
+                   20)
+          tileset (parse-tileset
+                   (condp = filetype
                      "awd"  (dec (int (read-byte buf)))
                      "aws"  (int (read-byte buf))
                      0))
-		terrain-data (vec (parse-terrain-data
-                           (doall (for [_ (range (* width height))]
-                                    (read-dword buf)))))
-		unit-data (parse-unit-data
-                   (doall (for [_ (range (* width height))]
-                            (read-dword buf)))
-                   width height)
-        name (read-when-possible buf
-                                 (read-n-string buf (read-int32 buf)))
-        author (read-when-possible buf
+          terrain-data (vec (parse-terrain-data
+                             (doall (for [_ (range (* width height))]
+                                      (read-dword buf)))))
+          unit-data (parse-unit-data
+                     (doall (for [_ (range (* width height))]
+                              (read-dword buf)))
+                     width height)
+          name (read-when-possible buf
                                    (read-n-string buf (read-int32 buf)))
-        desc (read-when-possible buf
-                                 (.replace (read-n-string buf (read-int32 buf))
-                                           "\r\n"
-                                           "\n"))
-        terrain-board (make-terrain-board
-                       [width height]
-                       (vec (map vec (partition height terrain-data))))
-        player-colors (extract-colors unit-data terrain-board)]
+          author (read-when-possible buf
+                                     (read-n-string buf (read-int32 buf)))
+          desc (read-when-possible buf
+                                   (.replace (read-n-string buf (read-int32 buf))
+                                             "\r\n"
+                                             "\n"))
+          terrain-board (make-terrain-board
+                         [width height]
+                         (vec (map vec (partition height terrain-data))))
+          player-colors (extract-colors unit-data terrain-board)]
 
-    (LoadedMap.
-     terrain-board
-     unit-data
-     {:file-path source
-      :tileset tileset
-      :name name
-      :author author
-      :description desc
-      :version editor-version
-      :player-colors player-colors})))
+      (LoadedMap.
+       terrain-board
+       unit-data
+       {:file-path source
+        :tileset tileset
+        :name name
+        :author author
+        :description desc
+        :version editor-version
+        :player-colors player-colors}))))

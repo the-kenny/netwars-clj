@@ -46,7 +46,7 @@
      :body in}))
 
 (defn make-game [map-name]
-  (if-let [game (game-creator/make-game {} map-name)]
+  (if-let [game (game-creator/make-game map-name)]
     (otw/edn-response (assoc game :map-url (map-url map-name)))
     (otw/edn-response {:error :map-not-found} 404)))
 
