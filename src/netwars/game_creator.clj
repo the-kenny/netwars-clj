@@ -22,11 +22,11 @@
 (def ^:dynamic *default-damagetable* (load-damagetable "resources/damagetable.xml"))
 (def ^:dynamic *default-unit-spec*   (load-units "resources/units.xml"))
 
-(defn make-game [& [{:keys [game-map
-                            settings
-                            damagetable
-                            unit-spec
-                            game-board]}]]
+(defn make-game [& {:keys [game-map
+                           settings
+                           damagetable
+                           unit-spec
+                           game-board]}]
   (let [game-map (if game-map
                    (load-map (if (string? game-map)
                                (str +default-maps-path+ game-map)
