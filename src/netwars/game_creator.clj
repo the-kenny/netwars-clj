@@ -22,9 +22,11 @@
 (def ^:dynamic *default-damagetable* (load-damagetable "resources/damagetable.xml"))
 (def ^:dynamic *default-unit-spec*   (load-units "resources/units.xml"))
 
-(defn make-game [game-map & [{:keys [settings
-                                     damagetable
-                                     unit-spec]}]]
+(defn make-game [& [{:keys [game-map
+                            settings
+                            damagetable
+                            unit-spec
+                            game-board]}]]
   (let [game-map (load-map (if (string? game-map)
                              (str +default-maps-path+ game-map)
                              game-map))
@@ -33,7 +35,8 @@
                         *default-damagetable*)
         unit-spec (or unit-spec
                       *default-unit-spec*)
-        board (board/generate-game-board game-map unit-spec)
+        game-board (or game-board
+                       (board/generate-game-board game-map unit-spec))
         players (map #(player/make-player %1 %2 0)
                      (map #(str "Player " %) (range 1 1000))
                      (sort-colors (-> game-map :info :player-colors)))]
@@ -41,7 +44,7 @@
                           :players (vec players)
                           :unit-spec unit-spec
                           :damagetable damagetable
-                          :board board})))
+                          :board game-board})))
 
 ;; (defn make-game [game-map info]
 ;;   (let [filename (str +maps-path+ game-map)]
