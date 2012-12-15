@@ -27,9 +27,11 @@
                             damagetable
                             unit-spec
                             game-board]}]]
-  (let [game-map (load-map (if (string? game-map)
-                             (str +default-maps-path+ game-map)
-                             game-map))
+  (let [game-map (if game-map
+                   (load-map (if (string? game-map)
+                               (str +default-maps-path+ game-map)
+                               game-map))
+                   (assert game-board))
         settings (or settings *default-game-settings*)
         damagetable (or damagetable
                         *default-damagetable*)
