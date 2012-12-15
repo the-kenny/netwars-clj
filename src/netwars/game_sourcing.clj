@@ -1,5 +1,6 @@
 (ns netwars.game-sourcing
   (:require [netwars.aw-game :as aw-game]
+            [netwars.aw-map :as aw-map]
             [netwars.game-creator :as game-creator]
             [netwars.game-board :as board]))
 
@@ -29,21 +30,36 @@
       (aw-game/start-game)))
 
 (handle-game-event :turn-completed
- [game [player]]
- (let [game* (aw-game/next-player game)]
-   (assert (= player (aw-game/current-player game)))
-   (assert (not= player (aw-game/current-player game*)))
-   game*))
+  [game [player]]
+  (let [game* (aw-game/next-player game)]
+    (assert (= player (aw-game/current-player game)))
+    (assert (not= player (aw-game/current-player game*)))
+    game*))
 
 (handle-game-event :unit-moved
- [game [from to path fuel-costs]]
- (let [game* (-> game
-                 (aw-game/select-unit from)
-                 (aw-game/move-unit path))]
-   (assert (= fuel-costs
-              (- (:fuel (board/get-unit (:board game) from))
-                 (:fuel (board/get-unit (:board game*) to)))))
-   game*))
+  [game [from to path fuel-costs]]
+  (let [game* (-> game
+                  (aw-game/select-unit from)
+                  (aw-game/move-unit path))]
+    (assert (= fuel-costs
+               (- (:fuel (board/get-unit (:board game) from))
+                  (:fuel (board/get-unit (:board game*) to)))))
+    game*))
+
+(handle-game-event :building-captured
+  [game [building coordinate unit]]
+  (let [game* (-> game
+                  (aw-game/select-unit coordinate)
+                  (aw-game/capture-building coordinate))
+        old-building (board/get-terrain (:board game) coordinate)]
+    (assert (= (aw-map/capture-points old-building)
+               (+ (aw-map/capture-points building)
+                  (:hp unit))))
+    game*))
 
 
 
+
+;; Local Variables:
+;; eval: (put-clojure-indent (quote handle-game-event) (quote defun))
+;; End:
