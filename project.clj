@@ -15,7 +15,7 @@
                  [clojure-complete "0.2.2"]
                  
                  ;; Clojurescript stuff
-                 [org.clojure/clojurescript "0.0-1535"]
+                 [org.clojure/clojurescript "0.0-1552"]
                  [org.clojure/google-closure-library "0.0-2029"] 
                  [org.clojure/google-closure-library-third-party "0.0-2029"]] 
   :exclusions [org.clojure/clojure]
