@@ -316,5 +316,6 @@ Returns path."
         :info (:info game)
         :initial-board (:board game)
         :unit-spec (:unit-spec game)
+        :damagetable (:damagetable game)
         :players (:players game)})
     (next-player)))
