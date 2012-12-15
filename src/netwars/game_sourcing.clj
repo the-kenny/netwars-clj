@@ -57,7 +57,14 @@
                   (:hp unit))))
     game*))
 
-
+(handle-game-event :bought-unit
+  [game [unit coordinate price]]
+  (let [game* (aw-game/buy-unit game
+                                coordinate
+                                (:internal-name unit))]
+    (assert (= (assoc unit :moved true)
+               (board/get-unit (:board game*) coordinate)))
+    game*))
 
 
 ;; Local Variables:
