@@ -299,7 +299,7 @@ Returns path."
 ;;; Starting the game
 
 (defn game-started? [game]
-  (> (count (game-events game)) 0))
+  (pos? (count (game-events game))))
 
 (defn start-game [game]
   {:pre [(not (game-started? game))]
@@ -314,6 +314,7 @@ Returns path."
       (log-event
        {:type :game-started
         :info (:info game)
+        :settings (:settings game)
         :initial-board (:board game)
         :unit-spec (:unit-spec game)
         :damagetable (:damagetable game)
