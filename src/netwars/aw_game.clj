@@ -24,6 +24,11 @@
                    moves                ;Every move in the game gets saved here
                    ])
 
+;;; Utility Stuff
+
+(defn update-board [game fn & args]
+  (apply update-in game [:board] fn args))
+
 ;;; Game events
 
 (defn game-events [game]
@@ -67,7 +72,7 @@
                                 0
                                 (inc idx))))
                  (turn-start-update-funds)
-                 (update-in [:board] (fn [board]
+                 (update-board (fn [board]
                                        (reduce #(board/update-unit %1 %2 dissoc :moved)
                                                board (keys (:units board))))))
         game (log-event game {:type :turn-completed
@@ -86,10 +91,10 @@
 
   (-> game
       ;; Remove terrain
-      (update-in [:board] #(board/neutralize-buildings % player-color))
+      (update-board #(board/neutralize-buildings % player-color))
 
       ;; Remove units
-      (update-in [:board] #(board/remove-units % player-color))
+      (update-board #(board/remove-units % player-color))
 
       ;; Remove the player
       (update-in [:players] (fn [seq] (remove #(= (:color %) player-color) seq)))))
@@ -105,7 +110,7 @@
   (let [board (:board game)]
     (if (and (nil? (board/get-unit board c))
              (aw-map/is-building? (board/get-terrain board c)))
-      (update-in game [:board] board/reset-capture c)
+      (update-board game board/reset-capture c)
       game)))
 
 ;;; Fuel Costs
@@ -172,7 +177,8 @@
   [game]
   {:pre [(selected-unit game)
          (not (:moved (selected-unit game)))]}
-  (-> (update-in game [:board] board/update-unit (selected-coordinate game) assoc :moved true)
+  (-> game
+      (update-board board/update-unit (selected-coordinate game) assoc :moved true)
       (deselect-unit)))
 
 (defn move-unit
@@ -192,15 +198,16 @@ Returns path."
         to   (last path)
         fuel-costs (fuel-costs game path)]
    (-> game
-       (update-in [:board] board/update-unit from
+       (update-board board/update-unit from
                   update-in [:fuel] - fuel-costs)
        ;; TODO: Deselection is wrong here; just update `current-unit'
        (assoc :current-unit to)
-       (update-in [:board] board/move-unit from to) ;Important: First use fuel, then move
+       (update-board board/move-unit from to) ;Important: First use fuel, then move
        (check-capture-after-move from)
        (log-event {:type :unit-moved
                    :from from
                    :to to
+                   :path path
                    :fuel-costs fuel-costs}))))
 
 (defn buy-unit [game c id-or-internal-name]
@@ -214,7 +221,7 @@ Returns path."
     (assert (<= price (:funds player))
             (str "Not enough funds to buy " (name (:internal-name unit))))
     (-> game
-        (update-in [:board] board/add-unit c (assoc unit :moved true))
+        (update-board board/add-unit c (assoc unit :moved true))
         (update-player (:color player) player/spend-funds price)
         (log-event {:type :bought-unit
                     :unit unit
@@ -232,7 +239,7 @@ Returns path."
         terrain (board/get-terrain newboard c)]
    (-> game
        (assoc :board newboard)
-       (update-in [:board] board/update-unit c assoc :moved true)
+       (update-board board/update-unit c assoc :moved true)
        (log-event {:type :building-captured
                    :building terrain
                    :unit unit
@@ -319,4 +326,5 @@ Returns path."
         :unit-spec (:unit-spec game)
         :damagetable (:damagetable game)
         :players (:players game)})
-    (next-player)))
+    (next-player)
+    (update-in [:moves] (comp vec butlast))))
