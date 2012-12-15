@@ -25,13 +25,15 @@
 (defn make-game [& {:keys [game-map
                            settings
                            damagetable
+                           players
                            unit-spec
                            game-board]}]
   (let [game-map (if game-map
                    (load-map (if (string? game-map)
                                (str +default-maps-path+ game-map)
                                game-map))
-                   (assert game-board))
+                   (do (assert game-board)
+                       (assert players)))
         settings (or settings *default-game-settings*)
         damagetable (or damagetable
                         *default-damagetable*)
@@ -39,9 +41,10 @@
                       *default-unit-spec*)
         game-board (or game-board
                        (board/generate-game-board game-map unit-spec))
-        players (map #(player/make-player %1 %2 0)
-                     (map #(str "Player " %) (range 1 1000))
-                     (sort-colors (-> game-map :info :player-colors)))]
+        players (or players
+                    (map #(player/make-player %1 %2 0)
+                         (map #(str "Player " %) (range 1 1000))
+                         (sort-colors (-> game-map :info :player-colors))))]
     (aw-game/map->AwGame {:settings settings
                           :players (vec players)
                           :unit-spec unit-spec
@@ -66,3 +69,4 @@
 ;;                                   :unit-spec unit-spec
 ;;                                   :damagetable damagetable
 ;;                                   :board board}))))))
+
