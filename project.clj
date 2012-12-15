@@ -6,8 +6,8 @@
                  [org.clojure/tools.logging "0.2.3"]
                  [log4j/log4j "1.2.16"]
                  [clj-logging-config "1.9.6" :exclusions [swank-clojure]]
-                 [compojure "1.0.1"]
-                 [hiccup "1.0.0"]
+                 [compojure "1.1.3"]
+                 [hiccup "1.0.2"]
                  [ring/ring-devel "1.1.0"]
                  [ring-edn "0.1.0"]
 
