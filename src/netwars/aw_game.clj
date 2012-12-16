@@ -263,7 +263,9 @@ Returns path."
     (set (filter #(attack-possible? game att-coord %)
                  (board/attack-range (:board game) att-coord)))))
 
-(defn perform-attack [game att-coord vic-coord & {:keys [counterattack]}]
+(defn perform-attack [game att-coord vic-coord & {:keys [counterattack
+                                                         damage
+                                                         disable-counterattack?]}]
   {:pre [(attack-possible? game att-coord vic-coord)
          (not (:moved (board/get-unit (:board game) att-coord)))]}
   (let [board (:board game)
@@ -271,9 +273,10 @@ Returns path."
         vic (board/get-unit board vic-coord)
         att-terr (board/get-terrain board att-coord)
         vic-terr (board/get-terrain board vic-coord)]
-    (let [dam (damage/calculate-damage (:damagetable game)
-                                       [att att-terr]
-                                       [vic vic-terr])
+    (let [dam (or damage
+                  (damage/calculate-damage (:damagetable game)
+                                           [att att-terr]
+                                           [vic vic-terr]))
           newvic (unit/apply-damage vic dam)
           board (:board game)
           newboard (-> (if newvic
@@ -295,13 +298,17 @@ Returns path."
                         ;; TODO: Handle special case when vic is destroyed
                         (log-event {:type (if counterattack :counter-attack :attack)
                                     :from att-coord, :to vic-coord
-                                    :attacker att, :victim newvic
+                                    :attacker (board/get-unit newboard att-coord)
+                                    :victim newvic
                                     :damage dam}))]
         (if (and newvic
                  (board/in-attack-range? (:board newgame) vic-coord att-coord)
-                 (not counterattack))
-          (perform-attack newgame vic-coord att-coord :counterattack true)
+                 (not counterattack)
+                 (not disable-counterattack?))
+          (perform-attack newgame vic-coord att-coord
+                          :counterattack true)
           newgame)))))
+
 
 ;;; Starting the game
 
@@ -328,3 +335,4 @@ Returns path."
         :players (:players game)})
     (next-player)
     (update-in [:moves] (comp vec butlast))))
+

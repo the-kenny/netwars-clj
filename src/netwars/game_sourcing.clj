@@ -32,8 +32,7 @@
 (handle-game-event :turn-completed
   [game [player]]
   (let [game* (aw-game/next-player game)]
-    (assert (= player (aw-game/current-player game)))
-    (assert (not= player (aw-game/current-player game*)))
+    (assert (= player (aw-game/current-player game*)))
     game*))
 
 (handle-game-event :unit-moved
@@ -64,6 +63,31 @@
                                 (:internal-name unit))]
     (assert (= (assoc unit :moved true)
                (board/get-unit (:board game*) coordinate)))
+    game*))
+
+(handle-game-event :attack
+  [game [from attacker to victim from damage]]
+  (let [game* (-> game
+                  (aw-game/perform-attack from to
+                                          :damage damage
+                                          :disable-counterattack? true))]
+    (assert (= (board/get-unit (:board game*) to)
+               victim))
+    (assert (= (board/get-unit (:board game*) from)
+               (assoc attacker
+                 :moved true)))
+    game*))
+
+(handle-game-event :counter-attack
+  [game [from attacker to victim from damage]]
+  (let [game* (-> game
+                  (aw-game/perform-attack from to
+                                          :damage damage
+                                          :counterattack true))]
+    (assert (= (board/get-unit (:board game*) to)
+               victim))
+    (assert (= (board/get-unit (:board game*) from)
+               attacker))
     game*))
 
 
