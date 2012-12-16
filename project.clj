@@ -4,8 +4,6 @@
                  [aleph "0.3.0-beta7"]
                  [commons-codec "1.5" :exclusions [commons-logging]]
                  [org.clojure/tools.logging "0.2.3"]
-                 [log4j/log4j "1.2.16"]
-                 [clj-logging-config "1.9.6" :exclusions [swank-clojure]]
                  [compojure "1.1.3"]
                  [hiccup "1.0.2"]
                  [ring/ring-devel "1.1.0"]
@@ -13,6 +11,8 @@
 
                  [org.clojure/tools.nrepl "0.2.0-RC1"]
                  [clojure-complete "0.2.2"]
+
+                 [com.datomic/datomic-free "0.8.3664"]
                  
                  ;; Clojurescript stuff
                  [org.clojure/clojurescript "0.0-1552"]

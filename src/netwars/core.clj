@@ -1,7 +1,6 @@
 (ns netwars.core
   (:use compojure.core
         clojure.tools.logging
-        clj-logging-config.log4j
         [aleph.http :only [start-http-server
                            wrap-aleph-handler
                            wrap-ring-handler]]
@@ -33,11 +32,6 @@
 (defonce server (atom nil))
 
 (defn start [& open-browser]
-  (set-loggers!
-   "netwars.net"
-   {:level :info
-    :pattern "%d %p: %m%n"
-    :out #_(java.io.File. "netwars.log") :console})
   (reset! server (start-http-server (-> #'main-routes
                                         ringtrace/wrap-stacktrace
                                         wrap-ring-handler)
@@ -53,9 +47,4 @@
     (info "Server stopped")))
 
 (defn -main []
-  (set-loggers!
-   "netwars"
-   {:level :info
-    :pattern "%d %p: %m%n"
-    :out (java.io.File. "netwars.log")})
   (start true))
