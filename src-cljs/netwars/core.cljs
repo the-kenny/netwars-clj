@@ -450,5 +450,16 @@
                             200 (start-game (otw/decode-data text))
                             (js/alert (str "Error response from server: " text)))))))
 
+(defn send-events-to-server [id]
+  (set! *print-meta* true)
+  (goog.net.XhrIo/send (str "/api/game/" id) 
+                       nil
+                       "POST"
+                       (pr-str
+                        {:game-events (-> @current-game-state
+                                          game-state
+                                          aw-game/game-events)})
+                       (clj->js {"Content-Type" "application/edn"})))
+
 (defn repl-connect []
   (repl/connect "http://localhost:9000/repl"))

@@ -50,6 +50,13 @@
     (otw/edn-response (assoc game :map-url (map-url map-name)))
     (otw/edn-response {:error :map-not-found} 404)))
 
+;;; Event Sourcing debug stuff
+
+(defonce game-states (atom {}))
+(defn save-game-events [id req]
+  (swap! game-states assoc id (-> req :edn-params :game-events))
+  (otw/edn-response {:saved true}))
+
 ;;; Compojure routes
 
 (defroutes api-handler
@@ -57,8 +64,11 @@
   (GET "/damagetable"          [] (damagetable))
   (GET "/unit-spec"            [] (unit-spec))
   (GET "/new-game/:map-name"   [map-name] (make-game map-name))
-  (GET "/render-map/:map-name" [map-name] (render-map map-name)))
+  (GET "/render-map/:map-name" [map-name] (render-map map-name))
+  (POST "/game/:id"            [id :as req] (save-game-events id req)))
 
 (def api
-  (-> api-handler
+  (-> #'api-handler
       edn/wrap-edn-params))
+
+
