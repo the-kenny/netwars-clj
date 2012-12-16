@@ -7,7 +7,7 @@
             [netwars.aw-map :as aw-map]))
 
 
-(def ^:private board (:board (netwars.game-creator/make-game {} "7330.aws")))
+(def ^:private board (:board (netwars.game-creator/make-game :game-map "7330.aws")))
 
 (defn ^:private calculate-path [start end]
   (a-star-path board

@@ -27,7 +27,9 @@
   (context "/api" [] #'rest/api)
   (route/not-found "<p>aww... this doesn't exist</p>"))
 
-(defonce nrepl-server (start-server :port 4006))
+(defonce nrepl-server (try (start-server :port 4006)
+                           (catch java.lang.Exception e
+                             (error e "Failed to start nrepl-server"))))
 (defonce server (atom nil))
 
 (defn start [& open-browser]

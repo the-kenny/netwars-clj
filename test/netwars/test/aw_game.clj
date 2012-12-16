@@ -32,10 +32,11 @@
   (is (thrown? java.lang.Error
                (log-event *game* {})))
 
-  (is (= 2 (count (game-events *game*))))
+  (is (= 1 (count (game-events *game*)))
+      "A new game has a :game-started event")
 
   (is (= {:type :foobar}
-         (nth (game-events (log-event *game* {:type :foobar})) 2))))
+         (last (game-events (log-event *game* {:type :foobar}))))))
 
 (fact (:players *game*) => (has every? player/is-player?))
 (fact (current-player *game*) => player/is-player?)
