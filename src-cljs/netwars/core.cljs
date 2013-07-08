@@ -155,7 +155,7 @@
 
   (dom/set-properties (dom/get-element :unit-details) {"style" "visibility:visible;"})
 
-  
+
   (let [canvas (dom/get-element "unit-canvas")]
     (set! (.-width  canvas) game-drawer/+field-width+)
     (set! (.-height canvas) game-drawer/+field-height+)
@@ -379,7 +379,7 @@
              (aw-game/selected-coordinate game)
              c))
        (show-attack-info game c)
-       
+
        ;; When we're on a field with an unit, show info about it
        unit (show-unit-info unit)
 
