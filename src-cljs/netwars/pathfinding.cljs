@@ -4,8 +4,7 @@
             [netwars.aw-map :as aw-map]
             [netwars.path :as aw-path]
             [clojure.set :as set]
-            [clojure.string :as string]
-            [netwars.logging :as logging]))
+            [clojure.string :as string]))
 
 ;;; A path is a mutable data structure holding a ordered sequence of coordinates.
 ;;; Updates using update-path! are mutable.
