@@ -5,7 +5,8 @@
             [netwars.net.page.game :as game-page]
             [compojure.route :as route]
             [ring.util.response :as response])
-  (:use compojure.core))
+  (:use compojure.core
+        netwars.logging))
 
 (def webapp-url "http://localhost")
 (def webapp-port 8080)
@@ -21,31 +22,16 @@
 (defonce nrepl-server (nrepl/start-server :port 4006))
 (defonce server (atom nil))
 
-(defn start [& open-browser]
-  ;; (set-loggers!
-  ;;  "netwars.net"
-  ;;  {:level :info
-  ;;   :pattern "%d %p: %m%n"
-  ;;   :out #_(java.io.File. "netwars.log") :console})
+(defn start []
   (reset! server (http/run-server
                   #'main-routes
                   {:port webapp-port :websocket true}))
-  ;; (info "server started")
-  ;; (when open-browser
-  ;;   (browse-url (str webapp-url ":" webapp-port)))
-  )
+  (log "server started"))
 
 (defn stop []
-  ;; (when @server
-  ;;   (@server)
-  ;;   (reset! server nil)
-  ;;   (info "Server stopped"))
-  )
+  (when @server
+    (@server)
+    (reset! server nil)))
 
 (defn -main []
-  ;; (set-loggers!
-  ;;  "netwars"
-  ;;  {:level :info
-  ;;   :pattern "%d %p: %m%n"
-  ;;   :out (java.io.File. "netwars.log")})
-  (start true))
+  (start))
