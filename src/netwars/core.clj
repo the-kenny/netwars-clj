@@ -8,8 +8,9 @@
   (:use compojure.core
         netwars.logging))
 
-(def webapp-url "http://localhost")
+(def webapp-url  "http://localhost")
 (def webapp-port 8080)
+(def nrepl-port  4006)
 
 (defroutes main-routes
   (GET "/" [] (response/redirect "/game"))
@@ -19,7 +20,8 @@
   (context "/api" [] #'rest/api)
   (route/not-found "<p>aww... this doesn't exist</p>"))
 
-(defonce nrepl-server (nrepl/start-server :port 4006))
+(defonce nrepl-server (do (nrepl/start-server :port nrepl-port)
+                          (println (str "Started nrepl-server on port " nrepl-port))))
 (defonce server (atom nil))
 
 (defn start []
