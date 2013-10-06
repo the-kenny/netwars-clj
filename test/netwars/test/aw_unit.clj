@@ -2,8 +2,7 @@
   (:use netwars.aw-unit
         [clojure.java.io :only [resource]]
         [netwars.unit-loader :as loader]
-        clojure.test
-        midje.sweet))
+        clojure.test))
 
 (def ^:dynamic *spec* nil)
 
@@ -12,9 +11,6 @@
 
 (use-fixtures :each #(binding [*spec* (make-test-spec)]
                        (%)))
-
-(background (around :facts (binding [*spec* (make-test-spec)]
-                             ?form)))
 
 (deftest prototype-finding
   (is (= (:internal-name (find-prototype *spec* :id 0)) :infantry)
@@ -28,9 +24,9 @@
                             true))
       "returns nil if the key is unknown"))
 
-(facts "about make-unit"
-  (make-unit *spec* 0         :red) => is-unit?
-  (make-unit *spec* :infantry :red) => is-unit?)
+(deftest test-make-unit
+  (is (is-unit? (make-unit *spec* 0 :red)))
+  (is (is-unit? (make-unit *spec* :infantry :red))))
 
 (deftest test-unit-creation
   (let [weapon-unit (make-unit *spec* 0 :red)  ;Infantry
@@ -85,43 +81,43 @@
     (is (not (has-weapons? apc)) "An APC doesn't have weapons")
     (is (empty? (weapons apc)) "weapons returns an empty seq")))
 
-(fact "about ranged-weapon?"
-  (let [infantry (main-weapon (make-unit *spec* :infantry ...color...))
-        artillery (main-weapon (make-unit *spec* :artillery ...color...))]
-    (ranged-weapon? infantry)  => false
-    (ranged-weapon? artillery) => true))
+(deftest test-ranged-weapon?
+  (let [infantry (main-weapon (make-unit *spec* :infantry :red))
+        artillery (main-weapon (make-unit *spec* :artillery :red))]
+    (is (not (ranged-weapon? infantry)))
+    (is (ranged-weapon? artillery))))
 
-(fact "about fire-weapon"
-  (let [infantry (make-unit *spec* :infantry ...color...)
-        tank (make-unit *spec* :tank ...color...)]
-    (-> infantry (fire-weapon :main-weapon) main-weapon :ammo) => :infinity
-    (- (-> tank main-weapon :ammo)
-       (-> tank (fire-weapon :main-weapon) main-weapon :ammo)) => 1))
+(deftest test-fire-weapon
+  (let [infantry (make-unit *spec* :infantry :red)
+        tank (make-unit *spec* :tank :red)]
+    (is (= :infinity(-> infantry (fire-weapon :main-weapon) main-weapon :ammo)))
+    (is (= (dec (-> tank main-weapon :ammo))
+           (-> tank (fire-weapon :main-weapon) main-weapon :ammo)))))
 
 (defn- deplete-ammo
-  "Helper function which returns u with all ammunition in alt- or main-weapon depleted"
+  "Helper function which returns u with all ammunition in alt- or main-weapon removed"
   [u main-or-alt]
   (assoc-in u [:weapons main-or-alt :ammo] 0))
 
-(fact "about deplete-ammo"
-  (-> (deplete-ammo (make-unit *spec* :infantry :red) :main-weapon) main-weapon :ammo)
-  => 0)
+(deftest test-deplete-ammo
+  (is (zero? (-> (make-unit *spec* :infantry :red)
+                 (deplete-ammo :main-weapon)
+                 main-weapon
+                 :ammo))))
 
-(facts "about available-weapons"
+(deftest test-available-weapons
   (let [infantry (make-unit *spec* 0 :red)
         megatank (make-unit *spec* 10 :red)
         apc (make-unit *spec* 22 :red)]
-    (available-weapons infantry) => (just {:main-weapon anything})
-    (available-weapons megatank) => (just {:main-weapon anything,
-                                           :alt-weapon anything})
-    (available-weapons apc)      => (just {})
+    (is (every? #{:main-weapon} (keys (available-weapons infantry))))
+    (is (every? #{:main-weapon :alt-weapon} (keys (available-weapons megatank))))
+    (is (empty? (available-weapons apc)))
 
-    (-> infantry (deplete-ammo :main-weapon) available-weapons)
-    => (just {})
-    (-> megatank (deplete-ammo :alt-weapon) available-weapons)
-    => (just {:main-weapon anything})))
+    (is (empty? (-> infantry (deplete-ammo :main-weapon) available-weapons)))
+    
+    (is (every? #{:main-weapon} (keys (-> megatank (deplete-ammo :alt-weapon) available-weapons))) )))
 
-(facts "about can-capture?"
-  (can-capture? (make-unit *spec* 0  :red)) => true ;Infantry
-  (can-capture? (make-unit *spec* 20 :red)) => true ;Mech
-  (can-capture? (make-unit *spec* 22 :red)) => false)
+(deftest test-can-capture?
+  (is (can-capture? (make-unit *spec* 0  :red))) ;Infantry
+  (is (can-capture? (make-unit *spec* 20 :red))) ;Mech
+  (is (not (can-capture? (make-unit *spec* 22 :red)))))
