@@ -14,7 +14,8 @@
                  :capture_buildings :can-capture}
       :fuel {:level :max-fuel-level
              :waste :fuel-waste
-             :remove_without :remove-without-fuel}
+             :remove_without :remove-without-fuel
+             :waste_hidden :cloak-waste}
       :combat {:counterattack :can-counterattack
                :knock_down :can-knock-down-units
                :damage_multiplier :damage-multiplier ;Used in dummy_units
@@ -45,6 +46,7 @@
       :can-capture parseBoolean
       :max-fuel-level parseInt
       :fuel-waste parseInt
+      :cloak-waste parseInt
       :remove-without-fuel parseBoolean
 
       ;; Combat
@@ -114,7 +116,9 @@
 
 (defmethod #^{:private true} parse-element :explosive_charge
   [{attrs :attrs}]
-  {:explosive-charge attrs})
+  {:explosive-charge {:name "Explosive Charge"
+                      :range (set (range 0 (parseInt (:range attrs))))
+                      :damage (parseInt (:damage attrs))}})
 
 ;;; Supply
 (defmethod #^{:private true} parse-element :supply
