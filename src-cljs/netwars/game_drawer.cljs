@@ -9,7 +9,6 @@
             [netwars.logging :as logging]
             [netwars.map-renderer :as map-renderer]
             [netwars.map-utils :as map-utils]
-            [clojure.browser.dom :as dom]
             [goog.dom :as gdom]))
 
 (def +field-width+  16)
@@ -182,7 +181,7 @@
     (cond
      (or (nil? hidden-canvas)
          (not= map-url (:map-url game)))
-     (let [newcanvas (dom/element :canvas)]
+     (let [newcanvas (gdom/createElement "canvas")]
        (prepare-canvas newcanvas game
                        (fn [newcanvas game]
                          (draw-map-background (.getContext newcanvas "2d")
