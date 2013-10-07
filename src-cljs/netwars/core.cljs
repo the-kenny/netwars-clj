@@ -27,13 +27,29 @@
             [netwars.damagecalculator :as damage]
             [netwars.game-board :as game-board]
             [netwars.map-utils :as map-utils]
-            [netwars.tile-drawer :as tile-drawer]))
+            [netwars.tile-drawer :as tile-drawer]
+
+            [cljs.core.async :as async])
+  (:use-macros [cljs.core.async.macros :only [go go-loop]]))
 
 ;;; TODO: Function for changing game-state instead of
 ;;; (reset current-game ...)
 (def current-game-state  (atom []))
 (def current-action-menu (atom nil))
 (def last-click-coord    (atom nil))
+
+(def game-move-channel
+  "core.async channel receiving all irreversible game states."
+  (async/chan))
+
+;; (go-loop []
+;;   (let [[val _] (alts! [game-move-channel])]
+;;     (logging/log "channel event:" val)
+;;     (recur)))
+
+;; (def game-event-channel
+;;   "core.async channel receiving all actions. Used for drawing."
+;;   (async/sliding-buffer 10))
 
 (defn game-states []
   @current-game-state)
@@ -63,8 +79,11 @@
 (defn remove-stacked-game-states! []
   (swap! current-game-state (comp vector peek)))
 
-(defn update-game-state! [f & args]
+(defn update-game-state!
+  "Updates the game state irreversible."
+  [f & args]
   #_(remove-stacked-game-states!)
+  (go (>! game-move-channel (game-state)))
   (swap! current-game-state (comp vector #(apply f % args) peek)))
 
 (defn update-game-state-reversible! [f & args]

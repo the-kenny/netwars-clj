@@ -7,7 +7,8 @@
                  [ring/ring-core "1.2.0" :exclusions [org.clojure/tools.reader]]
                  [fogus/ring-edn "0.2.0"]
                  [org.clojure/tools.nrepl "0.2.3"]
-                 [org.clojure/clojurescript "0.0-1913"]]
+                 [org.clojure/clojurescript "0.0-1913"]
+                 [org.clojure/core.async "0.1.242.0-44b1e3-alpha"]]
   :extra-files-to-clean ["resoures/public/netwars.js"]
   :main netwars.core
   :repl-options {:port 7888}
