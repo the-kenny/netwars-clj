@@ -4,10 +4,10 @@
                  [compojure "1.1.5"]
                  [hiccup "1.0.4"]
                  [http-kit "2.1.10"]
-                 [ring/ring-core "1.2.0"]
+                 [ring/ring-core "1.2.0" :exclusions [org.clojure/tools.reader]]
                  [fogus/ring-edn "0.2.0"]
                  [org.clojure/tools.nrepl "0.2.3"]
-                 [org.clojure/clojurescript "0.0-1909"]]
+                 [org.clojure/clojurescript "0.0-1913"]]
   :extra-files-to-clean ["resoures/public/netwars.js"]
   :main netwars.core
   :repl-options {:port 7888}
