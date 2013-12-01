@@ -8,6 +8,7 @@
 /out/
 /target/
 /stale/
+/resources/public/js/
 
 resources/public/netwars.js
 
