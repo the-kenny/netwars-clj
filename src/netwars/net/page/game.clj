@@ -71,4 +71,4 @@
           [:th {:colspan 2
                 :valign "bottom"}
            (submit-button {:id "end-turn-button"} "End Turn")]]]]]]]
-    (include-clojurescript "netwars.js")]))
+    (include-clojurescript "js/netwars.js")]))
