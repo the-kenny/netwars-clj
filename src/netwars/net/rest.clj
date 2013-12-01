@@ -57,7 +57,8 @@
   (GET "/damagetable"          [] (damagetable))
   (GET "/unit-spec"            [] (unit-spec))
   (GET "/new-game/:map-name"   [map-name] (make-game map-name))
-  (GET "/render-map/:map-name" [map-name] (render-map map-name)))
+  (GET "/render-map/:map-name" [map-name] (render-map map-name))
+  (PUT "/game/:uuid"           [uuid]     (println uuid)))
 
 (def api
   (-> api-handler

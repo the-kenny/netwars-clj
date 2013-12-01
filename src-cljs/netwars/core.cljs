@@ -20,6 +20,8 @@
             [netwars.menus.attack-menu :as attack-menu]
             [netwars.menus.factory-menu :as factory-menu]
 
+            ;; [netwars.net.game-server :as game-server]
+
             ;; Load all crossovers prevent stripping
             [netwars.aw-game :as aw-game]
             [netwars.aw-map :as aw-map]
@@ -44,7 +46,7 @@
 
 ;; (go-loop []
 ;;   (let [[val _] (alts! [game-move-channel])]
-;;     (logging/log "channel event:" val)
+;;     (logging/log "channel event:" (count (aw-game/game-events val)))
 ;;     (recur)))
 
 ;; (def game-event-channel
@@ -82,7 +84,6 @@
 (defn update-game-state!
   "Updates the game state irreversible."
   [f & args]
-  #_(remove-stacked-game-states!)
   (go (>! game-move-channel (game-state)))
   (swap! current-game-state (comp vector #(apply f % args) peek)))
 
@@ -272,7 +273,7 @@
 
 (defn own-unit-clicked
   "Function ran when the players clicks on his own units."
-  [game c unit]
+  [game c unit right-click?]
   (cond
    ;; Bug: (= c null) => crash; (= null c) => false
    (= (aw-game/selected-coordinate game) c)
@@ -287,7 +288,7 @@
 
 (defn enemy-unit-clicked
   "Function ran when the player clicks an enemy unit."
-  [game c unit]
+  [game c unit right-click?]
   (when-let [att-coord (aw-game/selected-coordinate game)]
     (when (aw-game/attack-possible? game att-coord c)
       (logging/log "Attack!")
@@ -302,11 +303,11 @@
 (defn unit-clicked
   "Function ran when the player clicks on any unit. Dispatches to
   `own-unit-clicked' or `enemy-unit-clicked'."
-  [game c]
+  [game c right-click?]
   (let [unit (-> game :board (game-board/get-unit c))]
     (if (= (:color unit) (:color (aw-game/current-player game)))
-      (own-unit-clicked game c unit)
-      (enemy-unit-clicked game c unit))))
+      (own-unit-clicked game c unit right-click?)
+      (enemy-unit-clicked game c unit right-click?))))
 
 (defn factory-clicked [game c]
   (let [[factory color] (game-board/get-terrain (:board game) c)]
@@ -316,32 +317,36 @@
 (defn terrain-clicked
   "Ran when the player clicks any terrain. Dispatches to functions
   handling buildings."
-  [game c]
+  [game c right-click?]
   (let [terrain (-> game :board (game-board/get-terrain c))]
-    (cond
-     ;; Move the unit
-     (and (aw-game/selected-unit game)
-          (when-let [path (:current-path game)]
-            (> (-> path pathfinding/elements count) 1)
-            (= c (-> path pathfinding/elements last)))
-          (nil? (game-board/get-unit (:board game) c)))
-     (update-game-state-reversible!
-      (comp #(dissoc % :current-path) aw-game/move-unit)
-      (pathfinding/path->aw-path (:current-path game)))
+    (if-not right-click?
+      (cond
+       ;; Move the unit
+       (and (aw-game/selected-unit game)
+            (when-let [path (:current-path game)]
+              (> (-> path pathfinding/elements count) 1)
+              (= c (-> path pathfinding/elements last)))
+            (nil? (game-board/get-unit (:board game) c)))
+       (update-game-state-reversible!
+        (comp #(dissoc % :current-path) aw-game/move-unit)
+        (pathfinding/path->aw-path (:current-path game)))
 
-     ;; Show the factory menu
-     (and (not (aw-game/selected-unit game))
-          (aw-map/can-produce-units? terrain))
-     (factory-clicked game c)
+       ;; Show the factory menu
+       (and (not (aw-game/selected-unit game))
+            (aw-map/can-produce-units? terrain))
+       (factory-clicked game c)
 
-     ;; Undo the last move
-     (> (count (game-states)) 1)
-     (pop-game-state!))))
+       ;; Undo the last move
+       (> (count (game-states)) 1)
+       (pop-game-state!))
+
+      (when (> (count (game-states)) 1)
+        (pop-game-state!)))))
 
 (defn clicked-on
   "Generic function ran when the player clicks on the game
   board. Dispatches between units and buildings."
-  [c]
+  [c right-click?]
   (when (and (game-state)
              (aw-map/in-bounds? (-> (game-state) :board :terrain) c))
     (reset! last-click-coord c)
@@ -354,12 +359,9 @@
             board (:board game)
             terrain (game-board/get-terrain board c)
             unit (game-board/get-unit board c)]
-        ;; TODO: Remove or better: USE the `game' parameter
         (cond
-         unit    (unit-clicked    game c)
-
-         terrain (terrain-clicked game c)
-
+         unit    (unit-clicked    game c right-click?)
+         terrain (terrain-clicked game c right-click?)
          true    nil)))))
 
 (defn mouse-moved
@@ -432,19 +434,21 @@
   ;; remove all handlers prior adding new
   (unregister-handlers canvas)
 
-  (event/listen canvas "click"
-                (fn [event]
-                  (clicked-on (game-drawer/canvas->coord
-                               (aw-map/coord (.-offsetX event) (.-offsetY event)))))
-                true)
-  (event/listen canvas "mousemove" mouse-moved-internal)
-
-
-  (event/listen (dom/get-element :end-turn-button) "click"
-                (fn [event]
-                  (when (game-state)
-                    (pop-all-game-states!)
-                    (update-game-state! aw-game/next-player))))
+  (gevents/listen
+   canvas (to-array
+           [gevents/EventType.CLICK
+            gevents/EventType.CONTEXTMENU])
+   (fn [event]
+     (.preventDefault event)
+     (clicked-on (game-drawer/canvas->coord
+                  (aw-map/coord (.-offsetX event) (.-offsetY event)))
+                 (= gevents/BrowserEvent.MouseButton.RIGHT (.-button event)))))
+  (gevents/listen canvas gevents/EventType.MOUSEMOVE mouse-moved-internal)
+  (gevents/listen (dom/get-element :end-turn-button) gevents/EventType.CLICK
+                  (fn [event]
+                    (when (game-state)
+                      (pop-all-game-states!)
+                      (update-game-state! aw-game/next-player))))
 
   ;; We use add-watch to redraw the canvas every time the state changes
   (add-watch current-game-state :redrawer
