@@ -420,7 +420,6 @@
        (when (and (aw-map/in-bounds? (-> game :board :terrain) c)
                   ;; CLJS-BUG: (= nil c) => Error (fixed in master)
                   (not= @last-coord c))
-         #_(logging/log "Mouse:" (pr-str c))
          (mouse-moved (reset! last-coord c)))))))
 
 ;;; Functions for setting up games in the DOM
