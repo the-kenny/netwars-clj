@@ -7,19 +7,24 @@
                  [ring/ring-core "1.2.0" :exclusions [org.clojure/tools.reader]]
                  [fogus/ring-edn "0.2.0"]
                  [org.clojure/tools.nrepl "0.2.3"]
-                 [org.clojure/clojurescript "0.0-1913"]
-                 [org.clojure/core.async "0.1.242.0-44b1e3-alpha"]]
+                 [org.clojure/clojurescript "0.0-2075"]
+                 [org.clojure/core.async "0.1.256.0-1bf8cf-alpha"]
+                 [prismatic/dommy "0.1.2"]]
   :extra-files-to-clean ["resoures/public/netwars.js"]
   :main netwars.core
   :repl-options {:port 7888}
   :cljsbuild
   {:builds
-   [{:source-paths ["src-cljs/"],
+   [{:source-paths ["src-cljs/"]
      :compiler
-     {:pretty-print true,
-      :output-to "resources/public/netwars.js",
+     {:pretty-print false
       :warnings true,
-      :optimizations :whitespace}}],
+      :optimizations :whitespace
+      :output-to "resources/public/js/netwars.js"
+      :output-dir "resources/public/js/"
+      ;; :source-map "resources/public/js/main.js.map"
+      ;; :source-map-path ""
+      }}]
    :crossovers [netwars.aw-game
                 netwars.aw-map
                 netwars.aw-player
@@ -33,4 +38,4 @@
                 netwars.tiles]}
 
   :profiles {:dev {:dependencies [[clojure-complete "0.2.3"]]}}
-  :plugins [[lein-cljsbuild "0.3.3"]])
+  :plugins [[lein-cljsbuild "1.0.0" :exclusions [org.clojure/clojurescript]]])
